@@ -1,0 +1,68 @@
+---
+title:  ES6 let const  
+date: 2016-12-01 12:36:00
+categories: ES6
+comments : true 
+updated : 
+layout : 
+---
+
+## ES6变量声明 let const
+
+### 1 let声明
+
+1.1 let声明的变量和var声明变量一样，都可以从父级作用域获取变量
+
+```javascript
+	let x = 9 ;//全局声明 let x ;
+    ~function fn(){
+        console.log(x);//9 可以访问父作用域内let声明的变量
+    }();
+    {
+        x = x + 3 ; //
+        console.log(x);//12
+    }
+```
+
+1.2  let 声明的变量必须 **先声明** 在  **使用** , 所有在声明之前的使用都会报错; 在同一个作用域内用let声明的变量不允许重复(暂时性死区) var却可以在同一作用域内重复声明同名变量 ;
+
+```javascript
+	{
+        var b = 8 ;
+        var b = 999;
+        console.log(b);//999  var声明变量可以重复声明名称相同的变量
+    }
+```
+
+```javascript
+    let x = 9 ;
+    {
+        let x = x + 3 ; //Uncaught ReferenceError: x is not defined
+      //对于let在一个作用域内，必须先声明在使用,这里需要注意,赋值运算是从右向左进行的,
+        console.log(x);
+    }
+```
+
+2 const声明
+
+```javascript
+ /* 1 const声明，可以声明一个常量，该常量在声明的同时必须初始化，如果不初始化会报错，
+       2 const声明可以声明一个复杂数据类型，同时该复杂数据类型也必须初始化
+        3 const声明本质上其实是保证所声明的变量指向的内存地址是不能变化的，比如声明基本数据类型，声明之后不可改变
+        如果声明一个复杂数据类型，同样不能重新赋值
+    *
+    * */
+//   -----------------------------
+//    基本数据类型,声明之后不能重新赋值，
+    const p = 9 ;
+    p = 8 ; //Uncaught TypeError: Assignment to constant variable.
+//    --------------------------------
+//    复杂数据类型，声明后该变量指向内存中的指针不能再修改，但是复杂数据类型内部的数据结构还是可变的
+    const o = {};//指向一个地址，改地址存放一个空的对象
+    o.name = "Jhon";//内部数据结构是可变的
+    console.log(o);
+    o = {};//Uncaught TypeError: Assignment to constant variable.
+```
+
+
+

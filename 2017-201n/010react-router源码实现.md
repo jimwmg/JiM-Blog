@@ -1,0 +1,398 @@
+---
+title: 高阶组件react-router源码实现
+date: 2017-07-25
+categories: react
+tags: router
+---
+
+## 高阶组件
+
+### 1 什么是高阶组件？
+
+简单的说就是：一个函数，这个函数接受一个组件，然后返回一个组件
+
+```javascript
+function myHOC() {
+  // Which returns a function that takes a component...
+  return function(WrappedComponent) {
+    // It creates a new wrapper component...
+    class TheHOC extends React.Component {
+      render() {
+        // And it renders the component it was given
+        return <WrappedComponent {...this.props} />;
+      }
+    }
+
+    // Remember: it takes a component and returns a new component
+    // Gotta return it here.
+    return TheHOC;
+  }
+}
+```
+
+###2 高阶组件的作用
+
+- 代码复用，逻辑抽象，抽离底层准备（bootstrap）代码
+- 渲染劫持
+- State 抽象和更改
+- Props 更改
+
+### 3 demo理解-props侵入 Props Proxy （PP）
+
+```jsx
+class MasterData1 extends Component{
+    constructor(props){
+        super(props)
+        this.state = {data:null}
+    }
+    componentDidMount(){
+        //这里实际工作中可以是后台请求数据
+        this.setState ({data:{name:'JiM',age:14,gender:"man"}})
+    }
+    render(){
+        const {data} = this.state 
+        if(!data) return null 
+        return (
+            <div>
+               <p> author:{data.name} </p>
+               <p> age:{data.age} </p>
+            </div>
+        )
+    }
+}
+export default MasterData1
+```
+
+```jsx
+class MasterData2 extends Component{
+    constructor(props){
+        super(props)
+        this.state = {data:null}
+    }
+    componentDidMount(){
+        //这里实际工作中可以是后台请求数据
+        this.setState ({data:{name:'JiM',age:14,gender:'man'}})
+    }
+    render(){
+        const {data} = this.state 
+        if(!data) return null 
+        return (
+            <div>
+               <p> author:{data.name} </p>
+               <p> gender:{data.gender} </p>
+            </div>
+        )
+    }
+}
+export default MasterData2 
+```
+
+以上两个组件，constructor和componentDidMount函数都是重复性的代码
+
+```jsx
+//wrapComponent.js
+const WrapComponent = (WrapedComponent)=>{
+
+    return class PP extends Component{
+        constructor(props){
+            super(props)
+            this.state = {data:null}
+        }
+        componentDidMount(){
+            //这里实际工作中可以是后台请求数据
+            this.setState ({data:{name:'JiM',age:14,gender:"man"}})
+        }
+        render(){
+            const {data} = this.state;  
+            if(!data) return null;
+            //高阶组件自身的props
+            return <WrapedComponent {...this.props} data={data}></WrapedComponent>
+            }
+        }
+}
+class MasterData extends Component{
+
+    render(){
+      //此时的data来自于WrapedComponent的props传递过来的数据
+        const {data} = this.props; 
+        if(!data) return null 
+        return (
+            <div>
+               <p> author:{data.name} </p>
+               <p> age:{data.age} </p>
+            </div>
+        )
+    }
+}
+
+export default WrapComponent(MasterData);
+```
+
+```jsx
+import App from './wrapComponent'
+import React from 'react';
+import ReactDOM from 'react-dom';
+//高阶组件自身的props通过这里传入。
+ReactDOM.render(<App logIn={true}/>, document.getElementById('root'));
+registerServiceWorker();
+```
+
+
+
+以上可以看到通过高阶组件，可以实现对包裹组件的props侵入。即可以增加被包裹组件的props对象的属性值，像react-redux中connect函数就是一个高阶组件，对杯connect的组件的props添加了很多接口(mapStateToProps,mapDispatchToProps);
+
+### 4 demo理解-渲染劫持,操作state。Inheritance Inversion
+
+反向继承：如你所见，返回的高阶组件类（Enhancer）继承了 WrappedComponent。这被叫做反向继承是因为 WrappedComponent 被动地被 Enhancer 继承，而不是 WrappedComponent 去继承 Enhancer。通过这种方式他们之间的关系倒转了。
+
+反向继承允许高阶组件通过 **this** 关键词获取 WrappedComponent，意味着它可以获取到 state，props，组件生命周期（component lifecycle）钩子，以及渲染方法（render）。
+
+```jsx
+function iiHOC(WrappedComponent) {
+  return class Enhancer extends WrappedComponent {
+    render() {
+      return super.render()
+    }
+  }
+}
+```
+
+```jsx
+//wrapComponent.js
+import React, { Component } from 'react';
+const WrapComponent = (WrapedComponent)=>{
+
+    return class II extends WrapedComponent{
+        constructor(props){
+            super(props)
+            this.state = {data:null}
+        }
+        componentDidMount(){
+            //这里实际工作中可以是后台请求数据
+            this.setState ({data:{name:'JiM',age:14,gender:"man"}})
+        }
+        render(){
+            console.log(super.render())
+            if(!this.props.logIn){
+                return super.render();
+            }else {
+                return (<div>
+                    {super.render()}
+                    没有进行渲染劫持</div>)
+            }
+        }
+    }
+}
+class MasterData extends Component{
+    constructor(props){
+        super(props)
+        this.state = {data:null}
+    }
+    componentDidMount(){
+        //这里实际工作中可以是后台请求数据
+        this.setState ({data:{name:'JiM',age:14,gender:'man'}})
+    }
+    render(){
+        const {data} = this.state 
+        if(!data) return null 
+        return (
+            <div>
+               <p> author:{data.name} </p>
+               <p> gender:{data.gender} </p>
+            </div>
+        )
+    }
+}
+export default WrapComponent(MasterData)
+```
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './wrapComponent';
+//可以通过改变这个属性logIn进行是否渲染劫持的判断
+ReactDOM.render(<App logIn={false}/>, document.getElementById('root'));
+registerServiceWorker();
+
+```
+
+## Router源码大概实现
+
+以下直接复制了
+
+### 1 Match
+
+```jsx
+<Match pattern='/test'component={Component} />
+
+import React from 'react';
+
+const Match = ({ pattern, component: Component }) => {
+  const pathname = window.location.pathname;
+  if (pathname.match(pattern)) {
+    // 此处使用match方法对url地址进行解析是远远不够的！
+    return (
+      <Component />
+    );
+  } else {
+    return null;
+  }
+}
+
+```
+
+### 2 Link 
+
+```jsx
+<Link to="/test" > To Test</Link>
+
+import createHistory from 'history/createBroserHistory';
+const history = createHistory();
+
+// Link组件因为不需要维持自身数据，因此我们在此可以使用无状态(stateless)函数
+const Link = ({ to, children }) => {
+    <a
+      onClick={(e) => 
+        e.preventDefault();
+        history.push(to)
+      }
+      href={to}
+    >
+      {children}
+    </a>
+  }
+```
+
+### 3 Redict 
+
+```jsx
+<Redirect to="/test" />
+
+class Redirect extends React.Component {
+  static contextTypes = {
+    history: React.PropTypes.object,
+  };
+  componentDidMount() {
+    // 根本不需要DOM，只要你加载该组件，就立即进行跳转
+    const history = this.context.history;
+    const to = this.props.to;
+    history.push(to);
+  }
+  render() {
+    return null;
+  }
+}
+```
+
+### 4 Router
+
+```jsx
+class Router extends React.Component {
+  static propTypes = {
+    history: ProTypes.object.isRequired,
+    children: PropTypes.node
+  };
+
+  static childrenContextTypes = {
+    history: PropTypes.object.isRequired
+  };
+
+  // 通过context给组件内所有元素提供共享数据: history
+  getChildrenContext(){
+    // 传入给所有react-router组件使用的history参数
+    return { history: this.props.history };
+  }
+
+  render() {
+    const { children } = this.props;
+    return children ? React.Children.only(children) : null;
+  };
+}
+
+```
+
+### 5 Route
+
+```jsx
+const createRouteElement = ({ component, render, children, ...props} => (
+  // createRouteElement 的执行优先级是
+  component ? 
+    (props.match ? React.createElement(component, props) : null)
+     : render ? (
+      props.match ? 
+        render(props) : null 
+      ) : children ? (
+        typeof children === 'function' ? 
+          children(props) : React.Children.only(children)
+        ) : ( null )
+));
+
+// 上面的版本是不是很眼晕？下面这个版本的你大概能理解的更清楚。
+const createRouteElement = ({ component, render, children, ...props} => {
+  /* 
+    参数优先级 component > render > children
+    要是同时有多个参数，则优先执行权重更高的方法。
+  */
+    // component 要求是方法
+    if (component && props.match) {
+      return React.createElement(component, props);
+    } else {
+      return null;
+    }
+    // render 要求是方法
+    if (render && props.match) {
+      return render(props);
+    } else {
+      return null;
+    }
+    // children 可以使方法也可以是DOM元素
+    if (children && typeof children === 'function') {
+      return children(props);
+    } else {
+      return React.Children.only(children)
+    }
+    return null;
+}
+
+const Route = ({ match, history, path, exact, ...props}) => (
+  createRouteElement({
+    ...props,
+    match: match || matchPath(history.location.pathname, path, exact),
+    history
+  })
+);
+
+Route.propTypes = {
+  match: PropTypes.object, // private, from <Switch>
+  history: PropTypes.object.isRequired, // 必备属性
+  path: PropTypes.string,
+  exact: PropTypes.bool,
+  component: PropTypes.func,
+  // TODO: Warn when used with other render props
+  render: PropTypes.func, 
+  // TODO: Warn when used with other render props
+  children: PropTypes.oneOfType([
+  // TODO: Warn when used with other render props
+    PropTypes.func,
+    PropTypes.node
+  ])
+}
+```
+
+
+
+
+
+
+
+同时，像react-redux中的Provider以及react-router中的Router等都是高阶组件的实现
+
+在node-modules文件夹下面，有一个react-router和react-router-dom文件夹，这两个文件夹下面有对应的源码实现，从这里可以明确的知道为什么组件中有location,history,match,statciContext对象
+
+[高阶组件](http://dev.dafan.info/detail/250545?p=34-14)
+
+[高阶组件](https://segmentfault.com/a/1190000004598113)
+
+[高阶组件](http://imweb.io/topic/5907038a2739bbed32f60dad)
+
+[Router高阶组件实现](https://juejin.im/post/58ca005361ff4b006c812ad9)
