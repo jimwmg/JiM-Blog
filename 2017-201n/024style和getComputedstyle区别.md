@@ -108,6 +108,14 @@ rgb(255,0,0)
 
 如果我们通过el.style.property = value 操作多次，每次操作总是会进行浏览器的reflow，增加浏览器的消耗，所以可以通过cssText一次性增加样式，减少reflow；
 
+```javascript
+element.style.fontWeight = 'bold' ;
+element.style.marginLeft= '30px' ;
+element.style.marginRight = '30px' ;
+//理论上会触发多次reflow;
+可以通过设置元素的className或者通过cssText进行优化；
+```
+
 
 
 [张鑫旭](http://www.zhangxinxu.com/wordpress/2012/05/getcomputedstyle-js-getpropertyvalue-currentstyle/)
