@@ -183,6 +183,11 @@ export default function createStore(reducer, preloadedState, enhancer) {
     try {
       //最初始的值是false
       isDispatching = true
+      //这里可以看到，reducer必须是纯的函数，接受整个state和action作为参数，返回一个新的state;
+      //如果这个currentReducer是一个combineReducer，那么初始化以及以后每次dispatch的时候，都会重复执行
+      //不同的是，初始化dispatch的action没有匹配的值，所以生成的state是所有的reducer默认的state组成的大对象；以后每次从你dispatch的时候，还是会流通所有的reducer，但是此时的action变了，会改变某个对应的state，生成不一样的大state对象；
+      //初始化的时候，会将state初始化为一个所有reducer中的默认state值；
+      //
       currentState = currentReducer(currentState, action)
     } finally {
       //执行完try之后,还是将该值重置为false

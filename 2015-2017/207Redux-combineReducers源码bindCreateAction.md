@@ -36,9 +36,11 @@ function combineReducers(reducers) { //传入combineReducers函数的是一个�
       var reducer = finalReducers[key]
       var previousStateForKey = state[key]                       // 获取当前子 state
       //首先,当createStore的时候,就会直接执行这个reducer,将默认的state给到state状态树,然后第一次调用该reducer的时候,传入该reducer的state就是默认的state,然后第一次调用reducer返回新的state更新对应state状态树对应的节点;当第二次调用的时候,传入该reducer的state参数就是上次更新的state状态值,依次类推.
+      //初始化的时候，previousStateForKey是undefined，所以初始化传入的reducer的state是undefined，此时会使用reducer中的state的默认值作为初始化的state进行操作；
       var nextStateForKey = reducer(previousStateForKey, action) // 执行各子 reducer 中获取子 nextState,每一个子reducer都会返回一个新的state
       //同时如果这个reducer还是combineReducer的返回值，那么依然会遍历调用，这就是为何可以流通所有reducer的关键，即使是reducer可以有多个组合；
       //每一个reducer必须返回其处理的state值，否则该state将会对应undefined;
+      //同时这也是为什么每次dispatch一个action的时候，每一个reducer会得到其对应的state（previousStateForKey）的原因；
       nextState[key] = nextStateForKey                           // 将子 nextState 挂载到对应的键名
       hasChanged = hasChanged || nextStateForKey !== previousStateForKey
     }

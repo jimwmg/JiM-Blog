@@ -173,6 +173,7 @@ export default function connect(mapStateToProps, mapDispatchToProps, mergeProps,
        componentDidMount() {
           // 改变Component的state
          //通过subscribe给store注册监听事件，每次dispatch一个action的时候，setState都会执行，从而实现UI的更新
+         //所有的组件都会注册在store对象中的listeners,每次state的更新，都会遍历数组触发所有的每个组件的setState,也就是说，只要又state的更新，所有组件的UI都会检查是否进行更新；这也是connect函数的作用；
           this.store.subscribe(() = {
             this.setState({
               storeState: this.store.getState()

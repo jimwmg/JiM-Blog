@@ -123,6 +123,8 @@ ReactDOM.render(
 
 react-redux 提供两个函数,一个是Provider,该组件函数定义的时候,大概实现如下:
 
+可以看出Provider组件可以使得子组件获取到store对象，也就是说可以获取到store对象中的state,dispatch，subscribe等；
+
 ```javascript
 class Provider extends Component {
   getChildContext() {
@@ -145,9 +147,9 @@ Provider.childContextTypes = {
 
 该函数的作用是通过mapStateToProps和mapDispatchToProps函数,将将一些属性添加到Toggle组件的props上，同时
 
-**当组件第一次加载的时候，给通过Provider组件传递下来的store注册监听事件，该事件的作用就是执行setState函数，从而实现UI的更新**
+**当组件第一次加载的时候，给通过Provider组件传递下来的store注册监听事件，该事件的作用就是执行setState函数，从而实现UI的更新**，这也就是connect函数的作用之一，
 
-以上三种state改变，触发UI的更新的根本还是通过出发setState函数执行ReactDOM.render函数；
+以上三种state改变，触发UI的更新的根本还是通过触发setState函数执行ReactDOM.render函数；
 
 ```jsx
 import React ,{Component,PropTypes} from 'react'
@@ -172,7 +174,10 @@ console.log(store);
 console.log(store.getState());
 
 class Toggle extends React.Component {
-  
+ //这个组件经过connect之后，就可以访问到通过connect中mapStateToProps，mapDispatchToProps传递到此组件的属性，所有的属性都会挂载到Toggle组件的props对象上；
+ //此时就可以在组件中访问到store整个state状态树中某个对应的state[key],以及store对象中的dispatch函数
+ //将dispatch函数给到相应的DOM事件，便可以触发分发动作，更新state;
+  //每次更新state之后，都会触发mapStateToProps，更新对应组件上对应的state,同时，对应组件上
   render() {
     console.log(this.props);//connect函数中stateProps dispatchProps ownProps 三者融合后的结果传递给UI组件props对象
     //对象的解构赋值
@@ -227,7 +232,7 @@ ReactDOM.render(
 4.2 react搭配redux的时候,通过store链接,react的状态可以通过redux来进行管理,此时redux创建的store中存储了react中的state状态,此时如果想要更新UI视图,需要手动绑定事件,此时唯一改变state的函数是dispatch,通过该函数改变state,从createStore源码中可以看出来
 
 * 先执行reducer,改变state状态
-* 然后会执行通过subscribe注册的所有的监听事件
+* 然后会执行通过subscribe注册的所有的监听事件，所以如果注册了setState函数，则可以实现dispatch执行以后UI更新
 
 4.3 react搭配redux的时候, 通过react-redux进行react和redux的连接 ;
 
