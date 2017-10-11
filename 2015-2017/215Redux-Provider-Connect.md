@@ -95,7 +95,9 @@ updater:Object
 _reactInternalIns
 ```
 
-
+render方法中，渲染了其子级元素，使整个应用成为Provider的子组件。
+1、`this.props.children`是react内置在`this.props`上的对象，用于获取当前组件的所有子组件
+2、`Children`为react内部定义的顶级对象，该对象上封装了一些方便操作子组件的方法。`Children.only`用于获取仅有的一个子组件，没有或超过一个均会报错。**故需要注意：确保Provider组件的直接子级为单个封闭元素，切勿多个组件平行放置。**
 
 使用如下:provider的主要作用就是将store作为props对象中的一个属性传递给Provider实例化的之后的对象
 
@@ -146,7 +148,7 @@ function Welcome(props){
    //一般情况下我们组件中传递props参数的时候,是通过这种方式传递的 
 ```
 
-而connect函数的作用就是向props组件中添加属性
+而connect函数的作用就是向props组件中添加属性，同时给store注册监听事件，每次dispatch一个action的时候，都会执行setState函数，从而实现UI的同步更新；
 
 ```javascript
 export default function connect(mapStateToProps, mapDispatchToProps, mergeProps, options = {}) {
@@ -168,8 +170,9 @@ export default function connect(mapStateToProps, mapDispatchToProps, mergeProps,
             return true
           }
         }
-        componentDidMount() {
+       componentDidMount() {
           // 改变Component的state
+         //通过subscribe给store注册监听事件，每次dispatch一个action的时候，setState都会执行，从而实现UI的更新
           this.store.subscribe(() = {
             this.setState({
               storeState: this.store.getState()
@@ -288,7 +291,7 @@ const FilterLink = connect(
   mapStateToProps,
   mapDispatchToProps
 )(Link)
-
+//这里执行了两次函数，一个是connect() ,一个是connect()() ;执行之后返回的是一个组件，赋值给容器组件，然后通过JSX语法，转化为一个对象；
 console.log('FilterLink',<FilterLink/>);
 
 export default FilterLink

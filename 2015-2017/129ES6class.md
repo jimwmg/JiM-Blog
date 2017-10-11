@@ -171,7 +171,7 @@ console.log(Rect.getArea() ); //prototype method 不能直接通过类名调用
 
 **一，声明一个函数的时候，创建一个类的时候（类也是来自最基本的声明构造函数的封装），会创建一个prototype对象，该对象是所声明函数的一个属性（对象），同时该对象有一个constructor属性，指向所声明的函数（互相引用，无限循环）**
 
-**二，extends关键字的作用就是 ：将子类(函数）的prototype对象上的`__proto__`指向父类（函数）**
+**二，extends关键字的作用就是 ：将子类(函数）的prototype对象上的`__proto__`指向父类（函数）的prototype属性**
 
 2.4 先来看下extends关键字的作用 class类实现继承的根本原因就是通过extends关键字，将子类的__ proto __ 属性指向父类构造函数
 

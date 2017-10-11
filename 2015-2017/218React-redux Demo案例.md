@@ -20,6 +20,8 @@ layout :
 
 [一个比较好的案例](https://github.com/bailicangdu/react-pxq)
 
+[ReactDOM.render源码解析](http://blog.csdn.net/u012937029/article/details/76696489)
+
 ### 1 react    
 
 通过setState改变state状态,触发ReactDOM.render函数,重新刷新UI组件
@@ -92,8 +94,8 @@ function render(){
     );
 }
 
-store.subscribe(render)
-//============================================
+store.subscribe(render);//注册监听事件，dispatch函数会执行注册的监听事件；此时的监听事件的作用就是将试图的UI更新，而如果没有触发ReactDOM.render事件，那么UI不会更新；
+//=========================如果没有这段代码,视图将不会更新,但是state状态确实是改变了的
 class Toggle extends React.Component {
 
   render() {
@@ -141,7 +143,11 @@ Provider.childContextTypes = {
 
 一个是connect函数 const WrapToggle = connect(mapStateToProps,mapDispatchToProps)(Toggle),高阶组件
 
-该函数的作用是通过mapStateToProps和mapDispatchToProps函数,将将一些属性添加到Toggle组件的props上
+该函数的作用是通过mapStateToProps和mapDispatchToProps函数,将将一些属性添加到Toggle组件的props上，同时
+
+**当组件第一次加载的时候，给通过Provider组件传递下来的store注册监听事件，该事件的作用就是执行setState函数，从而实现UI的更新**
+
+以上三种state改变，触发UI的更新的根本还是通过出发setState函数执行ReactDOM.render函数；
 
 ```jsx
 import React ,{Component,PropTypes} from 'react'
