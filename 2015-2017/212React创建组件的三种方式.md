@@ -118,6 +118,8 @@ const BasicExample = () => (
 )
 ```
 
+[react如何将ReactElement加载到DOM](http://developer.51cto.com/art/201610/519981.htm)
+
 
 
 
