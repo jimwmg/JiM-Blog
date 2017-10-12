@@ -115,3 +115,42 @@ expries 表示的是失效时间，准确讲是「时刻」，max-age表示的�
 
 增加流量：cookie每次请求都会被自动添加到Request Header中，无形中增加了流量。cookie信息越大，对服务器请求的时间越长
 
+### 6 跨域不会发送cookies等用户凭证，如何解决？
+
+```j
+本地模拟www.zawaliang.com向www.xxx.com发送带cookie的认证请求，我们需求做以下几步工作：
+默认情况下widthCredentials为false，我们需要设置widthCredentials为true：
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'http://www.xxx.com/api');
+xhr.withCredentials = true;
+xhr.onload = onLoadHandler;
+xhr.send();
+请求头，注意此时已经带上了cookie：
+GET http://www.xxx.com/api HTTP/1.1
+Host: www.xxx.com
+User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:18.0) Gecko/20100101 Firefox/18.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip, deflate
+DNT: 1
+Referer: http://www.zawaliang.com/index.html
+Origin: http://www.zawaliang.com
+Connection: keep-alive
+Cookie: guid=1
+设置服务端响应头：
+Access-Control-Allow-Credentials: true
+如果服务端不设置响应头，响应会被忽略不可用；同时，服务端需指定一个域名（Access-Control-Allow-Origin:www.zawaliang.com），而不能使用泛型（Access-Control-Allow-Origin: *）
+响应头：
+HTTP/1.1 200 OK
+Date: Wed, 06 Feb 2013 03:33:50 GMT
+Server: Apache/2
+X-Powered-By: PHP/5.2.6-1+lenny16
+Access-Control-Allow-Origin: http://www.zawaliang.com
+Access-Control-Allow-Credentials: true
+Set-Cookie: guid=2; expires=Thu, 07-Feb-2013 03:33:50 GMT
+Content-Length: 38
+Content-Type: text/plain; charset=UTF-8
+X-Cache-Lookup: MISS from proxy:8080
+有一点需要注意，设置了widthCredentials为true的请求中会包含远程域的所有cookie，但这些cookie仍然遵循同源策略，所以你是访问不了这些cookie的。
+```
+

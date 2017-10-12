@@ -52,6 +52,33 @@ URI是以一种抽象的，高层次概念定义统一资源标识，而URL和UR
 
 如果使用mac上的charls抓包工具，发现并不能抓取到包，可能我们设置了：自动代理配置，[详见](http://www.cnblogs.com/season-huang/p/6269841.html)
 
+XMLHttpRequest 对象提供了对 HTTP 协议的完全的访问，包括做出 POST 和 HEAD 请求以及普通的 GET 请求的能力。XMLHttpRequest 可以同步或异步地返回 Web 服务器的响应，并且能够以文本或者一个 DOM 文档的形式返回内容。XHR接口强制要求每个请求都具备严格的HTTP语义–应用提供数据和URL，浏览器格式化请求并管理每个连接的完整生命周期，所以XHR仅仅允许应用自定义一些HTTP首部，但更多的首部是不能自己设定的，如：
+
+- `Accept-Charset`
+- `Accept-Encoding`
+- `Access-Control-Request-Headers.   预检请求的时候浏览器自动设置
+- `Access-Control-Request-Method`  预检请求的时候浏览器自动设置
+- `Connection`
+- `Content-Length`
+- `Cookie`       允许发送Cookies的时候，浏览器自动从客户端读取；
+- `Cookie2`
+- `Date`
+- `DNT`
+- `Expect`
+- `Host`
+- `Keep-Alive`
+- `Origin`  跨域的时候，浏览器自动添加当前域名
+- `Proxy-`
+- `Sec-`
+- `Referer`  浏览器自动添加当前域名URL
+- `TE`
+- `Trailer`
+- `Transfer-Encoding`
+- `Upgrade`
+- `Via`
+
+浏览器会拒绝绝对不安全的首部重写，以保证应用不能假扮用户代理、用户或请求来源，如Origin由浏览器自动设置，Access-Control-Allow-Origin由服务器设置，如果接受该请求，不包含该字段即可，浏览器发出的请求将作废。
+
 ### 2 HTTP之Request.    [HTTP](http://tools.jb51.net/table/http_header)
 
 * http协议是无状态的，同一个客户端的这次请求和上次请求是没有对应关系，这就导致即使是请求了相同的资源，浏览器还是会从服务端去拿。对http服务器来说，它并不知道这两个请求来自同一个客户端。 为了解决这个问题， Web程序引入了Cookie机制来维护状态. 通过cookie等机制，浏览器可以告诉服务器
@@ -59,8 +86,14 @@ URI是以一种抽象的，高层次概念定义统一资源标识，而URL和UR
 * origion : 其具体流程是，当一个链接或者XMLHttpRequest去请求跨域操作，浏览器事实上的确向目标服务器发起了连接请求，并且携带这origin。 
   当服务器返回时，浏览器将检查response中是否包含Access-Control-Allow-Origin字段，当缺少这个字段时，浏览器将abort，abort的意思是不显示，不产生事件，就好像没有请求过，甚至在network区域里面都看不到。 
   当存在这个header时，浏览器将检查当前请求所在域是否在这个access-control-allow-origin所允许的域内，如果是，继续下去，如果不存在，abort！
+* if-None-Match： 参数为服务器先前发送的Etag，与服务器回应的Etag比较判断是否改变；
+* ​
 
 [HTTP1](http://www.jianshu.com/p/80e25cb1d81a)
 
 [HTTP推荐教程](http://www.cnblogs.com/rayray/p/3729533.html)
+
+[HTTP预检请求](http://www.ruanyifeng.com/blog/2016/04/cors.html)
+
+
 
