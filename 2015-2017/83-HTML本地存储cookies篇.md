@@ -26,6 +26,8 @@ cookie 将信息存储于用户硬盘，因此可以作为全局变量，这是�
 
 ② 创建购物车。购物网站通常把已选物品保存在cookie中，这样可以实现 `不同页面` 之间 `数据的同步` (同一个域名下是可以共享cookie的)，同时在提交订单的时候又会把这些cookie传到后台。
 
+我们可以随便打开天猫，进入自己的购物车，然后勾选几项，看下netWork中XHR的请求
+
 ③ 跟踪用户行为。例如百度联盟会通过cookie记录用户的偏好信息，然后向用户推荐个性化推广信息，所以浏览其他网页的时候经常会发现旁边的小广告都是自己最近百度搜过的东西。这是可以禁用的，这也是cookie的缺点之一。
 
 那么，cookie是怎么起作用的呢？
@@ -53,13 +55,17 @@ name、value 是 cookie 的名和值。domian 、Path 、 Expires/max-age 、Siz
 
 这两个选项共同决定了cookie能被哪些页面共享。
 
-**domain 参数是用来控制 cookie对「哪个域」有效**，默认为设置 cookie的那个域。这个值可以包含子域，也可以不包含它。如上图的例子，Domain选项中，可以是".google.com.hk`"(不包含子域,表示它对`google.com.hk`的所有子域都有效)，也可以是"`www.google.com.hk"(包含子域)。
+**domain 参数是用来控制 cookie对「哪个域」有效**，**默认为设置** cookie的那个域。这个值可以包含子域，也可以不包含它。如上图的例子，Domain选项中，可以是".google.com.hk`"(不包含子域,表示它对`google.com.hk`的所有子域都有效)，也可以是"`www.google.com.hk"(包含子域)。
+
+如网址为www.jb51.net/test/test.aspx，那么domain默认为www.jb51.net。而跨域访问，如域A为t1.test.com，域B为t2.test.com，那么在域A生产一个令域A和域B都能访问的cookie就要将该cookie的domain设置为.test.com；如果要在域A生产一个令域A不能访问而域B能访问的cookie就要将该cookie的domain设置为t2.test.com
 
 path用来控制cookie发送的指定域的「路径」，默认为"/"，表示指定域下的所有路径都能访问。**它是在域名的基础下，指定可以访问的路径**。例如cookie设置为"`domain=.google.com.hk; path=/webhp`"，那么只有"`.google.com.hk/webhp`"及"`/webhp`"下的任一子目录如"`/webhp/aaa`"或"`/webhp/bbb`"会发送cookie信息，而"`.google.com.hk`"就不会发送，即使它们来自同一个域。
 
 ### expries/max-age失效时间
 
 expries 和 max-age 是用来决定cookie的生命周期的，也就是cookie何时会被删除。
+
+字段为此cookie超时时间。若设置其值为一个时间，那么当到达此时间后，此cookie失效。不设置的话默认值是Session，意思是cookie会和session一起失效。当浏览器关闭(不是浏览器标签页，而是整个浏览器) 后，此cookie失效。
 
 expries 表示的是失效时间，准确讲是「时刻」，max-age表示的是生效的「时间段」，以「秒」为单位。
 

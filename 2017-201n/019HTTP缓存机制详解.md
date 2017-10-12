@@ -9,8 +9,6 @@ tags:
 
 (原文链接)[原文链接](https://mp.weixin.qq.com/s?__biz=MzAwNjI5MTYyMw==&mid=2651494713&idx=1&sn=4ef5853d6068c2aa92ac27523a83605e&key=a9f0cd582f409b4eff7fe3bb304b4d8949624f94f3a03c06e39bcc91f4a47e4eaae43971fce4b8e2e36082643038ab7a7b4bf66d75dfad681ce6cfada473b17f783600e18c289faa56fb72fa736612fc&ascene=0&uin=MjIzMzEwNzk0MQ%3D%3D&devicetype=iMac+MacBookPro12%2C1+OSX+OSX+10.12.6+build(16G29)&version=12020810&nettype=WIFI&fontScale=100&pass_ticket=I9GYgsMc2eZx1d7EABypdSzE73h6bH7ks7B1tmWWCNLORreYjaLrM0K13LSmhKR6)
 
-*转载自： *艾小莫的梦* [JavaScript](https://mp.weixin.qq.com/s?__biz=MzAwNjI5MTYyMw==&mid=2651494713&idx=1&sn=4ef5853d6068c2aa92ac27523a83605e&key=a9f0cd582f409b4eff7fe3bb304b4d8949624f94f3a03c06e39bcc91f4a47e4eaae43971fce4b8e2e36082643038ab7a7b4bf66d75dfad681ce6cfada473b17f783600e18c289faa56fb72fa736612fc&ascene=0&uin=MjIzMzEwNzk0MQ%3D%3D&devicetype=iMac+MacBookPro12%2C1+OSX+OSX+10.12.6+build(16G29)&version=12020810&nettype=WIFI&fontScale=100&pass_ticket=I9GYgsMc2eZx1d7EABypdSzE73h6bH7ks7B1tmWWCNLORreYjaLrM0K13LSmhKR6##)
-
 前言在请求一个静态文件的时候（图片，css，js）等，这些文件的特点是文件不经常变化，将这些不经常变化的文件存储起来，对客户端来说是一个优化用户浏览体验的方法。那么这个就是客户端缓存的意义了。
 
 Http 缓存机制作为 web 性能优化的重要手段，对于从事 Web 开发的同学们来说，应该是知识体系库中的一个基础环节，同时对于有志成为前端架构师的同学来说是必备的知识技能。
