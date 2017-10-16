@@ -161,10 +161,13 @@ class Rect {
   static shortHBW (H,W){
     return H-W ;
   }
+  //类似于 Rect.shortHBW = function(){return H-W }  直接声明的属性可以遍历到
+  //不同之处在于static声明的静态属性是不可枚举的，即通过for-in循环无法遍历到；
 }
-console.log(Rect);//static方法其实就是class类的属性
+console.log(Rect);//static方法其实就是class类的属性(函数的直接属性)
 console.log(Rect.shortHBW(21,12) );//9  //static方法直接通过类名可以直接调用
-console.log(Rect.getArea() ); //prototype method 不能直接通过类名调用
+console.log(Rect.getArea() ); //prototype method 不能直接通过类名调用，因为getArea方法在Rect.prototype.getArea()调用
+//同时Rect函数，从对象的角度来看，getArea和clearArea方法都是在prototype属性上的，而属性的查找是沿着原型链__proto__取查找的，并不是沿着函数(对象)的prototype查找的；
 ```
 
 **总结以上两者：**

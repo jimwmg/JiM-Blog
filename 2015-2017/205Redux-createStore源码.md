@@ -61,7 +61,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
     if (typeof enhancer !== 'function') {
       throw new Error('Expected the enhancer to be a function.')
     }
-
+//这里如果存在enhancer函数，则重新执行createStore函数；
     return enhancer(createStore)(reducer, preloadedState)
   }
 
