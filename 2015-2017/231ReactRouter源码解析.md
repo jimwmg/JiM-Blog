@@ -217,6 +217,28 @@ componentWillReceiveProps(nextProps, nextContext) {
   )
 
   this.setState({
+    //这里如果一个组件中，Route的path值为 '/'，那么对于任何路径，该Route对应的组件都会被渲染；
+   //因为location.pathname哈Route组件的path匹配的结果match必然存在，所以Route组件上对应的组件也一定会渲染；
+    /*
+class Home extends React.Component {
+    render() {
+        let path = this.props.match.path;
+        if (path === "/") path= "";
+        return (
+            <div>
+                <Route path={`${path}/approval`} component={Approval} />
+                <Route path={`${path}/billInput`} component={billInput} />
+                <Route path={`${path}/main`} component={Main} />
+                <Route path={`${path}/mine`} component={Mine} />
+                <Route path={`${path}/`} component={HomeNav}/>
+            </div>
+        )
+    }
+}
+
+
+
+    */
     match: this.computeMatch(nextProps, nextContext.router)
   })
 }
@@ -231,7 +253,9 @@ render() {
   const props = { match, location, history, staticContext }
 
   return (
-   //以下，将props对象传入ReactElement创建函数，这就是为什么所有的ReactElement对象中都有history,location,match对象的源代码；
+    //以下，将props对象传入ReactElement创建函数，这就是为什么所有的ReactElement对象中都有history,location,match对象的源代码；
+    //这里如果一个组件中，Route的path值为 '/'，那么对于任何路径，该Route对应的组件都会被渲染；
+   //因为location.pathname哈Route组件的path匹配的结果match必然存在，所以Route组件上对应的组件也一定会渲染；
     component ? ( // component prop gets first priority, only called if there's a match
       match ? React.createElement(component, props) : null
     ) : render ? ( // render prop is next, only called if there's a match
