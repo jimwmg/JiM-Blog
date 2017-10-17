@@ -209,9 +209,8 @@ Object.defineProperty(o, 'b', {
 });
 Object.defineProperty(o, 'c', {
   value: 3
-}); // enumerable defaults to false
-o.d = 4; // enumerable defaults to true
-         // when creating a property by setting it
+}); // enumerable defaults to false (当通过属性描述的时候，默认为false，不可枚举)
+o.d = 4; // enumerable defaults to true ;when creating a property by setting it
 
 for (var i in o) {
   console.log(i);

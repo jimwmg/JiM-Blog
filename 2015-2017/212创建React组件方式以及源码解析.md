@@ -421,7 +421,7 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
     //situation1:ReactEmptyComponent组件实例
     instance = ReactEmptyComponent.create(instantiateReactComponent);
   } else if (typeof node === 'object') {
-    var element = node;
+    var element = node;//element是ReactElement对象
     var type = element.type;
     if (typeof type !== 'function' && typeof type !== 'string') {
       var info = '';
@@ -452,6 +452,7 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
       }
     } else {
       //situation4:React自定义组件，比如通过class等定义的组件；
+      //这里其实也就是为什么所有的组件的render函数只能包含一个ReactElement，而不能包含并列的数组；因为element必须是一个ReactElement对象，如果是由多个ReactElement对象组成的数组，React会报错；
       instance = new ReactCompositeComponentWrapper(element);
     }
   } else if (typeof node === 'string' || typeof node === 'number') {
@@ -538,6 +539,72 @@ situation5:instance = ReactHostComponent.createInstanceForText(node);
 [ReactDOMComponent.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactDOMComponent.js)
 
 [ReactDOMTextComponent.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactDOMTextComponent.js)
+
+[ReactMultiChild.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactMultiChild.js)
+
+```javascript
+//ReactDOMComponent.js
+this._createInitialChildren(transaction, props, context, lazyTree);
+_createInitialChildren: function (transaction, props, context, lazyTree) {
+    // Intentional use of != to avoid catching zero/false.
+    var innerHTML = props.dangerouslySetInnerHTML;
+    if (innerHTML != null) {
+      if (innerHTML.__html != null) {
+        DOMLazyTree.queueHTML(lazyTree, innerHTML.__html);
+      }
+    } else {
+      var contentToUse = CONTENT_TYPES[typeof props.children] ? props.children : null;
+      var childrenToUse = contentToUse != null ? null : props.children;
+      // TODO: Validate that text is allowed as a child of this node
+      if (contentToUse != null) {
+        // Avoid setting textContent when the text is empty. In IE11 setting
+        // textContent on a text area will cause the placeholder to not
+        // show within the textarea until it has been focused and blurred again.
+        // https://github.com/facebook/react/issues/6731#issuecomment-254874553
+        if (contentToUse !== '') {
+          if (process.env.NODE_ENV !== 'production') {
+            setAndValidateContentChildDev.call(this, contentToUse);
+          }
+          DOMLazyTree.queueText(lazyTree, contentToUse);
+        }
+      } else if (childrenToUse != null) {
+        //这里就是对    根ReactElement对象的props上的子ReactElement对象进行解析；如此循环递归的创建所有的DOM元素,生成markup字符串;
+        var mountImages = this.mountChildren(childrenToUse, transaction, context);
+        for (var i = 0; i < mountImages.length; i++) {
+          DOMLazyTree.queueChild(lazyTree, mountImages[i]);
+        }
+      }
+    }
+  },
+```
+
+```javascript
+//ReactMultiChild.js
+mountChildren: function (nestedChildren, transaction, context) {
+  var children = this._reconcilerInstantiateChildren(nestedChildren, transaction, context);
+  this._renderedChildren = children;
+
+  var mountImages = [];
+  var index = 0;
+  for (var name in children) {
+    if (children.hasOwnProperty(name)) {
+      var child = children[name];
+      var selfDebugID = 0;
+      if (process.env.NODE_ENV !== 'production') {
+        selfDebugID = getDebugID(this);
+      }
+      var mountImage = ReactReconciler.mountComponent(child, transaction, this, this._hostContainerInfo, context, selfDebugID);
+      child._mountIndex = index++;
+      mountImages.push(mountImage);
+    }
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    setChildrenForInstrumentation.call(this, children);
+  }
+```
+
+
 
 从源码可以看到，instance上都有mountComponent函数，和ReactCompositeComponent.js中的mountComponent函数一样，对于不同的ReactElement对象执行不同的mountComponent函数；
 
@@ -635,7 +702,7 @@ var ReactCompositeComponent = {
     this._mountOrder = nextMountID++;
     this._hostParent = hostParent;
     this._hostContainerInfo = hostContainerInfo;
-//ReactElement对象中的props,context,type等的声明；
+//ReactElement对象中的props,context,type等的声明；props上有children
     var publicProps = this._currentElement.props;
     var publicContext = this._processContext(context);
 
@@ -645,7 +712,7 @@ var ReactCompositeComponent = {
 
     // Initialize the public class
     var doConstruct = shouldConstruct(Component);
-    //这里的inst就是new class组件生成的实力对象；_constructComponent下面有贴上源码；
+    //这里的inst就是new class组件生成的实例对象；_constructComponent下面有贴上源码；
     var inst = this._constructComponent(doConstruct, publicProps, publicContext, updateQueue);
     var renderedElement;
     // These should be set up in the constructor, but as a convenience for
@@ -845,9 +912,23 @@ var ReactReconciler = {
 ### 6 总结
 
 * React.js负责创建一个虚拟DOM对象，这个对象以一个大的ReactElement对象的形式存在；
+
 * ReactDOM.js负责将虚拟DOM对象挂在到真正的DOM 根节点上，
   * 对于class组件，会调用其render函数的返回值作为renderedElement的值，进行递归挂载
   * 对于宿主DOM对象，则直接将其挂载
+
+* ReactElement对象是一个类似于DOM对象的树状结构，ReactDOM.render(ReactElement,container,callback);中的ReactElement只能是一个对象，而不能是一个ReactElement组成的数组，这也是为什么React组件并列返回多个jsx对象是不合法的；在将React组件生成React实例的时候，这也解释了为什么只能又一个jsx对象
+
+  instance = new ReactCompositeComponentWrapper(element);
+
+* 一个ReactElement对象上的props.children什么时候进行实例化呢？
+  在ReactDOMComponent.js中,如下就是实例化props.children，此时就会递归的执行生成DOM结构的字符串markup;
+
+```javascript
+  var mountImages = this.mountChildren(childrenToUse, transaction, context);
+```
+
+
 
 
 

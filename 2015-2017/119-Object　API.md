@@ -9,6 +9,8 @@ layout :
 
 ## Object内置对象　API  
 
+现明确一点，每一个实例对象的`__protp__`属性指向其构造函数的prototype属性；
+
 1 Object.getPrototypeOf( obj )  ,返回obj对象的构造函数的prototype属性(也就是obj对象的__ proto __ 属性对象)，每个构造函数都有一个prototype属性
 
 ```javascript
@@ -31,9 +33,25 @@ layout :
 3.1 Object.create( proto , prop )  用来设置对象的__ proto __ 的属性的指向；返回一个创建的对象;prop和Object.defineProperties(obj ,prop) 里面的prop格式一致,如下栗子
 
 ```javascript
+if (typeof Object.create !== "function") {
+  Object.create = function (proto, propertiesObject) {
+    if (!(proto === null || typeof proto === "object" || typeof proto === "function")) {
+      throw TypeError('Argument must be an object, or null');
+    }
+    var temp = new Object();
+    temp.__proto__ = proto;
+    if(typeof propertiesObject ==="object")
+      Object.defineProperties(temp,propertiesObject);
+    return temp;
+    //由此可见返回值是一个在空对象上添加__proto__和propertiesObject这两个对象的新对象；
+  };
+}
+```
+
+```javascript
 var obj = Object.create({ foo: 1 }, { // foo is on obj's prototype chain.
   bar: {
-    value: 2  // bar is a non-enumerable property.
+    value: 2  // bar is a non-enumerable property.默认为enumerable:false,即不可枚举；
   },
   baz: {
     value: 3,
@@ -41,7 +59,8 @@ var obj = Object.create({ foo: 1 }, { // foo is on obj's prototype chain.
   }
 });
 
-var copy = Object.assign({}, obj);
+var copy = Object.assign({}, obj);//Object.assign(target,source....)
+//方法用于将所有可枚举属性的值从一个或多个源对象复制到目标对象。它将返回目标对象
 console.log(copy); // { baz: 3 }
 
 console.log(obj);
@@ -56,8 +75,6 @@ Object  baz: 3
             foo: 1
             __proto__: Object
 ```
-
-3.2 Object.setPrototypeOf(obj,prototype)  prototype参数必须是一个对象或者null,否则会抛出异常，用来设置对象的__ proto __ 的属性的指向,返回obj对象
 
 ```javascript
   function Test(){
@@ -124,6 +141,8 @@ var obj1 = Object.create(Test,{
 
 //proto 设置obj1的__proto__ 指向，必须是一个对象或者null否则会抛出异常; prop 设置 obj1 的属性值
 ```
+
+3.2 Object.setPrototypeOf(obj,prototype)  prototype参数必须是一个对象或者null,否则会抛出异常，用来设置对象的__ proto __ 的属性的指向,返回obj对象
 
 ```javascript
 var obj = {name:"JHOn"};

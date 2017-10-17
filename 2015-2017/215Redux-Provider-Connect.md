@@ -44,6 +44,8 @@ React推崇的是单向数据流，自上而下进行数据的传递，但是由
 
 **Provider**是一个组件，它接受store作为props，然后通过context往下传，这样react中任何组件都可以通过context获取store。也就意味着我们可以在任何一个组件里利用dispatch(action)来触发reducer改变state，并用subscribe监听state的变化，然后用getState获取变化后的值。但是并不推荐这样做，它会让数据流变的混乱，过度的耦合也会影响组件的复用，维护起来也更麻烦。
 
+[Provider.js源码地址](https://github.com/jimwmg/react-redux/blob/master/src/components/Provider.js)
+
 ```javascript
 var Provider = function (_Component) {
   _inherits(Provider, _Component);
@@ -129,6 +131,8 @@ const FilterLink = connect(
 ```
 
 ### 2  connect函数   connect(mapStateToProps, mapDispatchToProps, mergeProps)
+
+[官方文档解释](https://github.com/jimwmg/react-redux/blob/master/docs/api.md)
 
 Connects a React component to a Redux store.
 
@@ -303,7 +307,7 @@ export default FilterLink
 
 
 
-源码暂时没有告破
+
 
 
 
