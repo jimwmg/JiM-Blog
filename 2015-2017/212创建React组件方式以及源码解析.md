@@ -166,7 +166,7 @@ tips:建议用webstorm来进行源码的跟踪链接；
 
  从源码角度来看创建一个React组件的过程中发生了什么。
 
-[react.js源码github地址]()
+[react.js源码github地址](https://github.com/jimwmg/React-/blob/master/react/lib/React.js)
 
 ```javascript
 var createReactClass = require('./createClass');
@@ -225,19 +225,26 @@ var factory = require('create-react-class/factory');
 module.exports = factory(Component, isValidElement, ReactNoopUpdateQueue);
 ```
 
-[ReactBaseClasses源码地址]():这里解释了组件上为何有forceUpdate,以及setState等接口；
+[ReactBaseClasses源码地址](https://github.com/jimwmg/React-/blob/master/react/lib/ReactBaseClasses.js):这里解释了组件上为何有forceUpdate,以及setState等接口；
 
-[ReactElement.js源码地址]():这里解释了jsx转译之后，React到底是如何创建虚拟DOM对象的；
+[ReactElement.js源码地址](https://github.com/jimwmg/React-/blob/master/react/lib/ReactElement.js):这里解释了jsx转译之后，React到底是如何创建虚拟DOM对象的；
 
-[factory.js源码地址]()：这里解释了创建React组件（函数）的过程；
+[factory.js源码地址](https://github.com/jimwmg/React-/blob/master/create-react-class/factory.js)：这里解释了创建React组件（函数）的过程；
 
 ###  5 ReactDOM.js
 
  接下来看下创建一个React组件之后，如何通过ReactDOM.render(element,container)将其加载到指定 的DOM节点的。以下只贴关键源码，其他的都附有源码地址，读者可自行查看；
 
-[ReactDOM.js源码地址]()
+[ReactDOM.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactDOM.js)
+
+[ReactDefaultInjection源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactDefaultInjection.js)
+
+[源码解读](http://www.cnblogs.com/JhoneLee/p/5886759.html)
 
 ```javascript
+var ReactDefaultInjection = require('./ReactDefaultInjection');
+ReactDefaultInjection.inject();
+//上面两行是使ReactHostComponent.createInternalComponent注册方法；
 var ReactDOM = {
   findDOMNode: findDOMNode,
   render: ReactMount.render,
@@ -274,7 +281,7 @@ if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined' && typeof __REACT_DEVT
 }
 ```
 
-[ReactMount.js源码地址]()
+[ReactMount.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactMount.js)
 
 ```javascript
 var ReactMount = {
@@ -395,7 +402,7 @@ _mountImageIntoNode: function (markup, container, instance, shouldReuseMarkup, t
 var componentInstance = instantiateReactComponent(nextElement, false);
 ```
 
-[instantiateReactComponent.js源码地址]()
+[instantiateReactComponent.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/instantiateReactComponent.js)
 
 ```javascript
 var ReactCompositeComponent = require('./ReactCompositeComponent');
@@ -524,6 +531,18 @@ _assign(ReactCompositeComponentWrapper.prototype, ReactCompositeComponent, {
 
 situation2:instance = ReactHostComponent.createInternalComponent(element);这个其实就是创建宿主元素实例
 
+situation5:instance = ReactHostComponent.createInstanceForText(node);
+
+在宿主元素实例上也有mountComponent方法；在生成markup的时候，对于函数，class组件实例，会递归生成新的实例，直到宿主DOM元素；
+
+[ReactDOMComponent.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactDOMComponent.js)
+
+[ReactDOMTextComponent.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactDOMTextComponent.js)
+
+从源码可以看到，instance上都有mountComponent函数，和ReactCompositeComponent.js中的mountComponent函数一样，对于不同的ReactElement对象执行不同的mountComponent函数；
+
+区别在于ReactCompositeComponent.js中的mountComponent会递归的生成instance直到ReactElement的type类型为string，然后执行ReactDOMComponent.js或者ReactDOMTextComponent.js的mountComponent函数，生成最终的DOM元素，挂载到节点上；
+
 重点来看下
 
 situation4:React自定义组件。
@@ -549,10 +568,11 @@ var ReactCompositeComponentWrapper = function (element) {
 _assign(ReactCompositeComponentWrapper.prototype, ReactCompositeComponent, {
   _instantiateReactComponent: instantiateReactComponent
 });
-//这就使得instance = new ReactCompositeComponentWrapper(element);instance实例上有ReactCompositeComponent这个对象上的所有属性和方法，其中React组件实例上会有constructor和mountComponent函数
+//这就使得instance = new ReactCompositeComponentWrapper(element);会执行下面的constructor方法；instance实例上有ReactCompositeComponent这个对象上的所有属性和方法，其中React组件实例上会有constructor和mountComponent函数
+//注意这里并没有实例化class组件(函数)，真正new class组件(函数)是在mountComponent中进行的；这里只是让instance上可以访问到ReactElement对象（type,props.....)：this._currentElement = element;
 ```
 
-[ReactCompositeComponent.js源码地址]()
+[ReactCompositeComponent.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactCompositeComponent.js)
 
 这里暂时只分析class类创建的组件渲染底层实现的代码，其余代码不贴；
 
@@ -615,20 +635,33 @@ var ReactCompositeComponent = {
     this._mountOrder = nextMountID++;
     this._hostParent = hostParent;
     this._hostContainerInfo = hostContainerInfo;
-
+//ReactElement对象中的props,context,type等的声明；
     var publicProps = this._currentElement.props;
     var publicContext = this._processContext(context);
 
-    var Component = this._currentElement.type;
+    var Component = this._currentElement.type;//class声明的React组件(函数)_constructComponentWithoutOwner函数中初始化为实例对象；
 
     var updateQueue = transaction.getUpdateQueue();
 
     // Initialize the public class
     var doConstruct = shouldConstruct(Component);
+    //这里的inst就是new class组件生成的实力对象；_constructComponent下面有贴上源码；
     var inst = this._constructComponent(doConstruct, publicProps, publicContext, updateQueue);
     var renderedElement;
     // These should be set up in the constructor, but as a convenience for
     // simpler class abstractions, we set them up after the fact.
+    //将ReactElement对象上的props,context,refs给到React组件的实例对象；
+    //这就是为什么在组件中通过this.props可以访问到对应的属性值的原因；
+    /**
+    class Welcome extends React.Component {
+         render(){
+             return <h1>hello {this.props.name}</h1>
+         }
+     }
+
+     const element = <Welcome name = 'JiM'/>
+    通过JSX生成ReactElement对象，生成这个对象，会成为instance = new ReactCompositeComponentWrapper(element);对象的一个属性，_currentElement；同时instance上有mountComponent方法；当Flag2处生成markup的时候，会调用这个方法，在这个方法中会new class组件，生成实例对象；
+    */
     inst.props = publicProps;
     inst.context = publicContext;
     inst.refs = emptyObject;
@@ -655,6 +688,7 @@ var ReactCompositeComponent = {
     if (inst.unstable_handleError) {
       markup = this.performInitialMountWithErrorHandling(renderedElement, hostParent, hostContainerInfo, transaction, context);
     } else {
+      //这里进行递归的生成组件实例，直到renderElement是宿主DOM元素的时候；下面有源码；
       markup = this.performInitialMount(renderedElement, hostParent, hostContainerInfo, transaction, context);
     }
 
@@ -672,7 +706,95 @@ var ReactCompositeComponent = {
 
     return markup;
   },
+  performInitialMount: function (renderedElement, hostParent, hostContainerInfo, transaction, context) {
+    var inst = this._instance;
 
+    var debugID = 0;
+    if (process.env.NODE_ENV !== 'production') {
+      debugID = this._debugID;
+    }
+
+    if (inst.componentWillMount) {
+      if (process.env.NODE_ENV !== 'production') {
+        measureLifeCyclePerf(function () {
+          return inst.componentWillMount();
+        }, debugID, 'componentWillMount');
+      } else {
+        inst.componentWillMount();
+      }
+      // When mounting, calls to `setState` by `componentWillMount` will set
+      // `this._pendingStateQueue` without triggering a re-render.
+      if (this._pendingStateQueue) {
+        inst.state = this._processPendingState(inst.props, inst.context);
+      }
+    }
+
+    // If not a stateless component, we now render
+    if (renderedElement === undefined) {
+      renderedElement = this._renderValidatedComponent();
+    }
+
+    var nodeType = ReactNodeTypes.getType(renderedElement);
+    this._renderedNodeType = nodeType;
+    //如果是child是class生成的ReactElement对象，即type类型为函数，此时child上的mountComponent引用的是而ReactCompositeComponent.js中的mountComponent，则继续递归生成markup,直到child是宿主ReactElement对象，即type类型为字符串，此时child上mountComponent引用的是，ReactDOMComponent.js中的mountComponent,则最终生成DOM元素，插入到节点中；
+    var child = this._instantiateReactComponent(renderedElement, nodeType !== ReactNodeTypes.EMPTY /* shouldHaveDebugID */
+    );
+    this._renderedComponent = child;
+    //ReactReconciler.mountComponent会调用组件实例的mountComponent函数，这里对于函数组件；会调用ReactCompositeComponent.js中的mountComponent
+//这里进行递归调用ReactCompositeComponent.js中的mountComponent函数，而ReactCompositeComponent.js中的mountComponent中又调用performInitialMount形成递归；
+    //直到组件是宿主DOM对象的时候，生成markup的时候，会调用
+    var markup = ReactReconciler.mountComponent(child, transaction, hostParent, hostContainerInfo, this._processChildContext(context), debugID);
+
+    if (process.env.NODE_ENV !== 'production') {
+      if (debugID !== 0) {
+        var childDebugIDs = child._debugID !== 0 ? [child._debugID] : [];
+        ReactInstrumentation.debugTool.onSetChildren(debugID, childDebugIDs);
+      }
+    }
+
+    return markup;
+  },
+
+   _constructComponent: function (doConstruct, publicProps, publicContext, updateQueue) {
+    if (process.env.NODE_ENV !== 'production' && !doConstruct) {
+      ReactCurrentOwner.current = this;
+      try {
+        return this._constructComponentWithoutOwner(doConstruct, publicProps, publicContext, updateQueue);
+      } finally {
+        ReactCurrentOwner.current = null;
+      }
+    } else {
+      return this._constructComponentWithoutOwner(doConstruct, publicProps, publicContext, updateQueue);
+    }
+  },
+
+  _constructComponentWithoutOwner: function (doConstruct, publicProps, publicContext, updateQueue) {
+    var Component = this._currentElement.type;
+
+    if (doConstruct) {
+      if (process.env.NODE_ENV !== 'production') {
+        return measureLifeCyclePerf(function () {
+          //这里的Component就是ReactElement中的type，new该type的时候，如果是class声明的，会直接执行class类中的constructor函数；返回一个组件实例对象；
+          return new Component(publicProps, publicContext, updateQueue);
+        }, this._debugID, 'ctor');
+      } else {
+        return new Component(publicProps, publicContext, updateQueue);
+      }
+    }
+
+    // This can still be an instance in case of factory components
+    // but we'll count this as time spent rendering as the more common case.
+    if (process.env.NODE_ENV !== 'production') {
+      return measureLifeCyclePerf(function () {
+        return Component(publicProps, publicContext, updateQueue);
+      }, this._debugID, 'render');
+    } else {
+      return Component(publicProps, publicContext, updateQueue);
+    }
+  },
+
+
+}
 ```
 
 #### 接下来看下Flag2的解释
@@ -681,7 +803,7 @@ var ReactCompositeComponent = {
 var markup = ReactReconciler.mountComponent(wrapperInstance, transaction, null, ReactDOMContainerInfo(wrapperInstance, container), context, 0 )
 ```
 
-[ReactReconciler.js源码地址]()
+[ReactReconciler.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactReconciler.js)
 
 ```javascript
 var ReactReconciler = {
@@ -718,14 +840,13 @@ var ReactReconciler = {
   ........
   //其他方法.......
 }
-
 ```
 
 ### 6 总结
 
 * React.js负责创建一个虚拟DOM对象，这个对象以一个大的ReactElement对象的形式存在；
 * ReactDOM.js负责将虚拟DOM对象挂在到真正的DOM 根节点上，
-  * 对于class组件，会调用其render函数的返回值作为renderedElement的值，进行挂载
+  * 对于class组件，会调用其render函数的返回值作为renderedElement的值，进行递归挂载
   * 对于宿主DOM对象，则直接将其挂载
 
 
