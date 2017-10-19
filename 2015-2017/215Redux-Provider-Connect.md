@@ -12,6 +12,8 @@ layout :
 
 先来看下直接在React中使用Redux
 
+[Redux源码地址](https://github.com/jimwmg/redux/tree/master/src)
+
 ```javascript
 var store = createStore(reducer)
 

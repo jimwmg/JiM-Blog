@@ -61,7 +61,8 @@ export default function createStore(reducer, preloadedState, enhancer) {
     if (typeof enhancer !== 'function') {
       throw new Error('Expected the enhancer to be a function.')
     }
-//这里如果存在enhancer函数，则重新执行createStore函数；
+//这里如果存在enhancer函数，则重新执行createStore函数；因为enchancer函数是applyMiddleWare函数的返回值，返回值为一个接受createStore为参数的函数；
+    appliMiddleware源码地址：https://github.com/jimwmg/redux/blob/master/src/applyMiddleware.js
     return enhancer(createStore)(reducer, preloadedState)
   }
 
@@ -199,7 +200,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
       const listener = listeners[i]
       listener()
     }
-
+//return action 是为了在compose(thunk,logger)(store.dispatch) <==> thunk(logger(store.dispatch))
     return action
   }
 
@@ -279,6 +280,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
 * var store = createStore(reducer , preLoadState , enhancer) 定义一个store的时候可以传递reducer函数,state初始状态
   * 注意createStore之后,会先默认执行dispatch函数一次,看源码注意下这一点.通过这次默认执行dispatch函数,reducer函数就会执行,可以初始化state状态
   * dispatch函数执行的时候,由于刚创建store并没有通过subscribe绑定listeners,所以listeners在createStore的时候不会执行.
+  * 返回值就是最后return的那个对象，注意内存上的消耗，dispatch里面引用这currentReducer,currentReducer引用这reducer,而一般传递进来的reducer都是通过combinReducer处理的reducers的集合，所以combineReducer函数中形成的闭包在整个过程中会一直存在；
 * getState( )函数用来获取state下一个状态
 * dispatch(action)函数,
   * 用来根据不同的action,调用reducer函数改变state状态

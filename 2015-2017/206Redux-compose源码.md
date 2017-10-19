@@ -21,7 +21,7 @@ layout :
  * from right to left. For example, compose(f, g, h) is identical to doing
  * (...args) => f(g(h(...args))).
  */
-
+//   redux/compose.js
 export default function compose(...funcs) {
   if (funcs.length === 0) {
     return arg => arg
@@ -33,7 +33,6 @@ export default function compose(...funcs) {
 
   return funcs.reduce((a, b) => (...args) => a(b(...args)))
 }
-
 ```
 
 经过bable编译器编译之后
@@ -49,6 +48,8 @@ function compose() {
   for (var _len = arguments.length, funcs = Array(_len), _key = 0; _key < _len; _key++) {
     funcs[_key] = arguments[_key];
   }
+  //compose期望得到的参数都是函数
+  //现将传入compose的参数中的函数组成一个数组 funcs,然后对这个数组使用Array.prototype.reduce(cb,initV)方法，该方法接受的参数中的cb，接受四个参数；该函数的返回值将作为下一轮cb调用的第一个参数；
 
   if (funcs.length === 0) {
     return function (arg) {
@@ -61,11 +62,80 @@ function compose() {
   }
 
   return funcs.reduce(function (a, b) {
+    //注意这里，当第二次调用reduce的callback的时候，第一次调用callback的返回的函数
+      /*a=function () {
+      	return a(b.apply(undefined, arguments));
+      	}
+      	执行了；第二次调用的时候，a就是这个函数；
+      */
+    //为什么是apply而不是call,因为apply接受this指向和一个数组或者类数组作为参数，然后会将数组中的元素拆开传入b函数中；
     return function () {
       return a(b.apply(undefined, arguments));
     };
   });
 }
+
+```
+
+**compose函数所接受的多个函数参数中，仅最后一个函数可以接受多个参数；其余函数都是接受上一个函数的返回值，也就是说其余函数只能接受一个参数；**
+
+理解下arguments对象，MDN上解释，The `arguments` object is a local variable available within all (non-arrow) functions. You can refer to a function's arguments within the function by using the `arguments` object. This object contains an entry for each argument passed to the function, the first entry's index starting at 0. 
+
+* arguments对象是每个函数中的局部变量，只能在对应的函数中单独访问；当调用一个函数的时候，arguments对象会在函数作用域中声明，其元素包含函数接受的所有参数；
+* 传递给函数的所有参数都会成为arguments对象的成员，即使在函数定义的时候，形参少于实参
+* arguments对象在箭头函数中是不存在的；
+* 所以说上面的reduce函数中接受的arguments对象和compose函数接受的arguments对象是完全不相关的；
+
+```javascript
+let arrow = ()=>{
+  console.log(arguments);//报错，未定义
+}
+arrow(3);
+function f(a){
+  console.log(a);
+  console.log(arguments)；//包含1，2，3
+}
+f(1,2,3);
+```
+
+compose函数另外一种实现方式，对比着上面更好理解；
+
+```javascript
+//underscore.js
+function compose (){
+  console.log('compose',arguments)
+  var args = arguments ; 
+  var start = args.length -1 ;//从传入的参数中最后一个开始；
+  return function(){ //retFunc(2,3),此时下面的arguments对象中就有2，3	这两个变量；
+    console.log('return',arguments)
+    var i = start ;
+    //第一次调用，使用apply,因为最后一个函数参数可能有多个参数
+    var result = args[start].apply(this,arguments);
+    while(i--){//先运算，后做减法
+      //以后每次调用都是用call,因为其他的函数只能接受一个参数；
+      result = args[i].call(this,result);
+    }
+    return result ;
+  }
+};
+function sum (x,y){
+  return x+y;
+}
+function power(z){
+  return z*z;
+}
+var retFunc = compose(power,sum);
+//这里注意理解，compose(power,sum)执行返回一个函数，这里也就形成了闭包，compose的函数的整个作用域连会保存在内存中，即使compose函数执行完毕，该作用域开辟的内存也不会被GC机制回收；所以就可以访问args；
+var retValue = retFun(2,3);//25
+//这里retFunc执行，也就是compose返回的函数执行(闭包)；
+```
+
+对比上面两种实现方式,还是redux/compose.js中的实现更加严谨，即使compose函数不穿参数，也可以运行，但是underscore.js中必须传递参数
+
+```javascript
+var zero = compose();
+console.log('zero', zero);
+console.log(zero(3));//underscore.js会报错；redux/compose.js结果就是3；
 ```
 
 ### 2 简化应用过程 
@@ -108,7 +178,9 @@ Return value
 The value that results from the reduction.
 ```
 
-callback函数每次执行之后的结果作为第一个参数再次传递给callback函数
+callback函数每次执行之后的结果作为第一个参数再次传递给callback函数；
+
+If the array is empty and no `initialValue` is provided, [`TypeError`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError) will be thrown. If the array has only one element (regardless of position) and no `initialValue` is provided, or if `initialValue` is provided but the array is empty, the solo value will be returned *without calling callback.*
 
 ### 4 compose函数执行之后返回值是什么 
 
@@ -129,7 +201,7 @@ callback函数每次执行之后的结果作为第一个参数再次传递给cal
 var ret = [1,2,3].reduce(function(a,b){
   return a+b ;
 });
-
+// 假如一个函数没有返回值，那么ret的结果是undefined,因为最后一次执行的时候，传入该函数的参数是NAN和一个数字，函数执行完毕之后，默认返回值还是undefined;
 console.log(ret);//6
 ```
 
@@ -149,21 +221,26 @@ console.log(ret);//6
       return num + 1 ;
     }
 
-    function func3(num){
-      console.log('func1获取参数',num);
-      return num + 3 ;
+    function func3(num1,num2){
+      console.log('func3获取参数',num);
+      return num1+num2 ;
     }
 
     var ret = Redux.compose(func1,func2,func3);
     console.dir(ret);//可以看出结果是一个函数  function anonymous(t)
-    
-    
+    //实际上就是
+    ret = [func1,func2,func3].reduce(function (a, b) {
+      return function () {
+        //这里的arguments是ret函数执行传递进来的参数组成的类数组；执行到最后，就是func中最后一个函数，也就是ret接受的参数要和func中最后一个函数需要的参数保持一致；
+        return a(b.apply(undefined, arguments));
+      };
+    });
+    //也就是reduce执行的结果，reduce执行的结果是对func数组中所有元素执行之后最终的返回函数；
+    var ret1 = Redux.compose(func1,func2,func3)(3,1) ;
+    console.log(ret1);//8
 
-    var ret1 = Redux.compose(func1,func2,func3)(3) ;
-    console.log(ret1);
-
-    var ret2 = func1(func2(func3(3))); //这个就是compose函数最终返回的最简单的函数形态
-    console.log(ret2)
+    var ret2 = func1(func2(func3(3,1))); //这个就是compose函数最终返回的最简单的函数形态
+    console.log(ret2);//8
   </script>
 ```
 

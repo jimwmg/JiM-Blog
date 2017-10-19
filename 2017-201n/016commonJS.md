@@ -85,7 +85,7 @@ module.exports = {func:function(){},name:'Jhon'}
 03module.js文件
 
 ```javascript
-var ret = require('./02module');
+var ret = require('./02module');//require进来的是02module.js的exports对象的引用而已；
 require('./02module');
 require('./02module').age = 14 ;
 console.log('require模块的返回值',require('./02module'));

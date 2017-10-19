@@ -170,7 +170,7 @@ function reducer(state = {count: 0},action){
 
 const store = createStore(reducer)
 console.log(store);
-
+//这里 store 上有{dispatch,state,}
 console.log(store.getState());
 
 class Toggle extends React.Component {

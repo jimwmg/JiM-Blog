@@ -58,10 +58,6 @@ export default function applyMiddleware(...middlewares) {
 }
 ```
 
-由于目前对这个源码理解还是不够透彻,索性拿别人的作为记录得了,后期自己深入研究在自己写demo.
-
-下面这个就是一个简单的中间件
-
 ```javascript
 
 const printStateMiddleware = ({ getState }) => next => action => {
@@ -93,8 +89,6 @@ function printStateMiddleware(middlewareAPI) { // 记为【锚点-1】，中间�
   }
 }
 ```
-
-
 
 如果觉得代码有点晦涩难懂,可以进行下babel转化为ES5 如下:
 
