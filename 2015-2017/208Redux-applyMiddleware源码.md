@@ -109,6 +109,7 @@ function applyMiddleware() {
   }
 
   return function (createStore) {
+    //这里也是产生了闭包v a
     return function (reducer, preloadedState, enhancer) {
       var store = createStore(reducer, preloadedState, enhancer);
       var _dispatch = store.dispatch;

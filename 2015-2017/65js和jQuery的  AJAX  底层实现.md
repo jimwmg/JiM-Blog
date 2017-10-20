@@ -190,7 +190,7 @@ var $ = {
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     }
     xhr.send(obj.data);
-    xhr.onreadystatechange = function(){  //每次readyState值变化的时候，都活触发这个onreadystatechange监听器，所以要设定一些条件，来限制函数体的执行，
+    xhr.onreadystatechange = function(){  //每次readyState值变化的时候，都会触发这个onreadystatechange监听器，所以要设定一些条件，来限制函数体的执行，
       if(xhr.readyState == 4){  //响应完成
         if(xhr.status == 200) {  //状态ok
           var res = xhr.responseText ;//(如果返回是XML类型的数据，则用 xhr.responseXML接受)

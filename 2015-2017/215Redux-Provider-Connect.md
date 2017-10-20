@@ -8,8 +8,6 @@ updated :
 layout : 
 ---
 
-我是一个不信邪的人,所以无论如何我也要把这个搞明白
-
 先来看下直接在React中使用Redux
 
 [Redux源码地址](https://github.com/jimwmg/redux/tree/master/src)

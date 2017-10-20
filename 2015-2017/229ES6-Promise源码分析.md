@@ -26,7 +26,7 @@ layout :
 //例1
 
 function getUserId() {
-
+//通过new 调用Promise函数，函数内部的代码都会执行；
     return new Promise(function(resolve) {
 
         //异步请求
@@ -48,7 +48,6 @@ getUserId().then(function(id) {
     //一些处理
 
 })
-
 ```
 
 
@@ -65,19 +64,11 @@ getUserId方法返回一个promise，可以通过它的then方法注册(注意�
 function Promise(fn) {
 
     var value = null,
-
         callbacks = [];  //callbacks为数组，因为可能同时有很多个回调
-
- 
-
     this.then = function (onFulfilled) {
 
         callbacks.push(onFulfilled);
-
     };
-
- 
-
     function resolve(value) {
 
         callbacks.forEach(function (callback) {
@@ -87,13 +78,8 @@ function Promise(fn) {
         });
 
     }
-
- 
-
     fn(resolve);
-
 }
-
 ```
 
 
@@ -684,3 +670,5 @@ function Promise(fn) {
 
 1. 通过Promise.prototype.then和Promise.prototype.catch方法将观察者方法注册到被观察者Promise对象中，同时返回一个新的Promise对象，以便可以链式调用。
 2. 被观察者管理内部pending、fulfilled和rejected的状态转变，同时通过构造函数中传递的resolve和reject方法以主动触发状态转变和通知观察者。
+
+[Promise源码](https://github.com/jimwmg/promise/blob/master/src/core.js)

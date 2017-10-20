@@ -67,6 +67,7 @@ function createThunkMiddleware(extraArgument) {
     return function (next) { //这里的next就是chain[1](store.dispatch);
       return function (action) {  //这里就是 chain[0](chain[1](store.dispatch)) 也就是最终的dispatch,所以最终可以dispatch(action);
         if (typeof action === 'function') {
+          //传给异步任务的dispatch还是最原始createStore里面定义的dispath;
           return action(dispatch, getState, extraArgument);
         }
         //如果action不是函数，那么就执行next，就是chain[1](store);
@@ -102,9 +103,9 @@ function createLogger() {
     return function (next) {
       //chain[1](store.dispatch)就是下面这个函数；
       return function (action) {
-        console.log('dispatch 前：', middlewareAPI.getState());
+        console.log('dispatch 前：', getState());
         var returnedValue = next(action);
-        console.log('dispatch 后：', middlewareAPI.getState(), '\n');
+        console.log('dispatch 后：', getState(), '\n');
         return returnedValue;
       };
     };
@@ -142,6 +143,7 @@ return function (next) {
 
 ```javascript
 function logger(middlewareAPI) {
+  //像这样的代码，传入的参数会作为logger函数作用域中的局部变量，logger内部返回一个函数的时候，就会形成一个闭包r
   return function (next) {
     return function (action) {
       console.log('dispatch 前：', middlewareAPI.getState());
@@ -155,7 +157,7 @@ function logger(middlewareAPI) {
 
 ### 5 结合applyMiddleware改进dispatch；
 
-```javascript
+```jsx
 //createStore源码中有这么一行代码
 enhancer(createStore)(reducer, preloadedState);这里的enhancer就是applyMiddleware(thunk,logger)
 //============
@@ -163,13 +165,50 @@ const store = createStore(
     reducer,
     applyMiddleware(thunk, logger)
 );
-
-
+ReactDOM.render(
+    <Provider store={store}>
+        <App />
+    </Provider>, document.getElementById('app'));
 ```
 
+* 先来看下如何dispatch异步action,也就是说action是一个异步函数;
 
+从增强之后的_dispatch可以看到，所谓异步action,就是dispatch(action)中的action是一个函数；而这个函数就是一个异步请求之类的；
 
+```javascript
+//异步函数
+function doFetch(url,data,type,actionTYPE){
+  //_dispatch(doFetch(url,data,type,actionTYPE)) 中doFetch(url,data,type,actionTYPE)的返回值就是下面这个函数；这个函数就是thunk源码中,如下部分action;
+  /*
+  if (typeof action === 'function') {
+          //传给异步任务的dispatch还是最原始createStore里面定义的dispath;
+          return action(dispatch, getState, extraArgument);
+        }*/
+    return function(dispatch.getState){
+        if(type === "POST"){
+            return fetch(
+            	//请求参数配置
+            ).then({
+                //请求成功处理函数
+              dispatch(actionTYPE+"SUCCESS")
+            }).then({
+                //请求失败处理函数
+              dispatch(actionTYPE+"FAILED")
+            })
+        }
+    }
+}
+```
 
+```javascript
+_dispatch(doFetch(url,data,type,actionTYPE));
+这里就是分发了一个异步函数
+```
+
+### 6 以上：
+
+* 每个函数中的参数会作为该函数作用域中的一部分，如果该函数返回了另外一个函数，则会形成闭包
+* 最后增强的_dispatch和最原始的dispatch完全是两回事，不要混淆了；
 
 
 
