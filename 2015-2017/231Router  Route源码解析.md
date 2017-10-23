@@ -235,9 +235,6 @@ class Home extends React.Component {
         )
     }
 }
-
-
-
     */
     match: this.computeMatch(nextProps, nextContext.router)
   })

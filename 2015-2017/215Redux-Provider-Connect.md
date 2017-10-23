@@ -8,7 +8,11 @@ updated :
 layout : 
 ---
 
-先来看下直接在React中使用Redux
+先看下react中如何使用context
+
+[react中使用context](https://reactjs.org/docs/context.html#why-not-to-use-context)
+
+接着看下直接在React中使用Redux
 
 [Redux源码地址](https://github.com/jimwmg/redux/tree/master/src)
 
@@ -53,7 +57,7 @@ var Provider = function (_Component) {
   Provider.prototype.getChildContext = function getChildContext() {
     return { store: this.store };
   };
-
+//这里其实就产生了闭包
   function Provider(props, context) {
     _classCallCheck(this, Provider);
 
@@ -68,7 +72,7 @@ var Provider = function (_Component) {
   Provider.prototype.render = function render() {
     return _react.Children.only(this.props.children);
   };
-
+Provider.childContextTypes = {store:PropTypes.storeShape.isRequired,}
   return Provider;
 }(_react.Component);
 ```
@@ -103,7 +107,7 @@ render方法中，渲染了其子级元素，使整个应用成为Provider的子
 
 使用如下:provider的主要作用就是将store作为props对象中的一个属性传递给Provider实例化的之后的对象
 
-```javascript
+```jsx
 const store = createStore(reducer)
 
 const App = () => {
@@ -132,6 +136,10 @@ const FilterLink = connect(
 
 ### 2  connect函数   connect(mapStateToProps, mapDispatchToProps, mergeProps)
 
+[connect源码地址](https://github.com/jimwmg/React-/tree/master/react-redux/lib/connect)
+
+源码中connect函数真正是在connectAdvanced.js文件中
+
 [官方文档解释](https://github.com/jimwmg/react-redux/blob/master/docs/api.md)
 
 Connects a React component to a Redux store.
@@ -156,9 +164,11 @@ function Welcome(props){
 
 ```javascript
 export default function connect(mapStateToProps, mapDispatchToProps, mergeProps, options = {}) {
+  //其实下面这些代码在connectAdvanced.js中，并不在connect.js中
   return function wrapWithConnect(WrappedComponent) {
     class Connect extends Component {
       constructor(props, context) {
+        //Connect组件一定得继承到了Provider组件的getChildContext方法，才能获取到Provider中props属性的store;这部分工作应该是react做的；
         // 从祖先Component处获得store
         this.store = props.store || context.store
         this.stateProps = computeStateProps(this.store, props)
@@ -177,7 +187,7 @@ export default function connect(mapStateToProps, mapDispatchToProps, mergeProps,
        componentDidMount() {
           // 改变Component的state
          //通过subscribe给store注册监听事件，每次dispatch一个action的时候，setState都会执行，从而实现UI的更新
-         //所有的组件都会注册在store对象中的listeners,每次state的更新，都会遍历数组触发所有的每个组件的setState,也就是说，只要又state的更新，所有组件的UI都会检查是否进行更新；这也是connect函数的作用；
+         //所有的组件都会注册在store对象中的listeners,每次state的更新，都会遍历数组触发所有的每个组件的setState,也就是说，只要有state的更新，所有组件的UI都会检查是否进行更新；这也是connect函数的作用；
           this.store.subscribe(() = {
             this.setState({
               storeState: this.store.getState()
@@ -197,6 +207,97 @@ export default function connect(mapStateToProps, mapDispatchToProps, mergeProps,
       return Connect;
     }
   }
+```
+
+最后真正返回的其实是：hoist-non-react-statics文件中index.js中处理后的Connect组件和WrappedComponent组件的结果；[源码地址](https://github.com/jimwmg/React-/blob/master/hoist-non-react-statics/index.js)
+
+```javascript
+return (0, _hoistNonReactStatics2.default)(Connect, WrappedComponent);
+```
+
+```javascript
+//以下源码的作用其实是将WrappedComponent上的所有属性，包括上面的静态属性descriptor，prototype上的全部属性descriptor全部给到Connect组件上作为Connect组件的属性；
+function hoistNonReactStatics(targetComponent, sourceComponent, blacklist) {
+  if (typeof sourceComponent !== 'string') { // don't hoist over string (html) components
+
+    if (objectPrototype) {
+      var inheritedComponent = getPrototypeOf(sourceComponent);
+      if (inheritedComponent && inheritedComponent !== objectPrototype) {
+        hoistNonReactStatics(targetComponent, inheritedComponent, blacklist);
+      }
+    }
+//Object.getOwnPropertyNames()方法返回一个由指定对象的所有自身属性的属性名（包括不可枚举属性但不包括Symbol值作为名称的属性）组成的数组。
+    var keys = getOwnPropertyNames(sourceComponent);
+
+    if (getOwnPropertySymbols) {
+      keys = keys.concat(getOwnPropertySymbols(sourceComponent));
+    }
+
+    for (var i = 0; i < keys.length; ++i) {
+      var key = keys[i];
+      if (!REACT_STATICS[key] && !KNOWN_STATICS[key] && (!blacklist || !blacklist[key])) {
+        //Object.getOwnPropertyDescriptor() 方法返回指定对象上一个自有属性对应的属性描述符。（自有属性指的是直接赋予该对象的属性，不需要从原型链上进行查找的属性）
+        var descriptor = getOwnPropertyDescriptor(sourceComponent, key);
+        try { // Avoid failures from read-only properties
+          //Object.defineProperty() 方法会直接在一个对象上定义一个新属性，或者修改一个对象的现有属性， 并返回这个对象。
+          defineProperty(targetComponent, key, descriptor);
+        } catch (e) {}
+      }
+    }
+
+    return targetComponent;
+  }
+
+  return targetComponent;
+};
+```
+
+在connectAdvanced.js中，有如下代码
+
+```javascript
+Connect.prototype.initSelector = function initSelector() {
+  //selectorFactory该函数的作用是接受原来的store上的dispatch,返回一个函数给到sourceSelector；
+  //sourceSelector接受store上的state,返回mergeProps对象，该对象上就有dispatch state 以及自己的props。{dispatch:store.dispatch,state:store.state,ownProps}
+  var sourceSelector = selectorFactory(this.store.dispatch, selectorFactoryOptions);
+  this.selector = makeSelectorStateful(sourceSelector, this.store);
+  this.selector.run(this.props);
+};
+function makeSelectorStateful(sourceSelector, store) {
+  // wrap the selector in an object that tracks its results between runs.
+  var selector = {
+    run: function runComponentSelector(props) {
+      try {
+        var nextProps = sourceSelector(store.getState(), props);
+        if (nextProps !== selector.props || selector.error) {
+          selector.shouldComponentUpdate = true;
+          selector.props = nextProps;
+          selector.error = null;
+        }
+      } catch (error) {
+        selector.shouldComponentUpdate = true;
+        selector.error = error;
+      }
+    }
+  };
+
+  return selector;
+}
+
+```
+
+再来看下Connect组件真正的render函数
+
+```javascript
+Connect.prototype.render = function render() {
+  var selector = this.selector;
+  selector.shouldComponentUpdate = false;
+  if (selector.error) {
+    throw selector.error;
+  } else {
+    //这里this.addExtraProps(selector.props)，返回的结果就是我们mapStateToProps，mapDispatchToProps，mergeStateToprops中返回的对象的合并之后的结果，作为props对象传递给WrappedComponent组件；所以我们在组件中可以通过props访问到store对象的state和dispatch等接口的原理；
+    return (0, _react.createElement)(WrappedComponent, this.addExtraProps(selector.props));
+  }
+};
 ```
 
 

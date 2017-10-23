@@ -842,6 +842,7 @@ var ReactCompositeComponent = {
       if (process.env.NODE_ENV !== 'production') {
         return measureLifeCyclePerf(function () {
           //这里的Component就是ReactElement中的type，new该type的时候，如果是class声明的，会直接执行class类中的constructor函数；返回一个组件实例对象；
+          //这里就是将jsx语法生成的ReactElement，<Welcome greet = "hello" /> 中的props,传递给组件，然后组件new的时候，会执行其constructor函数；
           return new Component(publicProps, publicContext, updateQueue);
         }, this._debugID, 'ctor');
       } else {

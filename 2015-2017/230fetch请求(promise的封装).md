@@ -184,6 +184,7 @@ function handle(self, deferred) {
   if (Promise._onHandle) {
     Promise._onHandle(self);
   }
+  //这里将then中的回调函数注册给promsie对象；
   if (self._state === 0) {
     if (self._deferredState === 0) {
       self._deferredState = 1;
@@ -212,6 +213,7 @@ function handleResolved(self, deferred) {
       }
       return;
     }
+    //这里执行注册的函数，传入的参数就是上一个then注册的函数的返回值；
     var ret = tryCallOne(cb, self._value);
     if (ret === IS_ERROR) {
       reject(deferred.promise, LAST_ERROR);
@@ -224,7 +226,7 @@ function handleResolved(self, deferred) {
 //resolve(promise,newValue)，将newValue给到传递进来的promise._value属性；下面有源码
 //handleResolved(self,deferred),cb为通过then注册的回调函数，var ret = tryCallOne(cb, self._value);将promise._value给到cb函数
 //resolve(deferred.promise, ret);再次将通过then注册的函数的返回值给到新的promise对象，promis._value
-
+//每个promise上都有上一个then注册的回调函数的结果，将回调函数的结果绑定在新的promise._value属性上；
 
 function resolve(self, newValue) {
   // Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
@@ -353,6 +355,30 @@ getJSON("/posts.json").then(function(json) {
   console.error('出错了', error);
 });
 ```
+
+其实为什么通过then链式注册的函数都会得到执行呢？（在异步请求成功的情况下）
+
+其实Promise源码内部实现了一个闭环，每个promise上通过then注册的函数，都会注册到对应的promise对象上；也就是说：（划重点了）一个promise对象，注册两个个回调函数（成功的`_onHandle`，失败的`_onReject`)，绑定一个回调函数需要接受的参数`_value`；当我们new Promise(funtion(reslove,reject){ }) ;注册了如下闭环执行链
+
+异步成功的时候：
+
+```javascript
+new Promise(fn) ==> doResolve(fu,promise) ==> then（func1) ==> then(func2);
+完成promise链式注册之后；内部注册流程如下：
+resolve(,promise,value) ==> finale(promise) ==> handle(promise, promise.deferred) ==>handleResolved(promise,promise.deferred) ==>resolve(deferred.promise, ret);
+```
+
+* value就是异步返回的数据，ret就是上一个then执行的结果；
+
+* 在handleResolved中开始执行通过then注册的回调函数；
+
+* 回调函数以及回调函数的参数都是从每一个不同的promise对象上取的；
+
+* 回调函数是通过handle函数注册一个deferred属性，该属性指向 通过new Handler(onResolve,onReject)生成的对象；
+
+* 参数来自于异步请求的结果或者then注册的函数执行的结果，
+
+  resove(promise,value) resolve(deferred.promise, ret)是在这里注册给每一个promise对象的_value属性的；
 
 接下来看下[fetch源码](https://github.com/jimwmg/fetch-Source-Code/blob/master/node-fetch/index.js)。
 
