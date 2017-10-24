@@ -12,7 +12,7 @@ layout :
 
 ### 1 react-router中一个属性`exact` 的使用,默认是true,详见API文档解析
 
-```javascript
+```jsx
 const BasicExample = () => (
   <Router>
     <div>
@@ -36,7 +36,7 @@ const BasicExample = () => (
 
 如下所示,当url是 `/repo` 的时候  Repo 和RepoTest两者也是都会渲染.当然也可以通过设置exact属性进行精确匹配.
 
-```
+```jsx
  <Router>
     <div>
       <ul>

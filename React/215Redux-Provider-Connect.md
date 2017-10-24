@@ -136,6 +136,8 @@ const FilterLink = connect(
 
 ### 2  connect函数   connect(mapStateToProps, mapDispatchToProps, mergeProps)
 
+首先需要了解一下[高阶组件](https://github.com/jimwmg/JiM-Blog/blob/master/2017-201n/010%E9%AB%98%E9%98%B6%E7%BB%84%E4%BB%B6.md)
+
 [connect源码地址](https://github.com/jimwmg/React-/tree/master/react-redux/lib/connect)
 
 源码中connect函数真正是在connectAdvanced.js文件中
@@ -197,7 +199,8 @@ export default function connect(mapStateToProps, mapDispatchToProps, mergeProps,
         render() {
           // 生成包裹组件Connect
           return (
-            <WrappedComponent {...this.nextState} />
+            //这里的props就是mapStateToProps, mapDispatchToProps, mergeProps融合后的最后的大对象；
+            <WrappedComponent {...Props} />
           )
         }
       }
@@ -207,6 +210,7 @@ export default function connect(mapStateToProps, mapDispatchToProps, mergeProps,
       return Connect;
     }
   }
+  //从高阶组件的角度来理解，其实就是，wrapWithConnect将Provider通过context传递下来的store，进行分析解释，然后传递给WrappedComponent组件作为props;
 ```
 
 最后真正返回的其实是：hoist-non-react-statics文件中index.js中处理后的Connect组件和WrappedComponent组件的结果；[源码地址](https://github.com/jimwmg/React-/blob/master/hoist-non-react-statics/index.js)

@@ -24,10 +24,10 @@ layout :
 
 ```jsx
 <Router history={history}>
-  <div>
+  <switch>
     <Route exact path="/" component={Home}/>
     <Route path="/news" component={NewsFeed}/>
-  </div>
+  </switch>
 </Router>
 ```
 
@@ -65,9 +65,9 @@ getChildContext() {
       ...this.context.router,
       history: this.props.history,
       route: {
-      location: this.props.history.location,
-      match: this.state.match
-    }
+        location: this.props.history.location,
+        match: this.state.match
+      }
   }
 }
 }
@@ -75,7 +75,7 @@ getChildContext() {
 state = {
   match: this.computeMatch(this.props.history.location.pathname)
 }
-
+//最初的match就是一下这个返回的对象；
 computeMatch(pathname) {
   return {
     path: '/',
@@ -123,6 +123,71 @@ render() {
 export default Router
 ```
 
+switch.js
+
+```javascript
+var Switch = function (_React$Component) {
+  _inherits(Switch, _React$Component);
+
+  function Switch() {
+    _classCallCheck(this, Switch);
+
+    return _possibleConstructorReturn(this, _React$Component.apply(this, arguments));
+  }
+
+  Switch.prototype.render = function render() {
+    var route = this.context.router.route;
+    var children = this.props.children;
+//如果Switch上有location对象，则不会从Router组件中取location对象；
+    var location = this.props.location || route.location;
+//这个match 变量是否存在就是决定forEach返回那一个子组件；
+    var match = void 0,
+        child = void 0;
+    //forEach接受每一个children作为第一个参数，第二个参数接受一个函数，函数中的参数是每一个children对应的ReactElement对象
+    _react2.default.Children.forEach(children, function (element) {
+      if (!_react2.default.isValidElement(element)) return;
+
+      var _element$props = element.props,
+          //这个就是Route  作为Switch组件的Children的时候，Route组件上的path属性；
+          pathProp = _element$props.path,
+          exact = _element$props.exact,
+          strict = _element$props.strict,
+          sensitive = _element$props.sensitive,
+          //这个是Redict  作为Switch组件的Children的时候，Redict组件上的from属性
+          from = _element$props.from;
+
+      var path = pathProp || from;
+		//这里进行Route组件上的path属性是否和location.pathname匹配上的判断；
+      if (match == null) {
+        //将匹配到的ReactELement给到child,然后 进行clone返回匹配的ReactElement对象；作为Switch组件要渲染的真正组件对象；
+        child = element;
+        //这里，第一个匹配的时候，match = void 0 ;
+        //1  如果path不存在，也就是Route组件没有path属性，那么match = route.match；这个就是Route中的match；其他的Route path不在进行匹配；下面返回cloneElement
+        //2 如果path存在，也就是Route组件有path属性，那么 match =  (0, _matchPath2.default)(location.pathname, { path: path, exact: exact, strict: strict, sensitive: sensitive })
+        //但是在mathPath函数中，如果匹配不到，返回null ，forEach继续执行，接着寻找对应的child;匹配到了才返回match对象；
+        match = path ? (0, _matchPath2.default)(location.pathname, { path: path, exact: exact, strict: strict, sensitive: sensitive }) : route.match;
+      }
+    });
+
+    return match ? _react2.default.cloneElement(child, { location: location, computedMatch: match }) : null;
+  };
+
+  return Switch;
+}(_react2.default.Component);
+
+Switch.contextTypes = {
+  router: _propTypes2.default.shape({
+    route: _propTypes2.default.object.isRequired
+  }).isRequired
+};
+Switch.propTypes = {
+  children: _propTypes2.default.node,
+  location: _propTypes2.default.object
+};
+```
+
+
+
 Route.js
 
 ```javascript
@@ -166,9 +231,9 @@ getChildContext() {
     router: {
       ...this.context.router,
       route: {
-      location: this.props.location || this.context.router.route.location,
-      match: this.state.match
-    }
+        location: this.props.location || this.context.router.route.location,
+        match: this.state.match
+      }
   }
 }
 }
@@ -184,38 +249,14 @@ computeMatch({ computedMatch, location, path, strict, exact }, { route }) {
   const pathname = (location || route.location).pathname
 
   return path ? matchPath(pathname, { path, strict, exact }) : route.match
+  //{path url params isExact}
 }
 
 componentWillMount() {
   const { component, render, children } = this.props
-
-  warning(
-    !(component && render),
-    'You should not use <Route component> and <Route render> in the same route; <Route render> will be ignored'   
-  )
-
-  warning(
-    !(component && children),
-    'You should not use <Route component> and <Route children> in the same route; <Route children> will be ignored'   
-  )
-
-  warning(
-    !(render && children),
-    'You should not use <Route render> and <Route children> in the same route; <Route children> will be ignored'    
-  )
 }
 
 componentWillReceiveProps(nextProps, nextContext) {
-  warning(
-    !(nextProps.location && !this.props.location),
-    '<Route> elements should not change from uncontrolled to controlled (or vice versa). You initially used no "location" prop and then provided one on a subsequent render.'
-  )
-
-  warning(
-    !(!nextProps.location && this.props.location),
-    '<Route> elements should not change from controlled to uncontrolled (or vice versa). You provided a "location" prop initially but omitted it on a subsequent render.'
-  )
-
   this.setState({
     //这里如果一个组件中，Route的path值为 '/'，那么对于任何路径，该Route对应的组件都会被渲染；
    //因为location.pathname哈Route组件的path匹配的结果match必然存在，所以Route组件上对应的组件也一定会渲染；
@@ -248,11 +289,11 @@ render() {
   const location = this.props.location || route.location
   //这里将match,location,history,staticContext写为props对象
   const props = { match, location, history, staticContext }
-
+//
   return (
     //以下，将props对象传入ReactElement创建函数，这就是为什么所有的ReactElement对象中都有history,location,match对象的源代码；
     //这里如果一个组件中，Route的path值为 '/'，那么对于任何路径，该Route对应的组件都会被渲染；
-   //因为location.pathname哈Route组件的path匹配的结果match必然存在，所以Route组件上对应的组件也一定会渲染；
+   //因为location.pathname Route组件的path匹配的结果match必然存在，所以Route组件上对应的组件也一定会渲染；
     component ? ( // component prop gets first priority, only called if there's a match
       match ? React.createElement(component, props) : null
     ) : render ? ( // render prop is next, only called if there's a match

@@ -176,7 +176,7 @@ console.log(Rect.getArea() ); //prototype method 不能直接通过类名调用�
 
 **二，extends关键字的作用就是 ：将子类(函数）的prototype对象上的`__proto__`指向父类（函数）的prototype属性**
 
-2.4 先来看下extends关键字的作用 class类实现继承的根本原因就是通过extends关键字，将子类的__ proto __ 属性指向父类构造函数
+2.4 先来看下extends关键字的作用 class类实现继承的根本原因就是通过extends关键字，将子类的prototype.__ proto __ 属性指向父类构造函数prototype
 
 ```javascript
 class Animal {
@@ -196,7 +196,8 @@ class Dog {  //没有继承的情况下
 
 console.dir(Dog);
 console.dir(Animal);
-console.log(Dog.__proto__ === Animal);//fasle
+console.log(Dog.__proto__ === Animal);//true
+console.log(Dog.prototype.__proto__ === Animal.prototype) ;//true
 ```
 
 ```javascript
@@ -228,7 +229,7 @@ console.log(dog.__proto__ === Dog.prototype);//true  实例化的对象的原型
 //关于__proto__属性的指向，指向的是对象的构造函数的prototype属性
 ```
 
-先来看下什么是原型链：简单来说，在 javascript 中每个对象都会有一个 __proto__ 属性，当我们访问一个对象的属性时，如果这个对象内部不存在这个属性，那么他就会去 __proto__ 里找这个属性，这个 __proto__ 又会有自己的 __proto__，于是就这样一直找下去，也就是我们平时所说的原型链的概念。
+先来看下什么是原型链：简单来说，在 javascript 中每个对象都会有一个` __proto__` 属性，当我们访问一个对象的属性时，如果这个对象内部不存在这个属性，那么他就会去 `__proto__` 里找这个属性，这个` __proto__` 又会有自己的 `__proto__`，于是就这样一直找下去，也就是我们平时所说的原型链的概念。
 
 **三：new操作符的作用**
 
@@ -323,6 +324,26 @@ lion.speak();
 
 * 注意,通过super调用父类的方法的时候,super会绑定子类的this
 
+
+  其实super关键字指向的是使用该关键字对象的prototype属性，正好结合extends作用是子函数(对象)的prototype.`__proto__` 指向父函数的prototype；所以就可以访问到父函数中的prototype对象上的属性和方法
+
+```javascript
+//MDN上关于super关键字作用的解释；
+var obj1 = {
+  method1() {
+    console.log('method 1');
+  }
+}
+
+var obj2 = {
+  method2() {
+    super.method1();
+  }
+}
+
+Object.setPrototypeOf(obj2, obj1);
+obj2.method2(); // logs "method 1"
+```
 
 
 2.6 classs类中的 get 和 set    对某个属性设置存值函数和取值函数， 拦截该属性的存取行为

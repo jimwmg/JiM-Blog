@@ -224,7 +224,7 @@ o.propertyIsEnumerable('b'); // false
 o.propertyIsEnumerable('c'); // false
 ```
 
-### 6 Object.defineProperties(obj ,prop) The `**Object.defineProperties()**` method defines new or modifies existing properties directly on an object, returning the object.
+### 6 Object.defineProperties(obj ,prop)  method defines new or modifies existing properties directly on an object, returning the object.
 
 ```javascript
 
