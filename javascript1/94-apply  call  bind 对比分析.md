@@ -1,5 +1,5 @@
 ---
-title:  the difference between null and undefined 
+title: apply bind call
 date: 2017-1-15 12:36:00
 categories: javascript
 tags : [call,apply,bind]
