@@ -621,7 +621,89 @@ function unwrapListeners(arr) {
 }
 ```
 
+### 4 看其他框架源码另外一种事件实现机制
 
+```javascript
+function _eventable = function(obj, mode) {
+		
+		if (mode == "clear") {
+			
+			obj.detachAllEvents();
+			
+			obj.dhxevs = null;
+			
+			obj.attachEvent = null;
+			obj.detachEvent = null;
+			obj.checkEvent = null;
+			obj.callEvent = null;
+			obj.detachAllEvents = null;
+			
+			obj = null;
+			
+			return;
+			
+		}
+		
+		obj.dhxevs = { data: {} };
+		
+		obj.attachEvent = function(name, func) {
+			name = String(name).toLowerCase();
+			if (!this.dhxevs.data[name]) this.dhxevs.data[name] = {};
+			var eventId = window.dhx4.newId();
+			this.dhxevs.data[name][eventId] = func;
+			return eventId;
+		}
+		
+		obj.detachEvent = function(eventId) {
+			for (var a in this.dhxevs.data) {
+				var k = 0;
+				for (var b in this.dhxevs.data[a]) {
+					if (b == eventId) {
+						this.dhxevs.data[a][b] = null;
+						delete this.dhxevs.data[a][b];
+					} else {
+						k++;
+					}
+				}
+				if (k == 0) {
+					this.dhxevs.data[a] = null;
+					delete this.dhxevs.data[a];
+				}
+			}
+		}
+		
+		obj.checkEvent = function(name) {
+			name = String(name).toLowerCase();
+			return (this.dhxevs.data[name] != null);
+		}
+		
+		obj.callEvent = function(name, params) {
+			name = String(name).toLowerCase();
+			if (this.dhxevs.data[name] == null) return true;
+			var r = true;
+			for (var a in this.dhxevs.data[name]) {
+				r = this.dhxevs.data[name][a].apply(this, params) && r;
+			}
+			return r;
+		}
+		
+		obj.detachAllEvents = function() {
+			for (var a in this.dhxevs.data) {
+				for (var b in this.dhxevs.data[a]) {
+					this.dhxevs.data[a][b] = null;
+					delete this.dhxevs.data[a][b];
+				}
+				this.dhxevs.data[a] = null;
+				delete this.dhxevs.data[a];
+			}
+		}
+		
+		obj = null;
+	};
+	
+```
+
+这里传入一个对象obj,使得obj对象有可以添加事件监听器，执行事件监听器等的能力；
 
 [events.js](https://github.com/jimwmg/node/tree/master/lib)
 
