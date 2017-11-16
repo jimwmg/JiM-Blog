@@ -392,7 +392,9 @@ _mountImageIntoNode: function (markup, container, instance, shouldReuseMarkup, t
 }
 ```
 
-至此，从创建React组件，到组件加载到DOM 节点上的大致过程已经理顺；
+**至此，从创建React组件，到组件加载到DOM 节点上的大致过程已经理顺；**
+
+下面写的有点乱，不建议看啦；
 
 ####接下来解释下Flag1 和Flag2标记处源码
 
@@ -810,6 +812,7 @@ var ReactCompositeComponent = {
     //ReactReconciler.mountComponent会调用组件实例的mountComponent函数，这里对于函数组件；会调用ReactCompositeComponent.js中的mountComponent
 //这里进行递归调用ReactCompositeComponent.js中的mountComponent函数，而ReactCompositeComponent.js中的mountComponent中又调用performInitialMount形成递归；
     //直到组件是宿主DOM对象的时候，生成markup的时候，会调用
+    //Flag3: 重点注意下这里 ，这里就是react内部实现的通过context跨组件传递的核心；下面在解释；
     var markup = ReactReconciler.mountComponent(child, transaction, hostParent, hostContainerInfo, this._processChildContext(context), debugID);
 
     if (process.env.NODE_ENV !== 'production') {

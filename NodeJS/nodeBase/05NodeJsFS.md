@@ -88,6 +88,7 @@ fs.writeFileSync('./text.txt',{name:"Jhon"});//写入文件的内容是[object O
 fs.writeFileSync('./text.txt',function(){});//写入文件的内容是  function(){} 
 fs.writeFileSync('./text.txt',[1,2,3]); //写入文件的内容是  1,2,3
 fs.writeFileSync('./text.txt',1);//写入文件的内容是 1 
+//这些事同步的
 ```
 
 3 以上文件的读写都是异步进行的，不会阻塞程序的执行，同时我们在日常工作中通过服务器端的数据的读写也会经常用到这两个API 

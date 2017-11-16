@@ -41,8 +41,6 @@ backgroun-position：right  top ;表示图片在元素(content+padding)围成的
 ####第三种，通过百分数设置宽度；重点说明（看这个和尚是不是天龙八部的虚竹，尜尜）
 ![先上传图片有需要的小伙伴可以下载实验，](http://img.blog.csdn.net/20170107171016346?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzU4MDkyNDU=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
-还是上代码吧  哦  漏   你要不要一起“上”代码，然后撸起来。（纯洁的微笑）
-
 html代码
 ​	
 	#img {

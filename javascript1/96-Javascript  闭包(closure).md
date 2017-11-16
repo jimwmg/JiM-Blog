@@ -394,9 +394,11 @@ console.log('designer',obj.desiger);
 </script>
 ```
 
-这段代码也不要被其迷惑，抛开其他的来看，闭包的产生仅仅是 bindEvent这个函数，在这个函数中document.getElementById('btn').onclick所触发的函数，引用了	` _this`  这个变量而已（可以将`_this` 命名为任何变量名，便于理解，其实久类似于上面的变量num）
+这段代码也不要被其迷惑，抛开其他的来看，闭包的产生仅仅是 bindEvent这个函数，在这个函数中document.getElementById('btn').onclick所触发的函数，引用了	` _this`  这个变量而已（可以将`_this` 命名为任何变量名，便于理解，其实就类似于上面的变量num）
 
 2017-9-28 国庆节前更新[闭包博文](http://www.cnblogs.com/TomXu/archive/2012/01/31/2330252.html)
+
+[闭包变量对象](http://www.cnblogs.com/TomXu/archive/2012/01/16/2309728.html)
 
 javascript采用的是静态作用域，即作用域链是在变量和函数创建的时候确定的，而不是在执行的时候确定的；
 

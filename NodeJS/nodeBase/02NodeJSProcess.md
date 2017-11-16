@@ -33,8 +33,7 @@ updated :
 - `process.on()`：监听事件。
 - `process.setgid()`：指定当前进程的组，可以使用数字ID，也可以使用字符串ID。
 - `process.setuid()`：指定当前进程的用户，可以使用数字ID，也可以使用字符串ID。
-
-Process对象同样部署了EventEmitter的接口，所以可以调用 Process.on 进行事件绑定等其他事件操作；
+-  process.binding(name) :这个方法用于返回指定名称的内置模块。Process对象同样部署了EventEmitter的接口，所以可以调用 Process.on 进行事件绑定等其他事件操作；
 
 #### 事件
 

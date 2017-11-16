@@ -649,6 +649,7 @@ function _eventable = function(obj, mode) {
 		obj.attachEvent = function(name, func) {
 			name = String(name).toLowerCase();
 			if (!this.dhxevs.data[name]) this.dhxevs.data[name] = {};
+          //这里就是生成一个随机数；
 			var eventId = window.dhx4.newId();
 			this.dhxevs.data[name][eventId] = func;
 			return eventId;
@@ -682,6 +683,7 @@ function _eventable = function(obj, mode) {
 			if (this.dhxevs.data[name] == null) return true;
 			var r = true;
 			for (var a in this.dhxevs.data[name]) {
+              //这里巧用逻辑 && 的短路运算
 				r = this.dhxevs.data[name][a].apply(this, params) && r;
 			}
 			return r;

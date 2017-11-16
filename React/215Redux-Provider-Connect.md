@@ -51,6 +51,7 @@ React推崇的是单向数据流，自上而下进行数据的传递，但是由
 [Provider.js源码地址](https://github.com/jimwmg/react-redux/blob/master/src/components/Provider.js)
 
 ```javascript
+//自执行函数
 var Provider = function (_Component) {
   _inherits(Provider, _Component);
 
