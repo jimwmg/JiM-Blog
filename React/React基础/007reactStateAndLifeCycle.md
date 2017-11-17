@@ -134,7 +134,7 @@ componentWillUnmount() {
 
 完整代码如下：
 
-```html
+```
 <div id="root"></div>
     
    <script type='text/babel'>
@@ -151,6 +151,9 @@ componentWillUnmount() {
         }
 
         componentDidMount(){
+        //箭头函数中的this是在定义函数的时候绑定，而不是在执行函数的时候绑定。
+        //ES6中定义的时候绑定this的具体含义，应该继承的是父执行上下文里面的this，切忌是父执行上下文！！！
+        //箭头函数会继承外层函数调用的this绑定，而无论this绑定到什么
             this.timerID = setInterval(()=>this.tick(),1000)
         }
 

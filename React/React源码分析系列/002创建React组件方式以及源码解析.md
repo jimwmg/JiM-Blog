@@ -39,6 +39,9 @@ ES6的创建组件，其实根源还是调用了createClass
 <div id="root"></div>
 <script type='text/babel'>
      class Welcome extends React.Component {
+        tick(){
+          console.log('kkk');
+         }
          render(){
              return <h1>hello {this.props.name}</h1>
          }
@@ -74,7 +77,12 @@ var Welcome = function (_React$Component) {
 
         return _possibleConstructorReturn(this, (Welcome.__proto__ || Object.getPrototypeOf(Welcome)).apply(this, arguments));
     }
-
+	_createClass(Welcome, [{
+      key: 'tick',
+      value: function tick() {
+        console.log('kkk');
+      }
+    }, 
     _createClass(Welcome, [{
         key: "render",
         value: function render() {
@@ -89,6 +97,8 @@ var Welcome = function (_React$Component) {
 
     return Welcome;
 }(React.Component);
+var element = React.createElement(Welcome, { name: 'JiM' });
+ReactDOM.render(element, document.getElementById('root'));
 ```
 
 
@@ -244,7 +254,9 @@ module.exports = factory(Component, isValidElement, ReactNoopUpdateQueue);
 ```javascript
 var ReactDefaultInjection = require('./ReactDefaultInjection');
 ReactDefaultInjection.inject();
+
 //上面两行是使ReactHostComponent.createInternalComponent注册方法；
+//并且在ReactUpdates.js 中 batchingStrategy.batchedUpdates的注册也是此时完成的；
 var ReactDOM = {
   findDOMNode: findDOMNode,
   render: ReactMount.render,
@@ -305,7 +317,9 @@ var ReactMount = {
     // The initial render is synchronous but any updates that happen during
     // rendering, in componentWillMount or componentDidMount, will be batched
     // according to the current batching strategy.
+    // ReactDefaultInjection.inject();
     //这个函数是真正的将ReactElement元素插入到DOM元素的，会进入到batchedMountComponentIntoNode函数中；
+    //这里额外分析React中的注册机制的文章链接 https://github.com/jimwmg/JiM-Blog/tree/master/React
     ReactUpdates.batchedUpdates(batchedMountComponentIntoNode, componentInstance, container, shouldReuseMarkup, context);
 
     var wrapperID = componentInstance._instance.rootID;
@@ -586,7 +600,7 @@ mountChildren: function (nestedChildren, transaction, context) {
   var children = this._reconcilerInstantiateChildren(nestedChildren, transaction, context);
   this._renderedChildren = children;
 
-  var mountImages = [];
+  var mountImages = [ ];
   var index = 0;
   for (var name in children) {
     if (children.hasOwnProperty(name)) {

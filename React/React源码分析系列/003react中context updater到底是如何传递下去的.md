@@ -270,7 +270,7 @@ mountComponent: function (transaction, hostParent, hostContainerInfo, context) {
   var publicContext = this._processContext(context);
 //这里Component就是Provider函数；
   var Component = this._currentElement.type;
-
+//注意这里，就是传递给 new 组件的 update ,在本篇文章的update传递中分析
   var updateQueue = transaction.getUpdateQueue();
 
   // Initialize the public class
@@ -450,4 +450,187 @@ _processChildContext: function (currentContext) {
     return currentContext;
   },
 ```
+
+以上，react如何将context从祖先组件一层层传递下去的过程基本上分析完毕；
+
+接下来看下updaterQueue如何传递的
+
+看上面[ReactCompositeComponent.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactCompositeComponent.js)中介绍的：
+
+```javascript
+//注意这里，就是传递给 new 组件的 update ,在本篇文章的update传递中分析
+  var updateQueue = transaction.getUpdateQueue();
+```
+
+此时问题又来了，transation是哪里来的？
+
+在step4中第一次出现. transaction
+
+```javascript
+function batchedMountComponentIntoNode(componentInstance, container, shouldReuseMarkup, context) {
+  //ReactReconcileTransaction是通过注册进来的；参见React中的注册机制；
+  var transaction = ReactUpdates.ReactReconcileTransaction.getPooled(
+  /* useCreateElement */
+  !shouldReuseMarkup && ReactDOMFeatureFlags.useCreateElement);
+  
+  transaction.perform(mountComponentIntoNode, null, componentInstance, container, transaction, shouldReuseMarkup, context);
+  ReactUpdates.ReactReconcileTransaction.release(transaction);
+}
+```
+
+ReactReconcileTransaction.js
+
+```javascript
+var ReactUpdateQueue = require('./ReactUpdateQueue');
+var Mixin = {
+  getTransactionWrappers: function () {
+    return TRANSACTION_WRAPPERS;
+  },
+
+  getReactMountReady: function () {
+    return this.reactMountReady;
+  },
+
+  getUpdateQueue: function () {
+    //这个函数就是得到的updater对象，具体实现如下ReactUpdateQueue.js
+    return ReactUpdateQueue;
+  },
+  checkpoint: function () {
+    // reactMountReady is the our only stateful wrapper
+    return this.reactMountReady.checkpoint();
+  },
+
+  rollback: function (checkpoint) {
+    this.reactMountReady.rollback(checkpoint);
+  },
+  destructor: function () {
+    CallbackQueue.release(this.reactMountReady);
+    this.reactMountReady = null;
+  }
+};
+
+_assign(ReactReconcileTransaction.prototype, Transaction, Mixin);
+module.exports = ReactReconcileTransaction;
+```
+
+ReactUpdateQueue.js
+
+```javascript
+var ReactUpdateQueue = {
+ 
+  isMounted: function (publicInstance) {
+    if (process.env.NODE_ENV !== 'production') {
+      var owner = ReactCurrentOwner.current;
+      if (owner !== null) {
+        process.env.NODE_ENV !== 'production' ? warning(owner._warnedAboutRefsInRender, '%s is accessing isMounted inside its render() function. ' + 'render() should be a pure function of props and state. It should ' + 'never access something that requires stale data from the previous ' + 'render, such as refs. Move this logic to componentDidMount and ' + 'componentDidUpdate instead.', owner.getName() || 'A component') : void 0;
+        owner._warnedAboutRefsInRender = true;
+      }
+    }
+    var internalInstance = ReactInstanceMap.get(publicInstance);
+    if (internalInstance) {
+      // During componentWillMount and render this will still be null but after
+      // that will always render to something. At least for now. So we can use
+      // this hack.
+      return !!internalInstance._renderedComponent;
+    } else {
+      return false;
+    }
+  },
+
+
+  enqueueCallback: function (publicInstance, callback, callerName) {
+    ReactUpdateQueue.validateCallback(callback, callerName);
+    var internalInstance = getInternalInstanceReadyForUpdate(publicInstance);
+    if (!internalInstance) {
+      return null;
+    }
+
+    if (internalInstance._pendingCallbacks) {
+      internalInstance._pendingCallbacks.push(callback);
+    } else {
+      internalInstance._pendingCallbacks = [callback];
+    }
+  
+    enqueueUpdate(internalInstance);
+  },
+
+  enqueueCallbackInternal: function (internalInstance, callback) {
+    if (internalInstance._pendingCallbacks) {
+      internalInstance._pendingCallbacks.push(callback);
+    } else {
+      internalInstance._pendingCallbacks = [callback];
+    }
+    enqueueUpdate(internalInstance);
+  },
+
+  enqueueForceUpdate: function (publicInstance) {
+    var internalInstance = getInternalInstanceReadyForUpdate(publicInstance, 'forceUpdate');
+
+    if (!internalInstance) {
+      return;
+    }
+
+    internalInstance._pendingForceUpdate = true;
+
+    enqueueUpdate(internalInstance);
+  },
+
+
+  enqueueReplaceState: function (publicInstance, completeState, callback) {
+    var internalInstance = getInternalInstanceReadyForUpdate(publicInstance, 'replaceState');
+
+    if (!internalInstance) {
+      return;
+    }
+
+    internalInstance._pendingStateQueue = [completeState];
+    internalInstance._pendingReplaceState = true;
+
+    // Future-proof 15.5
+    if (callback !== undefined && callback !== null) {
+      ReactUpdateQueue.validateCallback(callback, 'replaceState');
+      if (internalInstance._pendingCallbacks) {
+        internalInstance._pendingCallbacks.push(callback);
+      } else {
+        internalInstance._pendingCallbacks = [callback];
+      }
+    }
+
+    enqueueUpdate(internalInstance);
+  },
+
+  enqueueSetState: function (publicInstance, partialState) {
+    if (process.env.NODE_ENV !== 'production') {
+      ReactInstrumentation.debugTool.onSetState();
+      process.env.NODE_ENV !== 'production' ? warning(partialState != null, 'setState(...): You passed an undefined or null state object; ' + 'instead, use forceUpdate().') : void 0;
+    }
+
+    var internalInstance = getInternalInstanceReadyForUpdate(publicInstance, 'setState');
+
+    if (!internalInstance) {
+      return;
+    }
+
+    var queue = internalInstance._pendingStateQueue || (internalInstance._pendingStateQueue = []);
+    queue.push(partialState);
+
+    enqueueUpdate(internalInstance);
+  },
+
+  enqueueElementInternal: function (internalInstance, nextElement, nextContext) {
+    internalInstance._pendingElement = nextElement;
+    // TODO: introduce _pendingContext instead of setting it directly.
+    internalInstance._context = nextContext;
+    enqueueUpdate(internalInstance);
+  },
+
+  validateCallback: function (callback, callerName) {
+    !(!callback || typeof callback === 'function') ? process.env.NODE_ENV !== 'production' ? invariant(false, '%s(...): Expected the last optional `callback` argument to be a function. Instead received: %s.', callerName, formatUnexpectedArgument(callback)) : _prodInvariant('122', callerName, formatUnexpectedArgument(callback)) : void 0;
+  }
+};
+
+module.exports = ReactUpdateQueue;
+```
+
+
 
