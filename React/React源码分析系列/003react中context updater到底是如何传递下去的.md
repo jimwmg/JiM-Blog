@@ -253,6 +253,17 @@ mountComponent: function (internalInstance, transaction, hostParent, hostContain
 
 [ReactCompositeComponent.js源码地址](https://github.com/jimwmg/React-/blob/master/react-dom/lib/ReactCompositeComponent.js)
 
+这里顺便提下React生命周期函数的调用
+
+#### Mounting
+
+These methods are called when an instance of a component is being created and inserted into the DOM:
+
+- [`constructor()`](https://reactjs.org/docs/react-component.html#constructor)
+- [`componentWillMount()`](https://reactjs.org/docs/react-component.html#componentwillmount)
+- [`render()`](https://reactjs.org/docs/react-component.html#render)
+- [`componentDidMount()`](https://reactjs.org/docs/react-component.html#componentdidmount)
+
 注意这里internalInstance.mountComponent其实就是ReactCompositeComponent.js中的mountComponent方法；
 
 ```javascript
@@ -276,6 +287,7 @@ mountComponent: function (transaction, hostParent, hostContainerInfo, context) {
   // Initialize the public class
   var doConstruct = shouldConstruct(Component);
   //flag1: 注意这里，这里会真的调用Provider函数，生成 new Provider实例对象
+  //注意这里执行生命周期函数  constructor
   var inst = this._constructComponent(doConstruct, publicProps, publicContext, updateQueue);
   var renderedElement;
 
@@ -296,8 +308,10 @@ mountComponent: function (transaction, hostParent, hostContainerInfo, context) {
     markup = this.performInitialMountWithErrorHandling(renderedElement, hostParent, hostContainerInfo, transaction, context);
   } else {
     //flag2 : 这里接着处理子组件
+    //注意这里执行生命周期函数  componentWillMount 和render函数
     markup = this.performInitialMount(renderedElement, hostParent, hostContainerInfo, transaction, context);
   }
+  //注意这里执行生命周期函数 componentDidMount
   if (inst.componentDidMount) {
     if (process.env.NODE_ENV !== 'production') {
       transaction.getReactMountReady().enqueue(function () {
@@ -336,7 +350,7 @@ _constructComponent: function (doConstruct, publicProps, publicContext, updateQu
     
   _constructComponentWithoutOwner: function (doConstruct, publicProps, publicContext, updateQueue) {
     var Component = this._currentElement.type;
-
+//注意这里执行生命周期函数  constructor
     if (doConstruct) {
       if (process.env.NODE_ENV !== 'production') {
         return measureLifeCyclePerf(function () {
@@ -374,7 +388,7 @@ performInitialMount: function (renderedElement, hostParent, hostContainerInfo, t
   if (process.env.NODE_ENV !== 'production') {
     debugID = this._debugID;
   }
-
+//注意这里执行生命周期函数  componentWillMount
   if (inst.componentWillMount) {
     if (process.env.NODE_ENV !== 'production') {
       measureLifeCyclePerf(function () {
@@ -389,10 +403,11 @@ performInitialMount: function (renderedElement, hostParent, hostContainerInfo, t
       inst.state = this._processPendingState(inst.props, inst.context);
     }
   }
-
+//注意这里执行生命周期函数  render 函数
   // If not a stateless component, we now render
   if (renderedElement === undefined) {
     //这个其实就是Provider的子组件 <App /> 也是一个ReactElement对象；
+    //会进入到_renderValidatedComponentWithoutOwnerOrContext函数；
     renderedElement = this._renderValidatedComponent();
   }
 
@@ -419,6 +434,29 @@ performInitialMount: function (renderedElement, hostParent, hostContainerInfo, t
 
   return markup;
 },
+_renderValidatedComponentWithoutOwnerOrContext: function () {
+    var inst = this._instance;
+    var renderedElement;
+
+    if (process.env.NODE_ENV !== 'production') {
+      renderedElement = measureLifeCyclePerf(function () {
+        return inst.render();
+      }, this._debugID, 'render');
+    } else {
+      renderedElement = inst.render();
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      // We allow auto-mocks to proceed as if they're returning null.
+      if (renderedElement === undefined && inst.render._isMockFunction) {
+        // This is probably bad practice. Consider warning here and
+        // deprecating this convenience.
+        renderedElement = null;
+      }
+    }
+
+    return renderedElement;
+  },
 
 ```
 

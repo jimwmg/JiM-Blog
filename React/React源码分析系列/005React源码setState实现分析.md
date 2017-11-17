@@ -35,7 +35,7 @@ ReactComponent.prototype.setState = function (partialState, callback) {
 
 所以主要来看是否传入了updater参数，也就是说何时进行 new  组件；具体的updater参数是怎么传递进来的，以及是那个对象，参见
 
-[react源码分析系列文章](https://github.com/jimwmg/JiM-Blog/tree/master/React)下面的react中context   updater到底是如何传递的
+[react源码分析系列文章](https://github.com/jimwmg/JiM-Blog/tree/master/React)下面的react中context   updater到底是如何传递的;以及事务处理过程；
 
 这里直接说结果，updater对象其实就是ReactUpdateQueue.js 中暴漏出的ReactUpdateQueue对象；
 
@@ -46,39 +46,44 @@ class Root extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      count: 0
+      val: 0
     };
-  }
+  };
+  click (){
+    debugger;
+    this.setState(val:100);
+  };
   componentDidMount() {
-    let me = this;
-    me.setState({
-      count: me.state.count + 1
-    });
-    console.log(me.state.count);    // 打印出0
-    me.setState({
-      count: me.state.count + 1
-    });
-    console.log(me.state.count);    // 打印出0
-    setTimeout(function(){
-     me.setState({
-       count: me.state.count + 1
-     });
-     console.log(me.state.count);   // 打印出2
+    debugger;
+    this.setState({val: this.state.val + 1});
+    console.log(this.state.val);    // 第 1 次 log 0
+
+    this.setState({val: this.state.val + 1});
+    console.log(this.state.val);    // 第 2 次 log 0
+    setTimeout(() => {
+      debugger;
+      this.setState({val: this.state.val + 1});
+      console.log(this.state.val);  // 第 3 次 log 2
+
+      this.setState({val: this.state.val + 1});
+      console.log(this.state.val);  // 第 4 次 log 3
     }, 0);
-    setTimeout(function(){
-     me.setState({
-       count: me.state.count + 1
-     });
-     console.log(me.state.count);   // 打印出3
-    }, 0);
+
   }
   render() {
     return (
-      <h1>{this.state.count}</h1>
+      <div>
+      	<div onClick ={ this.click.bind(this)}>点击</div>
+                <div>{this.state.val}</div>
+      </div>
     )
   }
 }
 ```
+
+![componentDidMount中调用setState](../setState.jpg)
+
+
 
 ```javascript
 ReactComponent.prototype.setState = function (partialState, callback) {
@@ -228,6 +233,8 @@ var ReactDefaultBatchingStrategy = {
   batchedUpdates: function (callback, a, b, c, d, e) {
     var alreadyBatchingUpdates = ReactDefaultBatchingStrategy.isBatchingUpdates;
 // 批处理最开始时，将isBatchingUpdates设为true，表明正在更新
+    //这里结合上面的图片可以看出，如果是在compponentDidMount中调用setState,其本身就是一景处于一个大的transition中了，此时的ReactDefaultBatchingStrategy.isBatchingUpdates被设置为true；当执行到componentDidMount中的setState的时候；看上面的ReactUpdates.js，执行enqueueUpdate的时候；不会在进入batchedUpdates，而是直接将其放入dirtyComponents；
+    //这也就解释了为什么在componentDidMount中执行setState不会更新立即更新state的原因；
     ReactDefaultBatchingStrategy.isBatchingUpdates = true;
 
     // The code is written this way to avoid extra allocations
@@ -361,12 +368,71 @@ var FLUSH_BATCHED_UPDATES = {
 ReactUpdates.js中
 
 ```javascript
+//注意区分和ReactDefaultBatchingStrategy.js中的transition;
+var NESTED_UPDATES = {
+  initialize: function () {
+    this.dirtyComponentsLength = dirtyComponents.length;
+  },
+  close: function () {
+    if (this.dirtyComponentsLength !== dirtyComponents.length) {
+      // Additional updates were enqueued by componentDidUpdate handlers or
+      // similar; before our own UPDATE_QUEUEING wrapper closes, we want to run
+      // these new updates so that if A's componentDidUpdate calls setState on
+      // B, B will update before the callback A's updater provided when calling
+      // setState.
+      dirtyComponents.splice(0, this.dirtyComponentsLength);
+      flushBatchedUpdates();
+    } else {
+      dirtyComponents.length = 0;
+    }
+  }
+};
+
+var UPDATE_QUEUEING = {
+  initialize: function () {
+    this.callbackQueue.reset();
+  },
+  close: function () {
+    this.callbackQueue.notifyAll();
+  }
+};
+
+var TRANSACTION_WRAPPERS = [NESTED_UPDATES, UPDATE_QUEUEING];
+
+function ReactUpdatesFlushTransaction() {
+  this.reinitializeTransaction();
+  this.dirtyComponentsLength = null;
+  this.callbackQueue = CallbackQueue.getPooled();
+  this.reconcileTransaction = ReactUpdates.ReactReconcileTransaction.getPooled(
+  /* useCreateElement */true);
+}
+
+_assign(ReactUpdatesFlushTransaction.prototype, Transaction, {
+  getTransactionWrappers: function () {
+    return TRANSACTION_WRAPPERS;
+  },
+
+  destructor: function () {
+    this.dirtyComponentsLength = null;
+    CallbackQueue.release(this.callbackQueue);
+    this.callbackQueue = null;
+    ReactUpdates.ReactReconcileTransaction.release(this.reconcileTransaction);
+    this.reconcileTransaction = null;
+  },
+
+  perform: function (method, scope, a) {
+    // Essentially calls `this.reconcileTransaction.perform(method, scope, a)`
+    // with this transaction's wrappers around it.
+    return Transaction.perform.call(this, this.reconcileTransaction.perform, this.reconcileTransaction, method, scope, a);
+  }
+});
 var flushBatchedUpdates = function () {
  
   while (dirtyComponents.length || asapEnqueued) {
     if (dirtyComponents.length) {
+      //这个transition是ReactUpdates.js中声明的，注意区分
       var transaction = ReactUpdatesFlushTransaction.getPooled();
-      //这里执行runBatchedUpdates函数；
+      //这里执行runBatchedUpdates函数；perform就是上面声明的perform函数，该函数又会进入Transition.js中的perform函数；
       transaction.perform(runBatchedUpdates, null, transaction);
       ReactUpdatesFlushTransaction.release(transaction);
     }
@@ -442,6 +508,24 @@ performUpdateIfNecessary: function (internalInstance, transaction, updateBatchNu
 
 ReactCompositeComponent.js
 
+顺便提下React声明周期中
+
+- #### Updating
+
+  An update can be caused by changes to props or state. These methods are called when a component is being re-rendered:
+
+  - [`componentWillReceiveProps()`](https://reactjs.org/docs/react-component.html#componentwillreceiveprops)
+  - [`shouldComponentUpdate()`](https://reactjs.org/docs/react-component.html#shouldcomponentupdate)
+  - [`componentWillUpdate()`](https://reactjs.org/docs/react-component.html#componentwillupdate)
+  - [`render()`](https://reactjs.org/docs/react-component.html#render)
+  - [`componentDidUpdate()`](https://reactjs.org/docs/react-component.html#componentdidupdate)
+
+  #### Unmounting
+
+  This method is called when a component is being removed from the DOM:
+
+  - [`componentWillUnmount()`](https://reactjs.org/docs/react-component.html#componentwillunmount)
+
 ```javascript
 performUpdateIfNecessary: function (transaction) {
   if (this._pendingElement != null) {
@@ -456,7 +540,6 @@ performUpdateIfNecessary: function (transaction) {
 },
 
   //执行更新React组件的props. state。context函数
-
   updateComponent: function (transaction, prevParentElement, nextParentElement, prevUnmaskedContext, nextUnmaskedContext) {
     var inst = this._instance;
     var willReceive = false;
@@ -486,6 +569,7 @@ performUpdateIfNecessary: function (transaction) {
           return inst.componentWillReceiveProps(nextProps, nextContext);
         }, this._debugID, 'componentWillReceiveProps');
       } else {
+        //注意这里执行生命周期函数
         inst.componentWillReceiveProps(nextProps, nextContext);
       }
     }
@@ -495,6 +579,7 @@ performUpdateIfNecessary: function (transaction) {
     var shouldUpdate = true;
 
     if (!this._pendingForceUpdate) {
+      //如果React组件中写了shouldComponentUpdate函数，则会执行该函数；默认shouldUpdate为true;
       if (inst.shouldComponentUpdate) {
         if (process.env.NODE_ENV !== 'production') {
           shouldUpdate = measureLifeCyclePerf(function () {
@@ -518,7 +603,6 @@ performUpdateIfNecessary: function (transaction) {
     } else {
       // If it's determined that a component should not update, we still want
       // to set props and state but we shortcut the rest of the update.
-      //诺：在这里更新组件的state. props 等值；
       this._currentElement = nextParentElement;
       this._context = nextUnmaskedContext;
       inst.props = nextProps;
@@ -526,8 +610,151 @@ performUpdateIfNecessary: function (transaction) {
       inst.context = nextContext;
     }
   },
+_performComponentUpdate: function (nextElement, nextProps, nextState, nextContext, transaction, unmaskedContext) {
+    var _this2 = this;
+
+    var inst = this._instance;
+
+    var hasComponentDidUpdate = Boolean(inst.componentDidUpdate);
+    var prevProps;
+    var prevState;
+    var prevContext;
+    if (hasComponentDidUpdate) {
+      prevProps = inst.props;
+      prevState = inst.state;
+      prevContext = inst.context;
+    }
+
+    if (inst.componentWillUpdate) {
+      if (process.env.NODE_ENV !== 'production') {
+        measureLifeCyclePerf(function () {
+          return inst.componentWillUpdate(nextProps, nextState, nextContext);
+        }, this._debugID, 'componentWillUpdate');
+      } else {
+            //注意这里执行生命周期函数 componentWillUpdate
+        inst.componentWillUpdate(nextProps, nextState, nextContext);
+      }
+    }
+
+    this._currentElement = nextElement;
+    this._context = unmaskedContext;
+    inst.props = nextProps;
+    inst.state = nextState;
+    inst.context = nextContext;
+//注意这里执行生命周期函数 _updateRenderedComponent内部跟下去的话可以看到：执行的是:inst.render() ;
+  
+    this._updateRenderedComponent(transaction, unmaskedContext);
+
+    if (hasComponentDidUpdate) {
+      if (process.env.NODE_ENV !== 'production') {
+        transaction.getReactMountReady().enqueue(function () {
+         //注意这里执行生命周期函数  componentDidUpdate
+          measureLifeCyclePerf(inst.componentDidUpdate.bind(inst, prevProps, prevState, prevContext), _this2._debugID, 'componentDidUpdate');
+        });
+      } else {
+        transaction.getReactMountReady().enqueue(inst.componentDidUpdate.bind(inst, prevProps, prevState, prevContext), inst);
+      }
+    }
+  },
+_updateRenderedComponent: function (transaction, context) {
+    var prevComponentInstance = this._renderedComponent;
+    var prevRenderedElement = prevComponentInstance._currentElement;
+    var nextRenderedElement = this._renderValidatedComponent();
+
+    var debugID = 0;
+    if (process.env.NODE_ENV !== 'production') {
+      debugID = this._debugID;
+    }
+//更新组件时，如果不满足DOM diff条件，会先unmountComponent, 然后再mountComponent，下面我们来分析下unmountComponent时都发生了什么事。和mountComponent的多态一样，不同type的ReactComponent也会有不同的unmountComponent行为。我们来分析下React自定义组件，也就是ReactCompositeComponent中的unmountComponent。
+    if (shouldUpdateReactComponent(prevRenderedElement, nextRenderedElement)) {
+      ReactReconciler.receiveComponent(prevComponentInstance, nextRenderedElement, transaction, this._processChildContext(context));
+    } else {
+      var oldHostNode = ReactReconciler.getHostNode(prevComponentInstance);
+      ReactReconciler.unmountComponent(prevComponentInstance, false);
+
+      var nodeType = ReactNodeTypes.getType(nextRenderedElement);
+      this._renderedNodeType = nodeType;
+      var child = this._instantiateReactComponent(nextRenderedElement, nodeType !== ReactNodeTypes.EMPTY /* shouldHaveDebugID */
+      );
+      this._renderedComponent = child;
+
+      var nextMarkup = ReactReconciler.mountComponent(child, transaction, this._hostParent, this._hostContainerInfo, this._processChildContext(context), debugID);
+
+      if (process.env.NODE_ENV !== 'production') {
+        if (debugID !== 0) {
+          var childDebugIDs = child._debugID !== 0 ? [child._debugID] : [];
+          ReactInstrumentation.debugTool.onSetChildren(debugID, childDebugIDs);
+        }
+      }
+
+      this._replaceNodeWithMarkup(oldHostNode, nextMarkup, prevComponentInstance);
+    }
+  },
 
 ```
+
+```javascript
+	//这里执行componentWillUnmount ；
+unmountComponent: function (safely) {
+    if (!this._renderedComponent) {
+      return;
+    }
+
+    var inst = this._instance;
+
+    if (inst.componentWillUnmount && !inst._calledComponentWillUnmount) {
+      inst._calledComponentWillUnmount = true;
+
+      if (safely) {
+        var name = this.getName() + '.componentWillUnmount()';
+        ReactErrorUtils.invokeGuardedCallback(name, inst.componentWillUnmount.bind(inst));
+      } else {
+        if (process.env.NODE_ENV !== 'production') {
+          measureLifeCyclePerf(function () {
+            return inst.componentWillUnmount();
+          }, this._debugID, 'componentWillUnmount');
+        } else {
+          inst.componentWillUnmount();
+        }
+      }
+    }
+
+    if (this._renderedComponent) {
+      ReactReconciler.unmountComponent(this._renderedComponent, safely);
+      this._renderedNodeType = null;
+      this._renderedComponent = null;
+      this._instance = null;
+    }
+
+    // Reset pending fields
+    // Even if this component is scheduled for another update in ReactUpdates,
+    // it would still be ignored because these fields are reset.
+    this._pendingStateQueue = null;
+    this._pendingReplaceState = false;
+    this._pendingForceUpdate = false;
+    this._pendingCallbacks = null;
+    this._pendingElement = null;
+
+    // These fields do not really need to be reset since this object is no
+    // longer accessible.
+    this._context = null;
+    this._rootNodeID = 0;
+    this._topLevelWrapper = null;
+
+    // Delete the reference from the instance to this internal representation
+    // which allow the internals to be properly cleaned up even if the user
+    // leaks a reference to the public instance.
+    ReactInstanceMap.remove(inst);
+
+    // Some existing components rely on inst.props even after they've been
+    // destroyed (in event handlers).
+    // TODO: inst.props = null;
+    // TODO: inst.state = null;
+    // TODO: inst.context = null;
+  },
+```
+
+
 
 ```javascript
 _processPendingState: function (props, context) {
@@ -602,3 +829,5 @@ setState流程还是很复杂的，设计也很精巧，避免了重复无谓的
 [React中setState实现机制](https://www.cnblogs.com/danceonbeat/p/6993674.html)
 
 [React中setState](https://yq.aliyun.com/articles/72329?t=t1)
+
+[事务处理机制](https://zhuanlan.zhihu.com/purerender/20328570)
