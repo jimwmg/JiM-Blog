@@ -41,7 +41,7 @@ index.html
 
 控制台输出如下
 
-```
+```javascript
 // console.log(seajs);
 Object
 Module:function t(a,b)

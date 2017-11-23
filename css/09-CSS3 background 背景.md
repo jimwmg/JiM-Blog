@@ -18,7 +18,7 @@ CSS3 background-origin clip size 背景
 
  定义元素的**背景图像** 从何处开始**向外** 裁剪，默认值是border-box；
 
-*  bakcground-origin : border-box || padding-box || content-box  该属性改变**背景图像** 的填充开始原点，对**背景色** 没有影响
+*  bakcground-origin : border-box || padding-box || content-box  该属性改变**背景图像** 的填充开始原点，对**背景色** 没有影响;默认值是padding-box,即从元素盒子的padding处开始填充；
 
 定义元素的**背景图像** 从何处开始填充，即填充开始的原点；默认值是padding-box ；
 
