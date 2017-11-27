@@ -70,7 +70,7 @@ function GetXmlHttpObject()
 xhr.onreadystatechange = function(){
   if(xhr.readyState == 4 ){  //代表服务器已经完全接受响应
     if(xhr.status == 200 ){  //代表服务器响应状态OK
-      sone code
+      //some code
     }else{
       alert("status is "+xhr.status) ;
     }

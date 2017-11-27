@@ -164,14 +164,18 @@ Element.dataset   //返回元素节点中所有的data-*属性。
 ```javascript
 Element.clientHeight   //返回元素节点可见部分的高度
 Element.clientWidth   //返回元素节点可见部分的宽度
+//
 Element.clientLeft   //返回元素节点左边框的宽度
 Element.clientTop   //返回元素节点顶部边框的宽度
-Element.scrollHeight  //返回元素节点的总高度
-Element.scrollWidth  //返回元素节点的总宽度
+//clientLeft clientTop指的是边框的宽度
+Element.scrollHeight  //返回元素节点内容的总高度
+Element.scrollWidth  //返回元素节点内容的总宽度
+//scroll用来获取元素内部内容的宽高
 Element.scrollLeft   //返回元素节点的水平滚动条向右滚动的像素数值,通过设置这个属性可以改变元素的滚动位置
 Element.scrollTop   //返回元素节点的垂直滚动向下滚动的像素数值
 Element.offsetHeight   //返回元素的垂直高度(包含border,padding)
 Element.offsetWidth    //返回元素的水平宽度(包含border,padding)
+//offset用来获取元素本身的宽高
 Element.offsetLeft    //返回当前元素左上角相对于Element.offsetParent节点的垂直偏移
 Element.offsetTop   //返回水平位移
 Element.style  //返回元素节点的行内样式
@@ -186,7 +190,7 @@ Element.firstElementChild  //返回当前节点的第一个Element子节点
 Element.lastElementChild   //返回当前节点的最后一个Element子节点  
 Element.nextElementSibling  //返回当前元素节点的下一个兄弟HTML元素节点
 Element.previousElementSibling  //返回当前元素节点的前一个兄弟HTML节点
-Element.offsetParent   //返回当前元素节点的最靠近的、并且CSS的position属性不等于static的父元素。
+Element.offsetParent   //返回当前元素节点的最靠近的、并且CSS的position属性不等于static的父元素。(必须是定位了的元素，否则就追溯到body元素)
 ```
 
 **1.4.2 Element节点的方法**
@@ -256,7 +260,41 @@ ul.addEventListener('click', function(event) {
 });
 ```
 
-**（5）其他**
+**(5)  表格操作**
+
+HTML. DOM 为`<table>`,`<tbody>`,`<tr>`添加了一些新的属性和接口
+
+* table
+
+```javascript
+caption: 保存着对<caption> 元素的引用（如果有）
+tBodies: 是一个对<tbody>元素的HTMLCollection，table中所有的tbody元素的集合；
+tHead : 是一个对<thead>元素的引用
+tFoot : 是一个对<tfoot>元素的引用
+rows  : 是一个表格中  所有 所有 行的HTMLCollection
+insertRow(pos) : 向rows集合中指定位置插入一行
+deleteRow(pos) : 删除rows集合中指定位置的行
+createTHead() createTFoot() createCaption() :创建这些元素，并将其放置指定位置，返回所创建元素的引用
+deleteTHead() deleteTFoot() deleteCaption() :删除这些元素
+```
+
+* tbody
+
+```javascript
+rows  : 保存着tbody中所有 行的HTMLCollection
+insertRow(pos) : 向rows集合中指定位置插入一行，返回该行的引用
+deleteRow(pos) : 删除rows集合中指定位置的行
+```
+
+* tr
+
+```javascript
+cells : 保存着tr这一行中所有单元格，也就是 td 的HTMLCollection集合；
+insertCell(pos) : 向指定单元格位置处插入一个单元格,并返回该单元格的引用 ；
+deleteCell(pos) : 删除指定位置处的单元格
+```
+
+**（6）其他**
 
 ```javascript
 Element.scrollIntoView()   //滚动当前元素，进入浏览器的可见区域

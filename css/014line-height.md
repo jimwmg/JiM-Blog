@@ -71,9 +71,43 @@ p{line-height:150px;} //26*1.5=39
 
 #### 3.2 内容区（content area）
 
-内容区是指底线和顶线包裹的区域（行内元素display：inline可以通过background-color属性显示出来），实际中不一定看得到，但确实存在。**内容区的大小依据font-size的值和字数进行变化。**
+内容区是指底线和顶线包裹的区域（行内元素display：inline可以通过background-color属性显示出来），实际中不一定看得到，但确实存在。**内容区的大小依据font-size的值和字数进行变化。**利用这个特性可以使图片居中
 
 #### 3.3 行高
+
+行高还有一个特性，叫做垂直居中性。line-height的最终表现是通过line boxes实现的，而无论line boxes所占据的高度是多少（无论比文字大还是比文字小），其占据的空间都是与**文字内容公用水平中垂线**
+
+```css
+div { line-height: 240px; font-size: 0; }
+img { vertical-align: middle; }
+```
+
+对于多行文字的垂直居中，我们可以进行将多行文字用一个标签包裹起来，改变其display:inline-block（和img一样）
+
+```html
+<style>
+  div{
+    font-size:0px;
+    line-height:150px;
+    background-color:aquamarine
+  }
+  span{
+    font-size:20px;
+    line-height:30px;
+    display:inline-block;
+    vertical-align:middle;
+  }
+</style>
+
+<div>
+  <span>
+    你好<br>
+    世界
+  </span>
+</div>
+```
+
+
 
 行高（line-height）：包括内容区与以内容区为基础对称拓展的空白区域，我们称之为行高。一般情况下，也可以认为是相邻文本行基线间的距离。
 
