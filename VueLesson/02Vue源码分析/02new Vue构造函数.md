@@ -14,7 +14,7 @@ categories: vue
 
 ```javascript
 console.dir(Vue) ;//我们可以看下Vue构造函数上的静态属性和原型属性都有哪些值，下面会分析这些属性的来源；
-var app = new Vue({
+var vm = new Vue({
   el: '#app',
   data: {
     message: 'Hello Vue!'
@@ -25,7 +25,7 @@ var app = new Vue({
     }
   },
 });
-console.dir(app) ;//同时看下输出的 Vue实例对象上的属性都有哪些，下面会分析这些属性是如何挂载上去的；
+console.dir(vm) ;//同时看下输出的 Vue实例对象上的属性都有哪些，下面会分析这些属性是如何挂载上去的；
 ```
 
 github搜VUE可以找到对应的源码
@@ -78,10 +78,14 @@ export function initMixin (Vue: Class<Component>) {
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
+    //组件实例的生命周期中一个函数  beforeCreate执行
     callHook(vm, 'beforeCreate')
+    //以下就是Vue组件实例的创建过程
+    //我们看到create阶段，基本就是对传入数据的格式化、数据的双向绑定、以及一些属性的初始化。
     initInjections(vm) // resolve injections before data/props
     initState(vm)
     initProvide(vm) // resolve provide after data/props
+    //这里，在组件创建完毕之后，调用组件生命周期函数 created
     callHook(vm, 'created')
 
     /* istanbul ignore if */
@@ -98,7 +102,7 @@ export function initMixin (Vue: Class<Component>) {
 }
 ```
 
-#### vm.$options 
+#### 2.1 vm.$options 
 
 ```javascript
 vm.$options = mergeOptions(
@@ -348,3 +352,220 @@ vm.$option = {
 
 ```
 
+#### 2.3 initLifycycle(vm)
+
+这个方法主要是给Vue组件实例对象vm上添加一些属性 ，包括$parent $root $children $refs 以及一些生命周期的标识
+
+```javascript
+export function initLifecycle (vm: Component) {
+  const options = vm.$options
+
+  // locate first non-abstract parent
+  let parent = options.parent
+  if (parent && !options.abstract) {
+    while (parent.$options.abstract && parent.$parent) {
+      parent = parent.$parent
+    }
+    parent.$children.push(vm)
+  }
+
+  vm.$parent = parent
+  vm.$root = parent ? parent.$root : vm
+
+  vm.$children = []
+  vm.$refs = {}
+
+  vm._watcher = null
+  vm._inactive = null
+  vm._directInactive = false
+  vm._isMounted = false
+  vm._isDestroyed = false
+  vm._isBeingDestroyed = false
+}
+```
+
+#### 2.4 initEvents(vm)
+
+这个方法的主要作用是给Vue组件的实例对象添加一些事件相关的属性 ，比如_events  _hasHookEvent等
+
+```javascript
+export function initEvents (vm: Component) {
+  vm._events = Object.create(null)
+  vm._hasHookEvent = false
+  // init parent attached events
+  const listeners = vm.$options._parentListeners
+  if (listeners) {
+    updateComponentListeners(vm, listeners)
+  }
+}
+```
+
+#### 2.5 initRender(vm)
+
+这个方法主要是给Vue实例对象添加了一些DOM相关的属性
+
+```javascript
+export function initRender (vm: Component) {
+  vm._vnode = null // the root of the child tree
+  vm._staticTrees = null // v-once cached trees
+  const options = vm.$options
+  const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
+  const renderContext = parentVnode && parentVnode.context
+  vm.$slots = resolveSlots(options._renderChildren, renderContext)
+  vm.$scopedSlots = emptyObject
+  // bind the createElement fn to this instance
+  // so that we get proper render context inside it.
+  // args order: tag, data, children, normalizationType, alwaysNormalize
+  // internal version is used by render functions compiled from templates
+  vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+  // normalization is always applied for the public version, used in
+  // user-written render functions.
+  vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+}
+```
+
+#### 2.6 callHook(vm, 'beforeCreate')
+
+接下来调用组件实例对象的beforeCreate函数
+
+```javascript
+export function callHook (vm: Component, hook: string) {
+  //从组件实例对象vm.$options中取到生命周期函数
+  const handlers = vm.$options[hook]
+  if (handlers) {
+    for (let i = 0, j = handlers.length; i < j; i++) {
+      try {
+        handlers[i].call(vm)
+      } catch (e) {
+        handleError(e, vm, `${hook} hook`)
+      }
+    }
+  }
+  if (vm._hasHookEvent) { //这个属性在initEvents(vm)中声明了
+    vm.$emit('hook:' + hook)
+  }
+}
+```
+
+#### 2.7initInjections(vm).  待研究 
+
+```javascript
+export const observerState = {
+  shouldConvert: true
+}
+export function initInjections (vm: Component) {
+  const result = resolveInject(vm.$options.inject, vm)
+  if (result) {
+    observerState.shouldConvert = false
+    Object.keys(result).forEach(key => {
+      /* istanbul ignore else */
+      if (process.env.NODE_ENV !== 'production') {
+        defineReactive(vm, key, result[key], () => {
+          warn(
+            `Avoid mutating an injected value directly since the changes will be ` +
+            `overwritten whenever the provided component re-renders. ` +
+            `injection being mutated: "${key}"`,
+            vm
+          )
+        })
+      } else {
+        defineReactive(vm, key, result[key])
+      }
+    })
+    observerState.shouldConvert = true
+  }
+}
+```
+
+#### 2.8 initState(vm)
+
+这里主要就是操作数据了，`props`、`methods`、`data`、`computed`、`watch`，从这里开始就涉及到了`Observer`、`Dep`和`Watcher`
+
+```javascript
+export function initState (vm: Component) {
+  vm._watchers = []
+  const opts = vm.$options
+  //操作props
+  if (opts.props) initProps(vm, opts.props)
+  //将传入vm.$options.methods中的key-value(fn)值给到vm实例对象，同时绑定value(fn)的this为vm
+  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.data) {
+    //将vm.$options.data给到vm实例属性vm._data (vm.$options.data是经过合并策略处理过的函数)，并侦听data的变化
+    initData(vm)
+  } else {
+    observe(vm._data = {}, true /* asRootData */)
+  }
+  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.watch && opts.watch !== nativeWatch) {
+    initWatch(vm, opts.watch)
+  }
+}
+```
+
+最后看下此时的vm实例对象上是什么
+
+```javascript
+// _init
+vm._uid = 0
+vm._isVue = true
+vm.$options = {
+    components: {
+		KeepAlive,
+		Transition,
+		TransitionGroup
+	},
+	directives: {
+		model,
+		show
+	},
+	filters: {},
+	_base: Vue,
+	el: '#app',
+	data: function mergedInstanceDataFn(){}
+}
+vm._renderProxy = vm
+vm._self = vm
+
+// initLifecycle
+vm.$parent = parent
+vm.$root = parent ? parent.$root : vm
+
+vm.$children = []
+vm.$refs = {}
+
+vm._watcher = null
+vm._inactive = null
+vm._directInactive = false
+vm._isMounted = false
+vm._isDestroyed = false
+vm._isBeingDestroyed = false
+
+// initEvents	
+vm._events = Object.create(null)
+vm._hasHookEvent = false
+
+// initRender
+vm.$vnode = null
+vm._vnode = null
+vm._staticTrees = null
+vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
+vm.$scopedSlots = emptyObject
+
+vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+
+vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+// 在 initState 中添加的属性
+vm._watchers = []
+vm._data
+vm.message
+```
+
+#### 2.9 callHook(vm, 'created')
+
+这个时候就会调用created函数
+
+我们看到`create`阶段，基本就是对传入数据的格式化、数据的双向绑定、以及一些属性的初始化。
+
+至此，创建一个Vue组件的全部过程已经完毕
+
+Q:observe观察者如何实现

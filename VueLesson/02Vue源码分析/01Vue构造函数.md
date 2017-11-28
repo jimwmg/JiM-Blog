@@ -153,7 +153,8 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   initUse(Vue)
   //Vue.mixin
   initMixin(Vue)
-  //Vue.extend  返回一个Sub函数，该函数其实基本上克隆了Vue构造函数的所有属性；//可以类比React中extends Component
+  //Vue.extend  返回一个Sub函数，该函数其实基本上克隆了Vue构造函数的所有属性；Vue.component(option)后面也是调用了extend函数，返回了一个Vue实例对象；
+  //可以类比React中extends Component
   initExtend(Vue)
   //Vue.component   Vue.directive    Vue.filter ==> function(id,defination){ }
   initAssetRegisters(Vue)
@@ -195,4 +196,68 @@ export default Vue
 ```
 
 由以上过程可以看出来，通过instance/index.js ==> core/index.js ==> plaforms/web/runtime/index.js这些文件一层层的对instance/index.js中的Vue构造函数进行加工，不停的增加功能，原型属性和静态属性；
+
+### 4 最后Vue构造函数上的静态属性和动态属性
+
+* 静态属性
+
+```javascript
+// src/core/index.js
+Vue.version = '__VERSION__'
+
+// src/entries/web-runtime-with-compiler.js
+Vue.compile = compileToFunctions    // 把模板template转换为render函数
+
+// src/core/global-api 在目录结构中，我们指出，Vue的静态方法大多都是在该文件夹中定义的
+// src/core/global-api/index.js
+Vue.config //不过以直接替换整个config对象
+Vue.util //几个工具方法，但是官方不建议使用
+Vue.set
+Vue.delete
+Vue.nextTick
+Vue.options = {
+  components: {KeepAlive: KeepAlive}
+  directives: {},
+  filters: {},
+  _base: Vue
+}
+
+// src/core/global-api/use.js
+Vue.use
+
+// src/core/global-api/mixin.js
+Vue.mixin
+
+// src/core/global-api/extend.js
+Vue.extend
+
+// src/core/global-api/assets.js
+Vue.component
+Vue.directive
+Vue.filter
+```
+
+* 原型属性
+
+```javascript
+Vue.prototype.$on 
+Vue.prototype.$off
+Vue.prototype.$delete
+Vue.prototype.$destroy
+Vue.prototype.$emit
+Vue.prototype.$once
+Vue.prototype.$forceUpdate
+Vue.prototype.$mount
+Vue.prototype.$set
+Vue.prototype.$watch
+Vue.prototype._init
+Vue.prototype._render
+Vue.prototype._update
+Vue.prototype.__patch__
+//以下还有不可枚举和不可配置的一些属性
+Vue.prototype.$props
+Vue.prototype.$data
+Vue.prototype.$ssrContext
+Vue.prototype.$isServer
+```
 
