@@ -78,14 +78,14 @@ export function initMixin (Vue: Class<Component>) {
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
-    //组件实例的生命周期中一个函数  beforeCreate执行
+    //组件实例的生命周期中一个函数  beforeCreate执行（如果有的话）
     callHook(vm, 'beforeCreate')
     //以下就是Vue组件实例的创建过程
     //我们看到create阶段，基本就是对传入数据的格式化、数据的双向绑定、以及一些属性的初始化。
     initInjections(vm) // resolve injections before data/props
     initState(vm)
     initProvide(vm) // resolve provide after data/props
-    //这里，在组件创建完毕之后，调用组件生命周期函数 created
+    //这里，在组件创建完毕之后，调用组件生命周期函数 created（如果有的话）
     callHook(vm, 'created')
 
     /* istanbul ignore if */
@@ -94,7 +94,7 @@ export function initMixin (Vue: Class<Component>) {
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-
+//执行到这里，当vm实例对象创建完毕之后，开始将这个对象挂载到DOM上了，这个时候，如果vm实例对象有要挂载的DOM节点，那么就执行 $mount函数
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
@@ -567,5 +567,94 @@ vm.message
 我们看到`create`阶段，基本就是对传入数据的格式化、数据的双向绑定、以及一些属性的初始化。
 
 至此，创建一个Vue组件的全部过程已经完毕
+
+#### 2.10 vm.$mount(vm.$options.el) 
+
+2.1——>2.9创建完vm实例对象之后，并且实现了一些数据的双向绑定等操作之后，就要执行将vm实例对象挂载到对应的DOM节点上了；
+
+如果vm实例对象传入的参数中有el属性，那么该属性就可以查找到被挂载的DOM节点，然后往这个节点上挂载组件，执行   $mount   函数
+
+```javascript
+if (vm.$options.el) {
+  vm.$mount(vm.$options.el)
+}
+```
+
+[platforms/web/entry-runtime-with-compiler.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
+
+```javascript
+//缓存住在 runtime/index.js中定义的  $mount. 函数
+const mount = Vue.prototype.$mount ;
+Vue.prototype.$mount = function (
+  el?: string | Element,
+  hydrating?: boolean
+): Component {
+  //可以理解为一个查询DOM节点的，类似于document.querySelector
+  el = el && query(el)
+
+  /* istanbul ignore if */
+  //vue组件不能挂载到body和html上
+  if (el === document.body || el === document.documentElement) {
+    process.env.NODE_ENV !== 'production' && warn(
+      `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
+    )
+    
+    return this
+  }
+
+  const options = this.$options
+  // resolve template/el and convert to render function
+  if (!options.render) {
+    let template = options.template
+    if (template) {
+      if (typeof template === 'string') {
+        if (template.charAt(0) === '#') {
+          template = idToTemplate(template)
+          /* istanbul ignore if */
+          if (process.env.NODE_ENV !== 'production' && !template) {
+            warn(
+              `Template element not found or is empty: ${options.template}`,
+              this
+            )
+          }
+        }
+      } else if (template.nodeType) {
+        template = template.innerHTML
+      } else {
+        if (process.env.NODE_ENV !== 'production') {
+          warn('invalid template option:' + template, this)
+        }
+        return this
+      }
+    } else if (el) {
+      template = getOuterHTML(el)
+    }
+    if (template) {
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+        mark('compile')
+      }
+
+      const { render, staticRenderFns } = compileToFunctions(template, {
+        shouldDecodeNewlines,
+        shouldDecodeNewlinesForHref,
+        delimiters: options.delimiters,
+        comments: options.comments
+      }, this)
+      options.render = render
+      options.staticRenderFns = staticRenderFns
+
+      /* istanbul ignore if */
+      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+        mark('compile end')
+        measure(`vue ${this._name} compile`, 'compile', 'compile end')
+      }
+    }
+  }
+  return mount.call(this, el, hydrating)
+}
+```
+
+
 
 Q:observe观察者如何实现

@@ -28,14 +28,21 @@ github搜VUE可以找到对应的源码
 
 ####web平台上
 
-[platforms/web/entry-runtime-with-compiler](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
+[platforms/web/entry-runtime-with-compiler.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
 
 ```javascript
 /* @flow */
 
 import Vue from './runtime/index'
 //Vue.compile 
-Vue.compile = compileToFunctions
+Vue.compile = compileToFunctions;
+//先保存 /runtime/index.js中定义的 $mount方法；
+const mount = Vue.prototype.$mount
+//然后重写该方法；
+Vue.prototype.$mount = function (){
+  //...
+}
+ 
 export default Vue
 ```
 
@@ -54,6 +61,7 @@ Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
 //Vue.prototype.$mount
+//注意这里向 Vue.prototype对象上添加了新的方法 $mount,在platforms/web/entry-runtime-with-compiler.js中会重写这个方法
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
