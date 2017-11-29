@@ -61,6 +61,7 @@ export function initMixin (Vue: Class<Component>) {
       initInternalComponent(vm, options)
     } else {
       //进入这个分支
+      //2.1
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -95,6 +96,7 @@ export function initMixin (Vue: Class<Component>) {
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
 //执行到这里，当vm实例对象创建完毕之后，开始将这个对象挂载到DOM上了，这个时候，如果vm实例对象有要挂载的DOM节点，那么就执行 $mount函数
+    //2.10
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
@@ -550,7 +552,7 @@ vm._vnode = null
 vm._staticTrees = null
 vm.$slots = resolveSlots(vm.$options._renderChildren, renderContext)
 vm.$scopedSlots = emptyObject
-
+//这个函数在生成虚拟DOM的时候会用到
 vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
 
 vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
@@ -601,13 +603,17 @@ Vue.prototype.$mount = function (
     
     return this
   }
-
+//引用了vm.$options
   const options = this.$options
   // resolve template/el and convert to render function
+  //如果没有render函数，则获取template，template可以是#id、模板字符串、dom元素，
+  //如果没有template，则获取el以及其子内容作为模板。
   if (!options.render) {
     let template = options.template
     if (template) {
+      //提供了template属性
       if (typeof template === 'string') {
+        //template传值可以是字符串或者id
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
           /* istanbul ignore if */
@@ -618,6 +624,7 @@ Vue.prototype.$mount = function (
             )
           }
         }
+        //也可以是一个node节点
       } else if (template.nodeType) {
         template = template.innerHTML
       } else {
@@ -626,6 +633,7 @@ Vue.prototype.$mount = function (
         }
         return this
       }
+      //如果没有template属性，有el,则去el的outerHTML
     } else if (el) {
       template = getOuterHTML(el)
     }
@@ -634,7 +642,9 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-
+      //这里会解析template
+//这里可以看到给vm.$options添加了 render和staticRenderFns
+     //编译render函数,下面有讲解如何生成编译函数render的；
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
         shouldDecodeNewlinesForHref,
@@ -642,6 +652,7 @@ Vue.prototype.$mount = function (
         comments: options.comments
       }, this)
       options.render = render
+      // staticRenderFns是为了优化，提取那些后期不用去更新的节点
       options.staticRenderFns = staticRenderFns
 
       /* istanbul ignore if */
@@ -655,6 +666,497 @@ Vue.prototype.$mount = function (
 }
 ```
 
+#####2.10.1 最后的vm实例对象上有了render和staticRenderFns属性
 
+```javascript
+vm.$option = {
+  components: {
+    KeepAlive,
+    Transition,
+    TransitionGroup
+  },
+  directives: {
+    model,
+    show
+  },
+  render:ƒ anonymous(),
+  staticRenderFns:[],
+  filters: {},
+  _base: Vue,
+  el: '#app',
+  data: function mergedInstanceDataFn(){},
+  computed:{reverseMessage:f}
+}
+
+
+```
+
+* with语句，with语句可以理解为给with语句后面的表达式expression添加了一个作用域，作用域就是with语句中的实例,expression中的语句在查找变量的时候会直接在这个对象上查找
+* new Function(str) :将字符串作为一个函数的内容，最终返回这个函数（对于字符串的内容没有限制）
+
+```javascript
+var obj = {name:"jhon"}
+//with(instance Object){expression}
+var str = "with(obj){console.log(this,name,'hhh')}"
+var ret = new Function(str);
+console.log(ret());//window. jhon  hhh
+var ret2 = new Function('console.log("sss")');
+ret2();//sss
+//ret2 : function(){console.log("sss")}
+```
+
+最终生成的render函数类似于这样的：过程就是解析template
+
+```javascript
+render = function () {
+	with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(message))])])}
+}
+```
+
+render函数的生成流程大致如下
+
+先说一下render函数的编译的主要几个步骤，这可以帮助我们从整体上把握它：
+
+1. 给编译options添加web平台特性
+2. 将template字符串解析成ast
+3. 优化：将那些不会被改变的节点（statics）打上标记
+4. 生成render函数字符串，并用with包裹（最新版本有改为buble）
+5. 通过new Function的方式生成render函数并缓存
+
+```javascript
+const { render, staticRenderFns } = compileToFunctions(template, {
+  shouldDecodeNewlines,
+  shouldDecodeNewlinesForHref,
+  delimiters: options.delimiters,
+  comments: options.comments
+}, this)
+```
+
+```javascript
+function createFunction (code, errors) {
+  try {
+    return new Function(code)
+  } catch (err) {
+    errors.push({ err, code })
+    return noop
+  }
+}
+export function createCompileToFunctionFn (compile: Function): Function {
+  //用来缓存render和staticRenderFns的对象
+  const cache: {
+    [key: string]: CompiledFunctionResult;
+  } = Object.create(null)
+
+  return function compileToFunctions (
+    template: string,
+    options?: CompilerOptions,
+    vm?: Component
+  ): CompiledFunctionResult {
+    //这里传入的options参数就是上面调用的时候传入参数中template后面的那个对象；
+    options = extend({}, options)
+    const warn = options.warn || baseWarn
+    delete options.warn
+    // check cache
+    const key = options.delimiters
+      ? String(options.delimiters) + template
+      : template
+    if (cache[key]) {
+      return cache[key]
+    }
+    // compile  第 1 2 3 4 步骤都在这个函数中
+    const compiled = compile(template, options)
+    // turn code into functions
+    //第 5 步：生成render函数并缓存
+    const res = {}
+    const fnGenErrors = []
+    //注意这里是从const compiled = compile(template, options)中compiled中拿到的render函数字符串的
+    res.render = createFunction(compiled.render, fnGenErrors)
+    res.staticRenderFns = compiled.staticRenderFns.map(code => {
+      return createFunction(code, fnGenErrors)
+    })
+    //....
+    return (cache[key] = res)
+  }
+}
+```
+
+第 1 2 3 4步是如何运行的呢？
+
+那么我们就去看下compile函数
+
+```javascript
+// 这是web平台特性下需要给compile添加的options
+export const baseOptions: CompilerOptions = {
+  isIE,
+  expectHTML: true,
+  modules, // web平台才有的module， 这个用于virtual dom
+  staticKeys: genStaticKeys(modules),
+  directives,  // web平台才有的指令
+  isReservedTag, // 保留节点
+  isUnaryTag, // 自闭和节点
+  mustUseProp, // 必须用固有属性来做绑定
+  getTagNamespace, // tag的命名空间
+  isPreTag
+}
+export function createCompilerCreator (baseCompile: Function): Function {
+  return function createCompiler (baseOptions: CompilerOptions) {
+    function compile (
+      template: string,
+       //这个options就是最初调用compileToFunctions函数的时候传入的options;
+      options?: CompilerOptions
+    ): CompiledResult {
+      const finalOptions = Object.create(baseOptions)
+      const errors = []
+      const tips = []
+      finalOptions.warn = (msg, tip) => {
+        (tip ? tips : errors).push(msg)
+      }
+
+      if (options) {
+        // merge custom modules
+        if (options.modules) {
+          finalOptions.modules =
+            (baseOptions.modules || []).concat(options.modules)
+        }
+        // merge custom directives
+        if (options.directives) {
+          finalOptions.directives = extend(
+            Object.create(baseOptions.directives),
+            options.directives
+          )
+        }
+        // copy other options
+        for (const key in options) {
+          if (key !== 'modules' && key !== 'directives') {
+            finalOptions[key] = options[key]
+          }
+        }
+      }
+//最后执行baseCompile函数  第 1 步：
+      const compiled = baseCompile(template, finalOptions)
+      if (process.env.NODE_ENV !== 'production') {
+        errors.push.apply(errors, detectErrors(compiled.ast))
+      }
+      compiled.errors = errors
+      compiled.tips = tips
+      return compiled
+    }
+
+    return {
+      compile,
+      compileToFunctions: createCompileToFunctionFn(compile)
+    }
+  }
+}
+```
+
+baseCompile
+
+```javascript
+export const createCompiler = createCompilerCreator(function baseCompile (
+  template: string,
+   //这里的options就是上面的finalOptions,也就是baseOptions
+  options: CompilerOptions
+): CompiledResult {
+  //第 2 步 ：ast解析:abstract syntax tree，是将template解析成一颗树状结构。这个树就是所谓的virtual dom,每个节点被命名为ASTElement，借助flow,还是很容易知道这个element具体有些什么的。
+  const ast = parse(template.trim(), options)
+//第 3 步 ：优化
+  optimize(ast, options)
+//第 4 步 ：拼接render函数字符串
+  const code = generate(ast, options)
+  return {
+    ast,
+    render: code.render,
+    staticRenderFns: code.staticRenderFns
+  }
+})
+```
+
+#####2.10.2 当把Vue实例对象和DOM节点关联起来之后，也就是说render函数拼接完毕之后，并且给到vm实例对象的vm.$options.render，接下来就执行真正的
+
+```javascript
+return mount.call(this, el, hydrating)
+```
+
+runtime/index.js
+
+```javascript
+Vue.prototype.$mount = function (
+  el?: string | Element,
+  hydrating?: boolean
+): Component {
+  el = el && inBrowser ? query(el) : undefined
+  return mountComponent(this, el, hydrating)
+}
+```
+
+src/core/instance/ifecycle.js
+
+```javascript
+export function mountComponent (
+  vm: Component,
+  el: ?Element,
+  hydrating?: boolean
+): Component {
+  vm.$el = el
+  //执行定义的生命周期函数 beforeMount
+  callHook(vm, 'beforeMount')
+
+  let updateComponent
+  if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+    updateComponent = () => {
+      const name = vm._name
+      const id = vm._uid
+      const startTag = `vue-perf-start:${id}`
+      const endTag = `vue-perf-end:${id}`
+
+      mark(startTag)
+      const vnode = vm._render()
+      mark(endTag)
+      measure(`vue ${name} render`, startTag, endTag)
+
+      mark(startTag)
+      vm._update(vnode, hydrating)
+      mark(endTag)
+      measure(`vue ${name} patch`, startTag, endTag)
+    }
+  } else {
+    //这里定义了updateComponent函数
+    updateComponent = () => {
+      vm._update(vm._render(), hydrating)
+    }
+  }
+  /* istanbul ignore if */
+  vm._watcher = new Watcher(vm, updateComponent, noop)
+  //给hydrating 赋值为false
+  hydrating = false
+
+  // manually mounted instance, call mounted on self
+  // mounted is called for render-created child components in its inserted hook
+  if (vm.$vnode == null) {
+    vm._isMounted = true
+    callHook(vm, 'mounted')
+  }
+  return vm
+}
+```
+
+* 调用了`beforeMount`钩子函数，
+* 新建了一个`Watcher`对象，绑定在`vm._watcher`上，
+* 之后就是判断如果`vm.$vnode == null`，则设置`vm._isMounted = true`并调用`mounted`钩子函数
+* 最后返回`vm`对象。
+
+在new Watcher的时候会执行Watcher类的构造函数，而该构造函数会执行传入的updateComponent函数；
+
+src/core/observer/watcher.js
+
+```javascript
+constructor (
+    vm: Component,
+    expOrFn: string | Function,
+    cb: Function,
+    options?: Object
+  ) {
+    this.vm = vm
+    vm._watchers.push(this)
+    if (options) {
+      this.deep = !!options.deep
+      this.user = !!options.user
+      this.lazy = !!options.lazy
+      this.sync = !!options.sync
+    } else {
+      this.deep = this.user = this.lazy = this.sync = false
+    }
+    ...
+    this.expression = process.env.NODE_ENV !== 'production'
+      ? expOrFn.toString()
+      : ''
+
+    if (typeof expOrFn === 'function') {
+      this.getter = expOrFn
+    } else {
+      this.getter = parsePath(expOrFn)
+      if (!this.getter) {
+        this.getter = function () {}
+        process.env.NODE_ENV !== 'production' && warn(
+          `Failed watching path: "${expOrFn}" ` +
+          'Watcher only accepts simple dot-delimited paths. ' +
+          'For full control, use a function instead.',
+          vm
+        )
+      }
+    }
+    this.value = this.lazy
+      ? undefined
+      : this.get()
+  }
+
+  get () {
+    pushTarget(this)
+    let value
+    const vm = this.vm
+    if (this.user) {
+      try {
+        value = this.getter.call(vm, vm)
+      } catch (e) {
+        handleError(e, vm, `getter for watcher "${this.expression}"`)
+      }
+    } else {
+      value = this.getter.call(vm, vm)
+    }
+
+    if (this.deep) {
+      traverse(value)
+    }
+    popTarget()
+    this.cleanupDeps()
+    return value
+  }
+```
+
+以下执行的updateComponent函数
+
+```javascript
+updateComponent = () => {
+  vm._update(vm._render(), hydrating)
+}
+```
+
+* 首先执行vm._render()函数
+
+src/core/instance/render.js
+
+```javascript
+Vue.prototype._render = function (): VNode {
+    const vm: Component = this
+  //这里获取到 vm.$options上的render,staticRenderFns，parentNode,这里的render函数就是compileToFunctions中生成的编译render函数
+  /**
+  诺，就是这个
+  render = function () {
+  //这里的with语句使得可以直接通过 _c访问this上的方法 _c;
+	with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(message))])])}
+}
+  **/
+    const {
+      render,
+      staticRenderFns,
+      _parentVnode
+    } = vm.$options
+ 
+ 	...
+    if (staticRenderFns && !vm._staticTrees) {
+      vm._staticTrees = []
+    }
+
+    vm.$vnode = _parentVnode
+    // render self
+    let vnode
+      //这里就执行了那个编译之后的render函数
+    vnode = render.call(vm._renderProxy, vm.$createElement)
+   	...
+
+    if (!(vnode instanceof VNode)) {
+      if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
+        warn(
+          'Multiple root nodes returned from render function. Render function ' +
+          'should return a single root node.',
+          vm
+        )
+      }
+      vnode = createEmptyVNode()
+    }
+    // set parent
+    vnode.parent = _parentVnode
+    return vnode
+  }
+
+```
+
+```javascript
+render = function () {
+  //这里的with语句使得可以直接通过 _c访问this上的方法 _c;这个在 2.5 initRender中给vm添加了_c方法
+	with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(message))])])}
+}
+```
+
+src/core/vdom/create-element.js中_c就是下面这个createElement函数
+
+```javascript
+export function createElement (
+  context: Component,
+  tag: any,
+  data: any,
+  children: any,
+  normalizationType: any,
+  alwaysNormalize: boolean
+): VNode {
+  if (Array.isArray(data) || isPrimitive(data)) {
+    normalizationType = children
+    children = data
+    data = undefined
+  }
+  if (isTrue(alwaysNormalize)) {
+    normalizationType = ALWAYS_NORMALIZE
+  }
+  return _createElement(context, tag, data, children, normalizationType)
+}
+```
+
+所以，从上面可以看出，`render`函数返回的是一个`VNode`对象，也就是我们的虚拟dom对象。它的返回值，将作为`vm._update`的第一个参数。
+
+* 接下来执行vm._update()函数
+
+```javascript
+Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+    const vm: Component = this
+    if (vm._isMounted) {
+      callHook(vm, 'beforeUpdate')
+    }
+    const prevEl = vm.$el
+    const prevVnode = vm._vnode
+    const prevActiveInstance = activeInstance
+    activeInstance = vm
+    vm._vnode = vnode
+    
+    if (!prevVnode) {
+      // initial render
+      vm.$el = vm.__patch__(
+        vm.$el, vnode, hydrating, false /* removeOnly */,
+        vm.$options._parentElm,
+        vm.$options._refElm
+      )
+    } else {
+      vm.$el = vm.__patch__(prevVnode, vnode)
+    }
+    activeInstance = prevActiveInstance
+    // update __vue__ reference
+    if (prevEl) {
+      prevEl.__vue__ = null
+    }
+    if (vm.$el) {
+      vm.$el.__vue__ = vm
+    }
+    // if parent is an HOC, update its $el as well
+    if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
+      vm.$parent.$el = vm.$el
+    }
+  }
+
+```
+
+从`mountComponent`中我们知道创建`Watcher`对象先于`vm._isMounted = true`。所以这里的`vm._isMounted`还是`false`，不会调用`beforeUpdate`钩子函数。
+
+下面会调用`vm.__patch__`，在这一步之前，页面的dom还没有真正渲染。该方法包括真实dom的创建、虚拟dom的diff修改、dom的销毁等，具体细节且等之后满满分析。
+
+至此，一个`Vue`对象的创建到显示到页面上的流程基本介绍完了
+
+
+
+
+
+
+参考：
+
+[Vue中render源码实现](http://blog.cgsdream.org/2016/11/23/vue-source-analysis-3/)
 
 Q:observe观察者如何实现
