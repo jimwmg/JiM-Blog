@@ -8,8 +8,9 @@ categories: vue
 
 ```html
 <div id="app">
-  {{ message }}
+  <p>{{message}}</p>
 </div>
+
 ```
 
 ```javascript
@@ -146,8 +147,8 @@ starts对象中这些属性都是对应new Vue(options)中的对应的属性，�
 
 ```javascript
 export function mergeOptions (
-  parent: Object,
-  child: Object,
+  parent: Object,//Vue.option
+  child: Object,//new Vue(option)中的option
   vm?: Component
 ): Object {
   if (process.env.NODE_ENV !== 'production') {
@@ -157,7 +158,8 @@ export function mergeOptions (
   if (typeof child === 'function') {
     child = child.options
   }
-
+//注意这些操作child(也就是传入 new Vue(option)中的值option)
+  //这里会将  option.props是数组的情况，转化为option.props为一个对象
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
@@ -190,6 +192,47 @@ export function mergeOptions (
 }
 
 ```
+
+```javascript
+function normalizeProps (options: Object, vm: ?Component) {
+  const props = options.props
+  if (!props) return
+  //这里声明一个空对象
+  const res = {}
+  let i, val, name
+  //这里操作这个对象
+  if (Array.isArray(props)) {
+    i = props.length
+    while (i--) {
+      val = props[i]
+      if (typeof val === 'string') {
+        name = camelize(val)
+        res[name] = { type: null }
+      } else if (process.env.NODE_ENV !== 'production') {
+        warn('props must be strings when using array syntax.')
+      }
+    }
+  } else if (isPlainObject(props)) {
+    for (const key in props) {
+      val = props[key]
+      name = camelize(key)
+      res[name] = isPlainObject(val)
+        ? val
+        : { type: val }
+    }
+  } else if (process.env.NODE_ENV !== 'production') {
+    warn(
+      `Invalid value for option "props": expected an Array or an Object, ` +
+      `but got ${toRawType(props)}.`,
+      vm
+    )
+  }
+  //这里传入的options.props最终都会被转化为一个对象；
+  options.props = res
+}
+```
+
+
 
 关于合并策略
 
@@ -608,6 +651,7 @@ Vue.prototype.$mount = function (
   // resolve template/el and convert to render function
   //如果没有render函数，则获取template，template可以是#id、模板字符串、dom元素，
   //如果没有template，则获取el以及其子内容作为模板。
+  //从这里也就可以看到，如果对于一个子组件，传入的option对象一般没有el属性，但是都会有template属性，对于根组件一般有el属性，却没有template属性；
   if (!options.render) {
     let template = options.template
     if (template) {
@@ -699,7 +743,7 @@ var obj = {name:"jhon"}
 //with(instance Object){expression}
 var str = "with(obj){console.log(this,name,'hhh')}"
 var ret = new Function(str);
-console.log(ret());//window. jhon  hhh
+console.log(ret());//window jhon  hhh
 var ret2 = new Function('console.log("sss")');
 ret2();//sss
 //ret2 : function(){console.log("sss")}
@@ -870,6 +914,46 @@ export const createCompiler = createCompilerCreator(function baseCompile (
     staticRenderFns: code.staticRenderFns
   }
 })
+```
+
+最后的ast类似于这样的
+
+```javascript
+{
+  type: 1,
+  tag: 'div',
+  plain: false,
+  parent: undefined,
+  attrs: [{name:'id', value: '"app"'}],
+  attrsList: [{name:'id', value: 'app'}],
+  attrsMap: {id: 'app'},
+  static: false,
+  staticRoot: false,
+  children: [{
+    type: 1,
+    tag: 'p',
+    plain: true,
+    parent: ast,
+    attrs: [],
+    attrsList: [],
+    attrsMap: {},
+    static: false,
+    staticRoot: false,
+    children: [{
+      expression: "_s(message)",
+      text: "{{message}}",
+      type: 2,
+      static: false
+    }]
+  }
+```
+
+最后生成的code.render: const code = generate(ast, options)
+
+```javascript
+render = function () {
+	with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(message))])])}
+}
 ```
 
 #####2.10.2 当把Vue实例对象和DOM节点关联起来之后，也就是说render函数拼接完毕之后，并且给到vm实例对象的vm.$options.render，接下来就执行真正的

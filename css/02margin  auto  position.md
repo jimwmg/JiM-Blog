@@ -10,6 +10,8 @@ layout :
 
 position定位如何在父盒子居中 
 
+因为position默认值是static,所以对于absolute的元素都要先找到其祖先元素中最近的 position 值不为 static 的元素，如果找不到则定位的基准就是body；
+
 一 简单了解position定位取值：
 
 *  position:left right bottom top     length | %

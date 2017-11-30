@@ -576,6 +576,8 @@ performUpdateIfNecessary: function (transaction) {
 //这里可以知道为什么setState可以接受函数，主要就是_processPendingState函数；
     //这里仅仅是将每次setState放入到_pendingStateQueue队列中的值，合并到nextState,并没有真正的更新state的值；真正更新组件的state的值是在下面；
     var nextState = this._processPendingState(nextProps, nextContext);
+    //注意这里！！！注意这里！！！注意这里！！！
+    //这里就是面试的时候经常问的，React性能优化的方案！看，默认shouldUpdate为true;
     var shouldUpdate = true;
 
     if (!this._pendingForceUpdate) {
@@ -590,12 +592,14 @@ performUpdateIfNecessary: function (transaction) {
         }
       } else {
         if (this._compositeType === CompositeTypes.PureClass) {
+          //这里，我们也可以声明组件的时候，以PureClass声明，这个时候会进行props的浅层次的比较
           shouldUpdate = !shallowEqual(prevProps, nextProps) || !shallowEqual(inst.state, nextState);
         }
       }
     }
 
     this._updateBatchNumber = null;
+    //看这个，对于所有的组件，默认shouldUpdate为true,也就是说，如果我们没有在生命周期中定义一个shouldComponentUpdate函数的话，那么该组件在更新渲染的时候就会重新渲染，执行后续的render,DOM Diff等一系列的操作，虽然官方建议我们可以不写这个函数，当然了，除非是确实需要的时候，这个时候如果我们确定某个组件在更新的时候不用去更新，那么就可以调用这个函数返回false,告诉react不要去更新，优化性能
     if (shouldUpdate) {
       this._pendingForceUpdate = false;
       // Will set `this.props`, `this.state` and `this.context`.
