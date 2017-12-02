@@ -9,12 +9,18 @@ categories: vue
 ```html
 <div id="app">
   <p>{{message}}</p>
+  <my-comp parent='parentData' v-bind:msg="message"></my-comp>
 </div>
 
 ```
 
 ```javascript
 console.dir(Vue) ;//我们可以看下Vue构造函数上的静态属性和原型属性都有哪些值，下面会分析这些属性的来源；
+var myComp = Vue.extend({
+  props:['parent','msg'],
+  template:' <div><p>{{parent}}</p><span>{{msg}}</span></div>'
+})
+Vue.component('myComp',myComp)
 var vm = new Vue({
   el: '#app',
   data: {
@@ -55,6 +61,7 @@ export function initMixin (Vue: Class<Component>) {
     vm._isVue = true	//给Vue实例对象添加 _isVue属性
     // merge options
     if (options && options._isComponent) {
+      //如果是子组件，会进入这个分支
       //根据上面的小demo不会进入这个分支
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
@@ -952,8 +959,9 @@ export const createCompiler = createCompilerCreator(function baseCompile (
 
 ```javascript
 render = function () {
-	with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(message))])])}
+	with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(message))]),_c(myComp,{attrs:{"parent":"parentData","msg":message}})])}
 }
+//这个with语句时重点，这里直接使得其函数内可以直接访问Vue实例上声明的所有属性的值，比如这里的message,同样也可以直接将父组件的值传递给子组件，还是比如这个message,需要注意的一点是如果message的值是一个引用类型的值，那么传递给子组件的就是这个引用，此时子组件中如果修改了message,那么父组件也会变化；                                                             
 ```
 
 #####2.10.2 当把Vue实例对象和DOM节点关联起来之后，也就是说render函数拼接完毕之后，并且给到vm实例对象的vm.$options.render，接下来就执行真正的
@@ -1106,7 +1114,7 @@ updateComponent = () => {
 }
 ```
 
-* 首先执行vm._render()函数
+* 首先执行vm._render()函数,生成虚拟vnode对象
 
 src/core/instance/render.js
 
@@ -1153,38 +1161,9 @@ Vue.prototype._render = function (): VNode {
     vnode.parent = _parentVnode
     return vnode
   }
-
+//详细参考《vnode对象是如何生成的？》
 ```
 
-```javascript
-render = function () {
-  //这里的with语句使得可以直接通过 _c访问this上的方法 _c;这个在 2.5 initRender中给vm添加了_c方法
-	with(this){return _c('div',{attrs:{"id":"app"}},[_c('p',[_v(_s(message))])])}
-}
-```
-
-src/core/vdom/create-element.js中_c就是下面这个createElement函数
-
-```javascript
-export function createElement (
-  context: Component,
-  tag: any,
-  data: any,
-  children: any,
-  normalizationType: any,
-  alwaysNormalize: boolean
-): VNode {
-  if (Array.isArray(data) || isPrimitive(data)) {
-    normalizationType = children
-    children = data
-    data = undefined
-  }
-  if (isTrue(alwaysNormalize)) {
-    normalizationType = ALWAYS_NORMALIZE
-  }
-  return _createElement(context, tag, data, children, normalizationType)
-}
-```
 
 所以，从上面可以看出，`render`函数返回的是一个`VNode`对象，也就是我们的虚拟dom对象。它的返回值，将作为`vm._update`的第一个参数。
 
@@ -1225,12 +1204,12 @@ Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
       vm.$parent.$el = vm.$el
     }
   }
-
+//详细参考《VNode对象的真正渲染patch函数》
 ```
 
 从`mountComponent`中我们知道创建`Watcher`对象先于`vm._isMounted = true`。所以这里的`vm._isMounted`还是`false`，不会调用`beforeUpdate`钩子函数。
 
-下面会调用`vm.__patch__`，在这一步之前，页面的dom还没有真正渲染。该方法包括真实dom的创建、虚拟dom的diff修改、dom的销毁等，具体细节且等之后满满分析。
+下面会调用`vm.__patch__`，在这一步之前，页面的dom还没有真正渲染。该方法包括真实dom的创建、虚拟dom的diff修改、dom的销毁等，具体细节且等之后在分析。
 
 至此，一个`Vue`对象的创建到显示到页面上的流程基本介绍完了
 
@@ -1242,5 +1221,7 @@ Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
 参考：
 
 [Vue中render源码实现](http://blog.cgsdream.org/2016/11/23/vue-source-analysis-3/)
+
+[createElement源码解析](http://www.debugrun.com/a/jJYFZMo.html)
 
 Q:observe观察者如何实现

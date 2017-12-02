@@ -111,7 +111,7 @@ function getInternalInstanceReadyForUpdate(publicInstance, callerName) {
   return internalInstance;
 };
 var ReactUpdateQueue = {
-//。。。。省略其他代码
+//。。。。省略其他代码,如果setState传入的callback，则执行到这里
   enqueueCallback: function (publicInstance, callback, callerName) {
     ReactUpdateQueue.validateCallback(callback, callerName);
     var internalInstance = getInternalInstanceReadyForUpdate(publicInstance);
@@ -130,7 +130,7 @@ var ReactUpdateQueue = {
     // componentWillMount during server-side rendering.
     enqueueUpdate(internalInstance);
   },
-
+//如果setState没有传入callback，则执行到这里
   enqueueSetState: function (publicInstance, partialState) {
     var internalInstance = getInternalInstanceReadyForUpdate(publicInstance, 'setState');
     if (!internalInstance) {
@@ -139,6 +139,8 @@ var ReactUpdateQueue = {
     //这里，初始化queue变量，同时初始化 internalInstance._pendingStateQueue = [ ] ;
     //对于 || 的短路运算还是要多梳理下
     //queue数组（模拟队列）中存放着setState放进来的对象；
+    //internalInstance._pendingStateQueue的初始值是 null ;
+    //queue引用internalInstance._pendingStateQueue的地址；
     var queue = internalInstance._pendingStateQueue || (internalInstance._pendingStateQueue = []);
     //这里将partialState放入queue数组中，也就是internalInstance._pendingStateQueue 数组中，此时，每次setState的partialState,都放进了React组件实例对象上的_pendingStateQueue属性中，成为一个数组；
     queue.push(partialState);
@@ -265,11 +267,11 @@ var TransactionImpl = {
     if (this.wrapperInitData) {
       this.wrapperInitData.length = 0;
     } else {
-      this.wrapperInitData = [];
+      this.wrapperInitData = [ ];
     }
     this._isInTransaction = false;
   },
-
+//这些都是TransactionImpl对象的属性
   _isInTransaction: false,
   getTransactionWrappers: null,
   isInTransaction: function () {
@@ -279,6 +281,7 @@ var TransactionImpl = {
     var errorThrown;
     var ret;
     try {
+      //这里标记是在组件更新的事务处理中
       this._isInTransaction = true;
       errorThrown = true;
       //var TRANSACTION_WRAPPERS = [FLUSH_BATCHED_UPDATES, RESET_BATCHED_UPDATES];
@@ -299,9 +302,13 @@ var TransactionImpl = {
           // Since `method` didn't throw, we don't want to silence the exception
           // here.
           //3 执行TRANSACTION_WRAPPERS对象中成员的所有close方法；
+          //主要两个作用，
+          //1 就是将ReactDefaultBatchingStrategy.isBatchingUpdates设置为false;表示组件批量更新完毕
+          //2 就是执行组件的更新；
           this.closeAll(0);
         }
       } finally {
+        //以上组件更新完毕之后，设置处理组件批量更新的_isInTransaction属性为false,表示该批量更新执行完毕
         this._isInTransaction = false;
       }
     }
@@ -508,7 +515,7 @@ performUpdateIfNecessary: function (internalInstance, transaction, updateBatchNu
 
 ReactCompositeComponent.js
 
-顺便提下React声明周期中
+顺便提下React生命周期中
 
 - #### Updating
 

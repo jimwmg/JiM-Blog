@@ -178,6 +178,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         }
         //无论我们传入Vue.component(id,defination)中的defination是一个纯对象or一个函数，都会执行到这里，这里的this指的是Vue构造函数，将我们传递进来的defination给到Vue.options[type]
         //其中type可以是component ,filter directive
+        //当我们全局注册之后，然后注册在Vue.options中的components组件在new Vue(options)的时候，会将Vue.options上的组件给到实例对象的vm.$options.components;
         this.options[type + 's'][id] = definition
         return definition
       }
@@ -245,14 +246,17 @@ export function initAssetRegisters (Vue: GlobalAPI) {
 ```html
 <div id="box">
         <myComp></myComp>
+  		<my-component></my-component>
     </div>
-    <div id='box2'>
-      <!-- 不能使用myComp组件，因为myComp是一个局部组件，它属于#box-->
+    <!--
+	<div id='box2'>
+       不能使用myComp组件，因为myComp是一个局部组件，它属于#box
         <myComp></myComp>
     </div>
+	-->
     <script>
       //声明一个子组件
-        var Aaa = Vue.extend({
+        var myComp = Vue.extend({
             data() {
                 return {
                     msg: '我是标题^^'
@@ -272,7 +276,10 @@ export function initAssetRegisters (Vue: GlobalAPI) {
                 bSign: true
             },
             components:{
-                'myComp':myComp
+                'myComp':myComp,
+              	'my-component': {
+                    template: '<div>children component!</div>'
+                }
             }
         });
       console.log(vm);
