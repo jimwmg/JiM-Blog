@@ -101,8 +101,6 @@ var element = React.createElement(Welcome, { name: 'JiM' });
 ReactDOM.render(element, document.getElementById('root'));
 ```
 
-
-
 ### 3 function  
 
 ```html

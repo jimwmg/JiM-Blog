@@ -96,6 +96,7 @@ componentWillMount() {
   // Do this here so we can setState when a <Redirect> changes the
   // location in componentWillMount. This happens e.g. when doing
   // server rendering using a <StaticRouter>.
+  //这里执行history.listen()方法；传入一个函数；箭头函数的this指的是父级的作用域中的this值；
   this.unlisten = history.listen(() => {
     this.setState({
       match: this.computeMatch(history.location.pathname)

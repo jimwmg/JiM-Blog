@@ -257,6 +257,7 @@ var createBrowserHistory = function createBrowserHistory() {
     };
   };
 //这个函数在Router.js中componentWillMount 注册了setState函数，所以当push函数执行的时候；往上看push的解释；
+  //该函数返回组件卸载的时候，需要执行的动作，包括移除window上的popState和hashChange事件，以及过滤掉注册在listeners数组中的事件；
   var listen = function listen(listener) {
     var unlisten = transitionManager.appendListener(listener);
     checkDOMListeners(1);
@@ -322,5 +323,37 @@ history.pushState. history.go.  history.goBack.  history.goForward. 这些函数
 * React组件更新；
 
 
-
 **其实无论是react-router.  react-redux. 能够使组件更新的根本原因，还是最后出发了setState函数；**
+
+对于react-router，其实是对history原生对象的封装，重新封装了push函数，使得我们在push函数执行的时候，可以触发在Router组件中组件装载之前，执行了history.listener函数，该函数的主要作用就是给listeners数组添加监听函数，每次执行history.push的时候，都会执行listenrs数组中添加的listener,这里的listener就是传入的箭头函数，功能是执行了Router组件的setState函数，从《Router Switch Route源码解析》文章中，可以看出来，Router执行了setState之后，会将当前url地址栏对应的url传递下去，当Route组件匹配到该地址栏的时候，就会渲染该组件，如果匹配不到，Route组件就返回null;
+
+[Router.js](https://github.com/jimwmg/React-/blob/master/react-router/Router.js)
+
+```javascript
+componentWillMount() {
+  const { children, history } = this.props
+
+  invariant(
+    children == null || React.Children.count(children) === 1,
+    'A <Router> may have only one child element'
+  )
+
+  // Do this here so we can setState when a <Redirect> changes the
+  // location in componentWillMount. This happens e.g. when doing
+  // server rendering using a <StaticRouter>.
+  //这里执行history.listen()方法；传入一个函数；箭头函数的this指的是父级的作用域中的this值；
+  this.unlisten = history.listen(() => {
+    this.setState({
+      match: this.computeMatch(history.location.pathname)
+    })
+  })
+}
+```
+
+
+
+更为详细的源码请参阅
+
+[history源码](https://github.com/jimwmg/React-/tree/master/history)
+
+https://github.com/jimwmg/React-/tree/master/history
