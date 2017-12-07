@@ -297,7 +297,7 @@ _source:null
 
 * React中无论是组件还是标签，都必须被正确的闭合 每一个标签或者组件的   /   必不可少 ;
 
-### 3 除了通过children传递data数据，我们其实可以利用props传递组件对象
+### 3 除了通过children传递组件对象，我们其实可以利用props传递组件对象
 
 ```html
  <div id="root"></div>

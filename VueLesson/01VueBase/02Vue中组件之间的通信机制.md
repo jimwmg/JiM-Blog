@@ -1,0 +1,201 @@
+---
+title:  Vue中组件之间的通信机制
+date: 2017-12-05
+categories: vue
+---
+
+### 1 父子组件之间的额通信
+
+**父子组件的之间的额通信在工作中使用的也是特别频繁，接下来简单分析下**
+
+简单注意一点在HTML结构中，属性名要使用 - 连字符的形式，在javascript中需要将驼峰命名的形式转化为驼峰命名的形式
+
+组件定义如下：
+
+```html
+<script>
+    var myComp = Vue.extend({
+        props:['parentIncrease','msg'],
+        template:'<div>{{msg}}<button v-on:click="parentIncrease">子按钮</button></div>'
+    })
+     var vm = new Vue({
+         el:"#dv",
+         data:{
+             total:0,
+             msg:'bindResult'
+         },
+         methods:{
+             increatment:function(){
+                 this.total++;
+             }
+         },
+         components:{'my-comp':myComp}
+     })
+    console.log(vm)
+    </script>
+```
+
+####1.1 父组件简单的向子组件传递一个字符串
+
+```html
+<div id='dv'>
+  <span>{{total}}</span>
+  <div>{{msg}}   <button @click='increatment'>父按钮</button>
+  <my-comp parent-increase='increatment' msg='msg'></my-comp>
+</div>
+```
+
+这个时候去vm实例的对象的	$children上可以看到子组件上msg.  parentIncrease属性值都是对应的这些字符串
+
+如果想传递一个数值,下面这种写法传递给组件my-comp的是一个字符串 '123' 
+
+```html
+<div id='dv'>
+  <span>{{total}}</span>
+  <div>{{msg}}   <button @click='increatment'>父按钮</button>
+  <my-comp parent-increase='increatment' msg='msg' num='123'></my-comp>
+</div>
+```
+
+需要通过v-bind,传递给子组件的才是数值Number类型
+
+```html
+<div id='dv'>
+  <span>{{total}}</span>
+  <div>{{msg}}   <button @click='increatment'>父按钮</button>
+  <my-comp parent-increase='increatment' msg='msg' v-bind:num='123'></my-comp>
+</div>
+```
+
+
+
+####1. 2 父组件向子组件传递父组件中的数据
+
+向子组件传递的时候通过v-bind（简写 ：）传递父组件数据
+
+此时无论点击子按钮还是父按钮，都可以改变父组件中的total数据；这个时候也就实现了子组件向父组件通信的机制；
+
+```html
+<div id='dv'>
+  <span>{{total}}</span>
+  <div>{{msg}}   <button @click='increatment'>父按钮</button>
+  <my-comp :parent-increase='increatment' :msg='msg'></my-comp>
+</div>
+```
+
+####1.3 父组件向子组件传递父组件中的数据
+
+向子组件传递的时候，通过v-on（简写@）向子组件传递数据，v-on向子组件传递数据的时候，其实就是给子组件的 `_events`添加了传递的对象，通过`vm._$children._events`中可以看到传递过去了，所以这个时候可以通过子组件的$emit方法触发传递进来的函数执行；
+
+```html
+    <div id='dv'>
+        <span>{{total}}</span>
+        <div>{{msg}}   <button @click='increatment'>父按钮</button>
+        <my-comp @parent-increase='increatment' :msg='msg'></my-comp>
+    </div>
+
+    <script>
+    var myComp = Vue.extend({
+        props:['parentIncrease','msg'],
+      //增加一个方法
+        methods:{
+            emitIncrease:function(){
+                console.log('触发emit')
+                this.$emit('parent-increase')
+            }
+        },
+        template:'<div>{{msg}}<button v-on:click="emitIncrease">子按钮</button></div>'
+    })
+     var vm = new Vue({
+         el:"#dv",
+         data:{
+             total:0,
+             msg:'bindResult'
+         },
+         methods:{
+             increatment:function(){
+                 this.total++;
+             }
+         },
+         components:{'my-comp':myComp}
+     })
+    
+    </script>
+```
+
+#### 1.4 父子组件之间的通信除了通过事件机制和props传递之外，还可以通过组件实例自身上的 $parent $children等来访问父组件或者子组件，或者在子组件上添加ref属性，然后可以在父组件实例上通过vm.$refs这个对象获取到;
+
+```html
+<div id='dv'>
+  <span>{{total}}</span>
+  <div>{{msg}}<button @click='increatment'>父按钮</button></div>
+  <my-comp @parent-increase='increatment' ref='compChild' :msg.sync='msg'></my-comp>
+</div>
+```
+
+还是上面的例子，父组件实例 vm.$refs.compChild就可以获取到my-comp组件实例对象
+
+### 2 非父子组件之间的通信机制
+
+实现原理就是通过一个空的Vue实例对象作为一个中转站，然后在在这个空的实例对象上绑定事件，注意绑定的事件处理函数要bind其所在的子组件this值；
+
+```html
+<script src="https://unpkg.com/vue"></script>
+<body>
+    <div id='dv'>
+        <comp1></comp1>
+        <comp2></comp2>
+    </div>
+    <script>
+        
+        var eventBus = new Vue({});//声明一个空的Vue实例对象，使用这个空Vue实例对象的事件机制
+        var comp1 = Vue.extend({
+            template:"<div><span>{{oneCount}}</span><button @click='increaseTwo'>按钮1</button></div>",
+            data:function(){
+                return {
+                    oneCount:1
+                }
+            },
+            methods:{
+                increaseTwo:function(){
+                    eventBus.$emit('increaseTwo')
+                }
+            },
+            mounted:function(){
+                eventBus.$on('increaseOne',function(){
+                    this.oneCount++;
+                }.bind(this))
+            }
+
+        })  ;
+        var comp2 = Vue.extend({
+            template:"<div><span>{{twoCount}}</span><button @click='increaseOne'>按钮2</button></div>",
+            data:function(){
+                return {
+                    twoCount:10
+                }
+            },
+            methods:{
+                increaseOne:function(){
+                    eventBus.$emit('increaseOne');
+                }
+            },
+            mounted:function(){
+                eventBus.$on('increaseTwo',function(){
+                    this.twoCount++;
+                }.bind(this))
+            }
+
+        })    ;
+        var vm = new Vue({
+            el:'#dv',
+            components:{
+                'comp1':comp1,
+                'comp2':comp2
+            }
+        })
+        
+    </script>
+</body>
+```
+

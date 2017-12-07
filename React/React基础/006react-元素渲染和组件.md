@@ -447,7 +447,7 @@ You can also return `null` or `false` to indicate that you don't want anything r
 
 The `render()` function should be pure, meaning that it does not modify component state, it returns the same result each time it's invoked, and it does not directly interact with the browser. If you need to interact with the browser, perform your work in `componentDidMount()`or the other lifecycle methods instead. Keeping `render()` pure makes components easier to think about.
 
-需要注意的是:
+需要注意的是:（React进行性能优化的关键点之一）
 
 `render()` will not be invoked if [`shouldComponentUpdate()`](https://facebook.github.io/react/docs/react-component.html#shouldcomponentupdate) returns false.
 

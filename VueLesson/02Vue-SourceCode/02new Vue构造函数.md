@@ -95,7 +95,7 @@ export function initMixin (Vue: Class<Component>) {
     initState(vm)
     initProvide(vm) // resolve provide after data/props
     //这里，在组件创建完毕之后，调用组件生命周期函数 created（如果有的话）
-    callHook(vm, 'created')
+    callHook(vm, 'created') //在这里可以进行后台数据的请求，重写vm对象的data数据等
 
     /* istanbul ignore if */
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -624,7 +624,11 @@ vm.message
 
 2.1——>2.9创建完vm实例对象之后，并且实现了一些数据的双向绑定等操作之后，就要执行将vm实例对象挂载到对应的DOM节点上了；
 
-如果vm实例对象传入的参数中有el属性，那么该属性就可以查找到被挂载的DOM节点，然后往这个节点上挂载组件，执行   $mount   函数
+如果vm实例对象传入的参数中有el属性，那么该属性就可以查找到被挂载的DOM节点，然后往这个节点上挂载组件，执行   $mount   函数，该函数的主要功能就是
+
+* 生成用于返回VNode的render函数
+* 执行Vue.prototype._render()该函数会执行上面生成的render函数，返回VNode对象
+* 执行Vue.prototype.update(VNode)将虚拟Vnode对象挂载到真实的DOM节点上
 
 ```javascript
 if (vm.$options.el) {
@@ -633,6 +637,8 @@ if (vm.$options.el) {
 ```
 
 [platforms/web/entry-runtime-with-compiler.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
+
+这三种渲染模式(el,template,render)最终都是要得到Render函数。只不过用户自定义的Render函数省去了程序分析的过程，等同于处理过的Render函数，而普通的template或者el只是字符串，需要解析成AST，再将AST转化为Render函数。
 
 ```javascript
 //缓存住在 runtime/index.js中定义的  $mount. 函数
@@ -659,7 +665,7 @@ Vue.prototype.$mount = function (
   //如果没有render函数，则获取template，template可以是#id、模板字符串、dom元素，
   //如果没有template，则获取el以及其子内容作为模板。
   //从这里也就可以看到，如果对于一个子组件，传入的option对象一般没有el属性，但是都会有template属性，对于根组件一般有el属性，却没有template属性；
-  if (!options.render) {
+  if (!options.render) {//如果没有写render函数，那么Vue会解析成ast生成render函数；
     let template = options.template
     if (template) {
       //提供了template属性
@@ -1143,7 +1149,7 @@ Vue.prototype._render = function (): VNode {
     vm.$vnode = _parentVnode
     // render self
     let vnode
-      //这里就执行了那个编译之后的render函数
+      //这里就执行了那个编译之后的render函数，如果我们传入的optionh中写入render，那么就不会生成ast解析之后的render函数，而是直接直接我们传入的render函数；注意执行我们传入的render函数的时候，vm.$createElement最后一个参数为true;
     vnode = render.call(vm._renderProxy, vm.$createElement)
    	...
 

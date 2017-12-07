@@ -135,7 +135,7 @@ export function createPatchFunction (backend) {
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue, parentElm, refElm)
     } else {
-      //所以会执行到这里,isRealElement返回值为 true ;但是当组件更新的时候，此时传入的oldVnode不知真实DOM节点
+      //所以会执行到这里,isRealElement返回值为 true ;但是当组件更新的时候，此时传入的oldVnode不是真实DOM节点
       const isRealElement = isDef(oldVnode.nodeType)
       //!isRealElement 为false
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
@@ -521,6 +521,6 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
 * modules数组中platformsModules和baseModules中操作各种节点，操作属性，操作类名等的封装以及指令的封装
 * node-opts中操作元素，注释，文本，以及属性的原生操作；
 
-### 5 参考
+### 参考
 
 [patch源码分析](http://www.debugrun.com/a/jJYFZMo.html)

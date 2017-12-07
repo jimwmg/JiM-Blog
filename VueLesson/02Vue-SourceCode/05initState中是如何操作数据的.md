@@ -87,12 +87,14 @@ instance/state.js中
 主要作用就是将props数据和视图进行双向绑定；
 
 ```javascript
-
 function initProps (vm: Component, propsOptions: Object) {
+  //初始化 vm.$options.propsData
   const propsData = vm.$options.propsData || {}
+  //初始化vm._props 
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
+  //初始化 vm.$options._propKeys
   const keys = vm.$options._propKeys = []
   //对于根组件 isRoot ==> true 
   //对于其他组件 isRoot ==> false
@@ -101,11 +103,12 @@ function initProps (vm: Component, propsOptions: Object) {
   observerState.shouldConvert = isRoot
   //这里propsOptions就是通过 Vue.extend(option)传入的option中的porps,但是是经过normalizeProps处理后的，也就是说如果options.props是数组，会被处理为一个对象；
   for (const key in propsOptions) {
+    //将vm.$options._propKeys 数组中添加key值
     keys.push(key)
     const value = validateProp(key, propsOptions, propsData, vm)
    //.....我简化了代码
       //这里进行数据和视图的双向绑定：后期在详细分析
-      //主要作用就是给 vm._props 通过Object.defineProperty(obj,key,{});
+      //主要作用就是给 vm._props 通过Object.defineProperty(vm._props,key,{});
       defineReactive(props, key, value)
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
@@ -132,6 +135,62 @@ export function proxy (target: Object, sourceKey: string, key: string) {
   }
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
+//observe/index.js
+export function defineReactive (
+  obj: Object,
+  key: string,
+  val: any,
+  customSetter?: ?Function,
+  shallow?: boolean
+) {
+  const dep = new Dep()
+
+  const property = Object.getOwnPropertyDescriptor(obj, key)
+  if (property && property.configurable === false) {
+    return
+  }
+
+  // cater for pre-defined getter/setters
+  const getter = property && property.get
+  const setter = property && property.set
+
+  let childOb = !shallow && observe(val)
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function reactiveGetter () {
+      const value = getter ? getter.call(obj) : val
+      if (Dep.target) {
+        dep.depend()
+        if (childOb) {
+          childOb.dep.depend()
+          if (Array.isArray(value)) {
+            dependArray(value)
+          }
+        }
+      }
+      return value
+    },
+    set: function reactiveSetter (newVal) {
+      const value = getter ? getter.call(obj) : val
+      /* eslint-disable no-self-compare */
+      if (newVal === value || (newVal !== newVal && value !== value)) {
+        return
+      }
+      /* eslint-enable no-self-compare */
+      if (process.env.NODE_ENV !== 'production' && customSetter) {
+        customSetter()
+      }
+      if (setter) {
+        setter.call(obj, newVal)
+      } else {
+        val = newVal
+      }
+      childOb = !shallow && observe(newVal)
+      dep.notify()
+    }
+  })
+}
 ```
 
 #### 2.2 initMethods(vm, opts.methods)
@@ -142,7 +201,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
- //主要作用在这里实现
+ //主要作用在这里实现，给methods中的函数绑定this值为vm实例对象，同时将绑定后的函数给到vm实例对象
     vm[key] = methods[key] == null ? noop : bind(methods[key], vm)
   }
 }

@@ -62,7 +62,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
       throw new Error('Expected the enhancer to be a function.')
     }
 //这里如果存在enhancer函数，则重新执行createStore函数；因为enchancer函数是applyMiddleWare函数的返回值，返回值为一个接受createStore为参数的函数；
-    appliMiddleware源码地址：https://github.com/jimwmg/redux/blob/master/src/applyMiddleware.js
+    //appliMiddleware源码地址：https://github.com/jimwmg/redux/blob/master/src/applyMiddleware.js
     return enhancer(createStore)(reducer, preloadedState)
   }
 

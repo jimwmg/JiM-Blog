@@ -329,7 +329,7 @@ mountComponent: function (transaction, hostParent, hostContainerInfo, context) {
 
 ```
 
-* flag1: 注意这里，这里会真的调用Provider函数，生成 new Provider实例对象
+* flag1: 注意这里，这里会调用Provider函数，生成 new Provider实例对象
 
   var inst = this._constructComponent(doConstruct, publicProps, publicContext, updateQueue);
 

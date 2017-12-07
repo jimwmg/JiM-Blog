@@ -432,7 +432,7 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
   var instance;
 
   if (node === null || node === false) {
-    //situation1:ReactEmptyComponent组件实例
+    //situation1:ReactEmptyComponent组件实例,这个也是在ReactDOM.js中注册的函数；ReactDOMEmptyComponent.js中声明的这个函数；
     instance = ReactEmptyComponent.create(instantiateReactComponent);
   } else if (typeof node === 'object') {
     var element = node;//element是ReactElement对象
@@ -450,7 +450,8 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
 
     // Special case string values
     if (typeof element.type === 'string') {
-      //situation2：浏览器宿主实例，比如div,span等
+      //situation2：浏览器宿主实例，比如div,span等，ReactDOMComponent.js中的ReactDOMComponent函数
+      //这里也是通过注入机制实现的；
       instance = ReactHostComponent.createInternalComponent(element);
     } else if (isInternalComponentType(element.type)) {
       // This is temporarily available for custom components that are not string
@@ -472,6 +473,7 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
   } else if (typeof node === 'string' || typeof node === 'number') {
    // situation5:// 元素是一个string时，对应的比如<span>123</span> 中的123,和situation2是一样的；
     // 本质上它不是一个ReactElement，但为了统一，也按照同样流程处理，称为ReactDOMTextComponent
+    //ReactDOMTextComponent.js中定义了这个函数；
     instance = ReactHostComponent.createInstanceForText(node);
   } else {
     !false ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Encountered invalid React node of type %s', typeof node) : _prodInvariant('131', typeof node) : void 0;
@@ -506,6 +508,8 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
 接下来看下这几种实例的创建源码
 
 situation1:instance = ReactEmptyComponent.create(instantiateReactComponent);
+
+这里是在ReactDOM.js中通过注册进来的函数；
 
 ```javascript
 var emptyComponentFactory;

@@ -165,8 +165,11 @@ function Welcome(props){
 
 而connect函数的作用就是向props组件中添加属性，同时给store注册监听事件，每次dispatch一个action的时候，都会执行setState函数，从而实现UI的同步更新；
 
+Connect高阶组件其实实现的是组件的props侵入；
+
 ```javascript
 export default function connect(mapStateToProps, mapDispatchToProps, mergeProps, options = {}) {
+  //这里就是简单理解：mapStateToProps, mapDispatchToProps, mergeProps, options = {}生成props给到被侵入的组件作为其属性
   //其实下面这些代码在connectAdvanced.js中，并不在connect.js中
   return function wrapWithConnect(WrappedComponent) {
     class Connect extends Component {
@@ -305,7 +308,15 @@ Connect.prototype.render = function render() {
 };
 ```
 
+总结一下Provider的实现原理：（阿里）
 
+#####1 首先，通过React自身可以通过context传递数据的特性，将store通过getChildContext传递给子组件，所有的子组件在通过connect之后，所有的子组件内就可以获取到该store;
+
+#####2 在connect函数中利用闭包的特性mapStateToProps(store.state), mapDispatchToProps(store.dispatch), mergeProps, options = {} 将上述这些函数返回的对象合并成一个props,传入我们实际要被侵入的组件 
+
+#####3 然后就可以在我们的组件上使用store对象上的state和dispatch等方法；
+
+#####4 主要还是利用了闭包和高阶组件入侵props来实现。同时利用了React提供的通过context传递数据的特性；
 
 #### 2.1 看一个组件的声明
 
