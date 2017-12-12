@@ -1,6 +1,6 @@
 ---
 title: opacity和rgba 改变透明度的区别
-date: 2015-10-17 12:36:00
+date: 2016-10-17 12:36:00
 tags: css
 categories:  css html
 comments : true 

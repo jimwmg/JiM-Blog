@@ -130,7 +130,7 @@ export class Observer {
     }
   }
 }
-  //observe用于观察一个对象，返回一个域被观察对象相关的对象
+  //observe用于观察一个对象，返回一个与被观察对象相关的对象
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
     //如果传入observe的不是对象，则直接返回

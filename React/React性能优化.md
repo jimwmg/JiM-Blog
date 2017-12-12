@@ -53,6 +53,8 @@ return <img src={item.src} key={item.id} />
 
 * React官方也有Immutable.js这个辅助库
 
+* 没有state的组件称为无状态的组件，有state的组件称为有状态的组件，可以多些无状态的组件；
+
   ​
 
 

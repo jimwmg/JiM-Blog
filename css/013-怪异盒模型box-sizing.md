@@ -1,6 +1,6 @@
 ---
 title: box-sizing  
-date: 2016-01-18 
+date: 2016-09-18 
 categories: css
 comments : true 
 updated : 

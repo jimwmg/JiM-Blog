@@ -642,7 +642,7 @@ _performComponentUpdate: function (nextElement, nextProps, nextState, nextContex
           return inst.componentWillUpdate(nextProps, nextState, nextContext);
         }, this._debugID, 'componentWillUpdate');
       } else {
-            //注意这里执行生命周期函数 componentWillUpdate
+            //注意这里执行生命周期函数 componentWillUpdate(注意不能在这里执行setState函数，否则会造成死循环；)
         inst.componentWillUpdate(nextProps, nextState, nextContext);
       }
     }
@@ -697,7 +697,7 @@ _updateRenderedComponent: function (transaction, context) {
           ReactInstrumentation.debugTool.onSetChildren(debugID, childDebugIDs);
         }
       }
-
+//这里替换掉第一次渲染的额markup;
       this._replaceNodeWithMarkup(oldHostNode, nextMarkup, prevComponentInstance);
     }
   },
