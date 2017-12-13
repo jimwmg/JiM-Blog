@@ -1,0 +1,17 @@
+/**
+ * 公共样式
+ */
+
+/*去掉layout分隔符*/
+div.dhxlayout_sep_sw_dhx_bdp {
+    width: 0px;
+}
+/* 编辑影像工具条样式 */
+div.dhx_toolbar_dhx_bdp div.dhx_toolbar_btn.dhxtoolbar_btn_over {
+	border-radius: 0;
+	color: #0A71BC;
+}
+div.dhx_toolbar_dhx_bdp div.dhxtoolbar_float_left {
+	font-size: 16px;
+	color: #4b4a4a;
+}

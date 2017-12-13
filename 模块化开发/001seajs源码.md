@@ -203,7 +203,7 @@ function cid() {
   return _cid++
 }
 var events = data.events = {};
-//所有通过define定义的模块都会放在这个数组里面
+//所有通过define定义的模块都会放在这个对象里面，如果加载过一次，则再次加载的时候会直接从缓存中去去结果；
 var cachedMods = seajs.cache = {}
 var anonymousMeta;
 //在全局定义define函数；
@@ -634,7 +634,20 @@ seajs.use = function(ids, callback) {
 Module.use = function (ids, callback, uri) {
   //如果在cachedMods数组中有uri这个模块，就直接返回该模块，如果没有则创建新的模块
   var mod = Module.get(uri, isArray(ids) ? ids : [ids])
+  //mod就是下面这个构造函数new之后的返回值；
+  /*
+ mod = {uri:uri,dependencies:['a.js','b.js','c.js'],deps:{},status:0,_entry:[]}
+  **/
+/*
+function Module(uri, deps) {
+  this.uri = uri
+  this.dependencies = deps || [];//[ids]=>['a.js','b.js','c.js']
+  this.deps = {} // Ref the dependence modules
+  this.status = 0
 
+  this._entry = []
+}
+**/
   mod._entry.push(mod)
   mod.history = {}
   mod.remain = 1
@@ -654,25 +667,193 @@ Module.use = function (ids, callback, uri) {
       //这里apply函数会将exports数组一个一个传给callback
       callback.apply(global, exports)
     }
+/**又对这个对象进行了操作
+ mod = {uri:uri,dependencies:['a.js','b.js','c.js'],deps:{},status:0,_entry:[mod],history:{},remain:1,callback:f }
 
+*/
     delete mod.callback
     delete mod.history
     delete mod.remain
     delete mod._entry
   }
-
+//最后执行这个入口模块的load函数
   mod.load()
 }
 
 ```
 
-##### 3.2.3 接下来重点看下Module.prototype.exec函数的实现
+##### 3.2.3 执行mod.load()函数
+
+```javascript
+// Load module.dependencies and fire onload when all done
+Module.prototype.load = function() {
+  var mod = this;
+  // mod = {uri:uri,dependencies:['a.js','b.js','c.js'],deps:{},status:0,_entry:[mod],history:{},remain:1,callback:f }
+  // If the module is being loaded, just wait it onload call
+  if (mod.status >= STATUS.LOADING) {
+    //第一次执行的时候，很明显 mod.status 的值为 0 
+    return
+  }
+/**以下是模块的状态
+var STATUS = Module.STATUS = {
+  // 1 - The `module.uri` is being fetched
+  FETCHING: 1,
+  // 2 - The meta data has been saved to cachedMods
+  SAVED: 2,
+  // 3 - The `module.dependencies` are being loaded
+  LOADING: 3,
+  // 4 - The module are ready to execute
+  LOADED: 4,
+  // 5 - The module is being executed
+  EXECUTING: 5,
+  // 6 - The `module.exports` is available
+  EXECUTED: 6,
+  // 7 - 404
+  ERROR: 7
+}
+*/
+  mod.status = STATUS.LOADING
+
+  // Emit `load` event for plugins such as combo plugin
+  var uris = mod.resolve();
+  /**
+  // Resolve module.dependencies
+Module.prototype.resolve = function() {
+  var mod = this;
+  //mod = {uri:uri,dependencies:['a.js','b.js','c.js'],deps:{},status:0,_entry:[mod],history:{},remain:1,callback:f }
+  var ids = mod.dependencies
+  var uris = []
+
+  for (var i = 0, len = ids.length; i < len; i++) {
+    uris[i] = Module.resolve(ids[i], mod.uri)
+  }
+  return uris
+}
+  
+ Module.resolve = function(id, refUri) {
+  // Emit `resolve` event for plugins such as text plugin
+  var emitData = { id: id, refUri: refUri }
+  emit("resolve", emitData)
+//这里主要是给每个模块计算一个唯一可识别的路径；
+  return emitData.uri || seajs.resolve(emitData.id, refUri)
+} 
+  */
+  emit("load", uris)
+
+  for (var i = 0, len = uris.length; i < len; i++) {
+//    mod.dependencies : ['a.js','b.js','c.js']
+    
+    //传入Modele.get(uris[i]) 即是['a.js','b.js','c.js']经过seajs处理后的seajs可以识别的模块的路径；
+    //再去看Models.get函数，这个时候就会找到'a.js','b.js','c.js'这些文件生成对应的模块对象；
+    mod.deps[mod.dependencies[i]] = Module.get(uris[i])；
+    //mod = {uri:uri,dependencies:['a.js','b.js','c.js'],deps:{'a.js':modulea,'b.js':moduleb,'c.js':modulec},status:3,_entry:[mod],history:{},remain:1,callback:f }
+  }
+
+  // Pass entry to it's dependencies
+  mod.pass()
+/**主要作用就是给主模块mod添加各个子模块m的uri，给各个子模块的_entry添加为主模块 mod;可以实现彼此相互依赖；
+Module.prototype.pass = function() {
+  var mod = this
+//mod = {uri:uri,dependencies:['a.js','b.js','c.js'],deps:{'a.js':modulea,'b.js':moduleb,'c.js':modulec},status:3,_entry:[mod],history:{},remain:1,callback:f }
+  var len = mod.dependencies.length
+
+  for (var i = 0; i < mod._entry.length; i++) {
+    var entry = mod._entry[i];//mod
+    var count = 0
+    for (var j = 0; j < len; j++) {
+      var m = mod.deps[mod.dependencies[j]]
+      // If the module is unload and unused in the entry, pass entry to it
+      if (m.status < STATUS.LOADED && !entry.history.hasOwnProperty(m.uri)) {
+        entry.history[m.uri] = true
+        count++
+        m._entry.push(entry)
+        if(m.status === STATUS.LOADING) {
+          m.pass()
+        }
+      }
+    }
+    // If has passed the entry to it's dependencies, modify the entry's count and del it in the module
+    if (count > 0) {
+      entry.remain += count - 1
+      mod._entry.shift()
+      i--
+    }
+  }
+}
+
+
+
+*/
+  // If module has entries not be passed, call onload
+  if (mod._entry.length) {
+    mod.onload()
+    return
+  }
+/*
+Module.prototype.onload = function() {
+  var mod = this
+  mod.status = STATUS.LOADED；//4
+
+  // When sometimes cached in IE, exec will occur before onload, make sure len is an number
+  for (var i = 0, len = (mod._entry || []).length; i < len; i++) {
+    var entry = mod._entry[i]
+    //这里就开始执行主模块的callback函数，
+    //mod = {uri:uri,dependencies:['a.js','b.js','c.js'],deps:{'a.js':modulea,'b.js':moduleb,'c.js':modulec},status:4,_entry:[mod],history:{modulea.uri:true,moduleb.uri:true,modulec.uri:true},remain:1,callback:f }
+    if (--entry.remain === 0) {
+      entry.callback()
+    }
+  }
+
+  delete mod._entry
+}
+  mod.callback = function() {
+    var exports = []
+    var uris = mod.resolve()；//这些是子模块的seajs路径；
+    //从前面的解释可以知道，每个模块已经生成了模块对象 ，在cacheMods中已经有了{mod,modulea,moduleb,modulec}这些模块，接下来就是对每个模块执行exec函数；重点去看下exec函数
+//这里给exports数组赋值为从cachedMods数组中每个模块执行后的结果
+    for (var i = 0, len = uris.length; i < len; i++) {
+      //每个模块的exec执行的返回值有两种可能
+      //第一，如果define传入的不是一个函数，那么该模块exec的返回值就是传入define的值，可以是对象，也可以是其他数据类型
+      //第二，如果define传入的是一个函数，那么该模块exec的返回值就是传入define函数中给exports添加的对象；
+      exports[i] = cachedMods[uris[i]].exec()
+    }
+
+    if (callback) {
+      //这里apply函数会将exports数组一个一个传给callback
+      callback.apply(global, exports)
+    }
+**/
+  // Begin parallel loading
+  var requestCache = {}
+  var m
+
+  for (i = 0; i < len; i++) {
+    m = cachedMods[uris[i]]
+
+    if (m.status < STATUS.FETCHING) {
+      m.fetch(requestCache)
+    }
+    else if (m.status === STATUS.SAVED) {
+      m.load()
+    }
+  }
+
+  // Send all requests at last to avoid cache bug in IE6-9. Issues#808
+  for (var requestUri in requestCache) {
+    if (requestCache.hasOwnProperty(requestUri)) {
+      requestCache[requestUri]()
+    }
+  }
+}
+```
+
+##### 3.2.4 接下来重点看下Module.prototype.exec函数的实现
 
 ```javascript
 // Execute a module
 Module.prototype.exec = function () {
   var mod = this
-
+//[modulea,moduleb,modulec]
   // When module is executed, DO NOT execute it again. When module
   // is being executed, just return `module.exports` too, for avoiding
   // circularly calling
@@ -722,6 +903,7 @@ Module.prototype.exec = function () {
     factory.call(mod.exports = {}, require, mod.exports, mod) :
     factory
 //如上所示，define函数中的传入的函数没有返回值，所以exports为undefined;此时在将其赋值为mod.exports；
+  //如果define函数中传入一个对象或者其他数据类型，那么该这些数据就是直接的返回值；
   if (exports === undefined) {
     exports = mod.exports
   }
