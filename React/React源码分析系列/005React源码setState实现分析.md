@@ -81,7 +81,7 @@ class Root extends React.Component {
 }
 ```
 
-![componentDidMount中调用setState](../setState.jpg)
+![componentDidMount中调用setState](../img/setState.jpg)
 
 
 

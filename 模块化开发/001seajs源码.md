@@ -713,7 +713,7 @@ var STATUS = Module.STATUS = {
 }
 */
   mod.status = STATUS.LOADING
-
+////得到uri 或者 uri数组  ['http://localhost/test/SEAJS/a.js','http://localhost/test/SEAJS/b.js',http://localhost/test/SEAJS/c.js]
   // Emit `load` event for plugins such as combo plugin
   var uris = mod.resolve();
   /**

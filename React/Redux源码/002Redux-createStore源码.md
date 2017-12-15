@@ -75,9 +75,11 @@ export default function createStore(reducer, preloadedState, enhancer) {
   let currentListeners = []
   let nextListeners = currentListeners
   let isDispatching = false
-
+//确定可否改变 nextListeners;nextListeners和currentListeners指向的是同一块内存地址；
+  //辅助方法ensureCanMutateNextListeners()。这是考虑到，在执行某个监听函数的时候，可能会添加新的监听函数，或者取消某个监听函数。为了让这些改变不影响当前的监听函数列表的执行，因此在改变之前，先拷贝一份副本（即nextListeners），然后对该副本进行操作，从而所有的改变会在下一次dispatch(action)的时候生效。 
   function ensureCanMutateNextListeners() {
     if (nextListeners === currentListeners) {
+      //如果nextListeners和currentListeners指向的是同一块内存地址，
       nextListeners = currentListeners.slice()
     }
   }
@@ -123,14 +125,15 @@ export default function createStore(reducer, preloadedState, enhancer) {
 
     ensureCanMutateNextListeners()
     nextListeners.push(listener)
-
+//每次订阅一个函数都会形成一个闭包，该闭包用来清除订阅的函数；
     return function unsubscribe() {
-      if (!isSubscribed) {
+      if (!isSubscribed) {//store没有订阅函数
         return
       }
 
       isSubscribed = false
-
+//需要再次确认是否可以操作nextListeners,因为如果dispatch过一个action的话，dispatch函数会执行
+      //const listeners = currentListeners = nextListeners
       ensureCanMutateNextListeners()
       const index = nextListeners.indexOf(listener)
       nextListeners.splice(index, 1)

@@ -28,6 +28,7 @@ function combineReducers(reducers) { //传入combineReducers函数的是一个�
   //这个函数负责处理根据不同的action来进行state状态改变
   //每次dispatch不同的action的时候,这个函数会被执行,执行的时候,所有的reducer树上的reducer都会执行,如果action对上了,则会执行响应的操作
   //这里其实就产生了闭包，并且这个闭包将会一直存在;我们读源码的时候，要多从内存的角度去理解；
+  //当store中dispatch(action)的时候，会执行combination(currentState,action)；
   return function combination(state = {}, action) {
     var hasChanged = false
     var nextState = {}
@@ -42,12 +43,25 @@ function combineReducers(reducers) { //传入combineReducers函数的是一个�
       //同时如果这个reducer还是combineReducer的返回值，那么依然会遍历调用，这就是为何可以流通所有reducer的关键，即使是reducer可以有多个组合；
       //每一个reducer必须返回其处理的state值，否则该state将会对应undefined;
       //同时这也是为什么每次dispatch一个action的时候，每一个reducer会得到其对应的state（previousStateForKey）的原因；
-      nextState[key] = nextStateForKey                           // 将子 nextState 挂载到对应的键名
+      nextState[key] = nextStateForKey         // 将子 nextState 挂载到对应的键名
       hasChanged = hasChanged || nextStateForKey !== previousStateForKey
+      //注意一点是这里比较的是nextStateForKey previousStateForKey 对应的是内存地址，一般来说我们在reducer中会Object.assign({},state,newState) 而不是Object.assign(state,newState)的原因
     }
     return hasChanged ? nextState : state
   }
 }
+```
+
+```javascript
+var target = {name:'jhon'};
+var source = {age:12};
+var newTarget= Object.assign({},target,source);
+console.log(target === newTarget);//false
+```
+
+```javascript
+var newTarget= Object.assign(target,source);
+console.log(target === newTarget);//true
 ```
 
 **通过源码我们可以看出,当将一个合并后的reducers函数传入createStore的时候**
@@ -138,3 +152,6 @@ $('#btn').on('click', function() {
 })
 </script>
 ```
+自己随便画了张图
+
+![从一个reducer到combineReducer](../img/reducer.jpg)

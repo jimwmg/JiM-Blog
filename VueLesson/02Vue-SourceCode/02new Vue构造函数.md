@@ -634,6 +634,9 @@ vm.message
 if (vm.$options.el) {
   vm.$mount(vm.$options.el)
 }
+//如果在new Vue(options)中options没有el参数，那么该组件则不会挂载
+//需要手动执行挂载函数
+const vm = new Vue(options}).$mount('#app');//$mount函数返回值依然是new Vue(options)这个实例对象vm
 ```
 
 [platforms/web/entry-runtime-with-compiler.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
@@ -719,7 +722,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
-  return mount.call(this, el, hydrating)
+  return mount.call(this, el, hydrating);//这个函数返回值就是Vue实例；
 }
 ```
 
