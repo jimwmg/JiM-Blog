@@ -32,6 +32,8 @@ console.dir(vm) ;//同时看下输出的 Vue实例对象上的属性都有哪些
 
 github搜VUE可以找到对应的源码
 
+el和template同时存在的时候，template会替换掉el对应的节点；
+
 ### 2 从源码的角度来看各个属性的取值是如何限制的
 
 #### 2.1 el属性

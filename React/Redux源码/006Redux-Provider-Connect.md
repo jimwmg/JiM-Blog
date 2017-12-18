@@ -122,10 +122,6 @@ const App = () => {
 
 此时store是Provider对象的props中的一个属性之一.
 
-=========
-
-after four hours  我有点信邪了  , 毕竟我是才学这个的小白.
-
 `Provider` 内的任何一个组件（比如这里的 `FilterLink`），如果需要使用 `store` 中的数据，就必须是「被 connect 过的」组件——使用 `connect` 方法对「你编写的组件（`Link`）」进行包装后的产物。
 
 ```

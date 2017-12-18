@@ -184,7 +184,7 @@ function doFetch(url,data,type,actionTYPE){
           //传给异步任务的dispatch还是最原始createStore里面定义的dispath;
           return action(dispatch, getState, extraArgument);
         }*/
-    return function(dispatch.getState){
+    return function(dispatch,getState){
         if(type === "POST"){
             return fetch(
             	//请求参数配置

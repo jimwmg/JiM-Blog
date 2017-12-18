@@ -128,7 +128,7 @@ this is the status of Rejected
 
 ```html
 <script>
-  function foo(f1){
+function foo(f1){
   f1()
 }
 new foo(function(){
@@ -250,7 +250,7 @@ new foo(function(){
             console.log('this is the status of Resolved');  
         })
 
-        console.log(ret);//Promise对象
+        console.log(ret);//Promise对象  pendding
         
     </script>
 ```
