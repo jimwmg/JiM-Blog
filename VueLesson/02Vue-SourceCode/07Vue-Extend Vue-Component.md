@@ -291,3 +291,94 @@ export function initAssetRegisters (Vue: GlobalAPI) {
     </script>
 ```
 
+### 3 Vue.filter 的实现
+
+```javascript
+export const ASSET_TYPES = [
+  'component',
+  'directive',
+  'filter'
+]
+export function initAssetRegisters (Vue: GlobalAPI) {
+  /**
+   * Create asset registration methods.
+   */
+  ASSET_TYPES.forEach(type => {
+    Vue[type] = function (
+      id: string,
+      definition: Function | Object
+    ): Function | Object | void {
+      if (!definition) {
+        return this.options[type + 's'][id]
+      } else {
+        /* istanbul ignore if */
+        if (process.env.NODE_ENV !== 'production') {
+          if (type === 'component' && config.isReservedTag(id)) {
+            warn(
+              'Do not use built-in or reserved HTML elements as component ' +
+              'id: ' + id
+            )
+          }
+        }
+        if (type === 'component' && isPlainObject(definition)) {
+          definition.name = definition.name || id
+          definition = this.options._base.extend(definition)
+        }
+        if (type === 'directive' && typeof definition === 'function') {
+          definition = { bind: definition, update: definition }
+        }
+      //this指的是Vue这个构造函数，Vue.filter(id,definition)会执行到这里，上面的if语句都不会进入；
+        this.options[type + 's'][id] = definition
+        return definition
+      }
+    }
+  })
+}
+```
+
+```javascript
+var filters = {
+  filter1:function(){
+    console.log('filters1')
+  },
+  filter2:function(){
+    console.log('filters1')
+  },
+  filter3:function(){
+    console.log('filters1')
+  }
+};
+Object.keys(filters).forEach(k => Vue.filter(k, filters[k]));
+console.dir(Vue);//Vue.options.filters:{filter1,filter2,filter3}
+```
+
+### 4 Vue.use(plugin)
+
+```javascript
+export function initUse (Vue: GlobalAPI) {
+  Vue.use = function (plugin: Function | Object) {
+    const installedPlugins = (this._installedPlugins || (this._installedPlugins = []))
+    if (installedPlugins.indexOf(plugin) > -1) {
+      return this
+    }
+
+    // additional parameters 将arguments对象转化为数组，方便后面apply调用
+    const args = toArray(arguments, 1)
+    args.unshift(this)
+    if (typeof plugin.install === 'function') {
+      //这个apply用的真巧妙，install函数中只接受第一个参数Vue构造函数，apply将args数组拆分开传过去也不会用到；
+      plugin.install.apply(plugin, args)
+    } else if (typeof plugin === 'function') {
+      plugin.apply(null, args)
+    }
+    installedPlugins.push(plugin)
+    return this
+  }
+}
+```
+
+```javascript
+Vue.use(VueRouter);
+console.dir(Vue._installedPlugins);//[VueRouter]
+```
+

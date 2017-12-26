@@ -57,7 +57,7 @@ categories: vue
 </div>
 ```
 
-需要通过v-bind,传递给子组件的才是数值Number类型
+需要通过v-bind,传递给子组件的才是数值Number类型（或者Boolean 类型，对象等 v-bind:bool='true'）
 
 ```html
 <div id='dv'>

@@ -314,17 +314,17 @@ test.call(obj)
 2.5 如果函数体是数组中的元素，那么函数作为数组的元素被调用的时候，指向数组,对于伪数组来书也是指向伪数组
 
 ```javascript
- function fn1 (){
-        console.log("fn1");
-        console.log(this);
-    }
-    function fn2 (){
-        console.log("fn2");
-        console.log(this[2]);
-    }
-    var arr = [fn1,fn2,'things'];
-    arr[0]();//fn1 [function, function, "things"]
-    arr[1]();//fn2 things
+function fn1 (){
+  console.log("fn1");
+  console.log(this);
+}
+function fn2 (){
+  console.log("fn2");
+  console.log(this[2]);
+}
+var arr = [fn1,fn2,'things'];
+arr[0]();//fn1 [function, function, "things"]
+arr[1]();//fn2 things
 ```
 
 ```javascript
@@ -390,6 +390,33 @@ this指向被调用的**直接对象** ，被谁调用指向谁
 </body>
 </html>
 ```
+
+```html
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<input type="button" value="按钮"/>
+<script>
+    document.querySelector("input").onclick = function(){
+        console.log(this.value);//按钮     这个this指向input标签
+      	f();//这个函数执行的时候，this指向window；
+    }
+    function f(){
+      console.log(this);
+    }
+</script>
+</body>
+</html>
+```
+
+总结一下上面的所有情况：
+
+* 函数在执行的时候，this指向调用该函数的对象，比如一个数组，一个对象，window对象，或者HTML元素对象
+* this的值是在函数执行的时候，js引擎确认的，指向该函数外部的环境，比如上一条所说的数组，对象，HTML元素等
 
 2.6 setInterval(fn,time)   setTimeout(fn,time)  中的this指向window;为什么呢？大家还记得 setInterval   setTimeont都是window对象的属性吗？setInterval(fn,time)  等价于  window.setInterval(fn,time)其实是window调用了setInterval方法，所以其指向window ;
 

@@ -363,15 +363,16 @@ init (
   ): ?boolean {
   //对于keep-alive组件，我们暂且不管。如果vnode.componentInstance不存在或已经销毁，则通过createComponentInstanceForVnode方法来创建新的Vue实例。
     if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
-      //这里执行 new Sub(options),所以会接着执行init函数，生成Vue组件实例对象之后
+      //这里执行 new Sub(options),所以会接着执行Vue.prototype._init函数 ==>beforeCreate==> 生成Vue组件实例对象==>created
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance,
         parentElm,
         refElm
       )
-      //在这里执行挂载方法；
+      //在这里执行挂载方法；child就是子组件的vm实例对象
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
+//又会重复执行  ==> 编译该子组件的render函数 ==> beforeMount ==> 执行编译之后的render函数生成vnode对象 ==> createElm(vnode,...) ==> 生成真实的DOM ==> monted 
     } else if (vnode.data.keepAlive) {
       // kept-alive components, treat as a patch
       const mountedNode: any = vnode // work around flow
@@ -520,6 +521,8 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
 
 * modules数组中platformsModules和baseModules中操作各种节点，操作属性，操作类名等的封装以及指令的封装
 * node-opts中操作元素，注释，文本，以及属性的原生操作；
+
+
 
 ### 参考
 

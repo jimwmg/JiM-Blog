@@ -209,7 +209,7 @@ class Animal {
     console.log(this.name + ' makes a noise.');
   }
 }
-class Dog extends Animal{    //extends的作用 是将子类(函数) 的__proto__属性指向父类(函数)，由此可以实现继承父类所有的属性和方法
+class Dog extends Animal{   
   speak1() {
     console.log(this.name + ' barks.');
   }

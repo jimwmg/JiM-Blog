@@ -585,7 +585,7 @@ Ctor: Class<Component> | Function | Object | void,
   // extract props 这里解释一下，在一个组件上的其实如果不写props,那么这些值在子组件中是无法访问的；也就是说如果往子组件中传递值了，那么子组件必须在props中接受一这些值的对应的key值，才可以在子组件中使用，因为每个子组件也都是一个闭合的作用域；
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
-  // functional component
+  // functional component   router-view组件会走这里
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
@@ -621,13 +621,23 @@ Ctor: Class<Component> | Function | Object | void,
     data, undefined, undefined, undefined, context,
     //componentOptions  这里的Ctor就是Vue.extend(option)返回的Sub,也就是子组件的构造函数
     //区别Vue构造函数和Sub构造函数在《Vue常用静态方法Extend-Component》文章中有分析；
-  
+  //componentOptions?: VNodeComponentOptions,vNode构造函数中就是下面这个；
     { Ctor, propsData, listeners, tag, children },
     asyncFactory
   )
   return vnode
 }
 ```
+
+首先要注意的一点就是对于自定义组件生成vnode的处理有两种常用的情况，一种是函数式组件，一种不是
+
+```
+													/ createFunctionalComponent
+createElement==>_createElement ==> createComponent 									==> vnode
+  													\ new VNode(options)
+```
+
+对于函数式组件在《RouterView和RouterLink》源码中分析
 
 这里还有一点比较重要的就是mergeHooks
 

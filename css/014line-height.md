@@ -107,8 +107,6 @@ img { vertical-align: middle; }
 </div>
 ```
 
-
-
 行高（line-height）：包括内容区与以内容区为基础对称拓展的空白区域，我们称之为行高。一般情况下，也可以认为是相邻文本行基线间的距离。
 
 #### 3.4 行内框（inline boxes）

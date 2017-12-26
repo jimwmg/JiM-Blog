@@ -198,7 +198,12 @@ undefined //注意这个undefined是如何来的，
 
 **从handleResolved源码中可以看到，如果某个promise中注册了onRejected函数，那么该函数的返回值ret传递给下一个promise对象进行resolve(deferred.promise, ret)，**
 
-因为捕获错误的函数，没有函数值，而函数返回值是undefined,所以会将undefined给到resolve(deferred.promise, ret)中的ret,下一个promise对象将会被resolve,同时执行该promise对象上的通过then注册的onFulfilled函数
+因为捕获错误的函数，没有函数值，而函数返回值是undefined,所以会将undefined给到resolve(deferred.promise, ret)中的ret,下一个promise对象将会被resolve,同时执行该promise对象上的通过then注册的onFulfilled函数;
+
+**所以在用promise的时候，**
+
+* **一般都是建议在then中只注册一个onFulfilled函数，最后进行catch注册一个捕获错误的函数，防止中途某个promise错误处理之后，后面的promise也将会继续resolve；这样如果中途某个promise被reject,那么后面的promise依然会接着resolve;**；
+* **当然，如果想在中途某个promise被reject之后，还想执行该promise被resolve的异步请求，可以直接在该promise的onFulfilled和onRejected中都返回一个异步请求的promise**
 
 ```javascript
 var promise = runAsync();

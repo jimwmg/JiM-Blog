@@ -39,6 +39,19 @@ github搜VUE可以找到对应的源码
 
 ### 2 接下来看下new Vue(option)的时候，Vue内部是如何运作的
 
+```javascript
+function Vue (options) {
+  if (process.env.NODE_ENV !== 'production' &&
+    !(this instanceof Vue)
+  ) {
+    warn('Vue is a constructor and should be called with the `new` keyword')
+  }
+  this._init(options) ;
+}
+```
+
+执行到这里的  _init. 函数；
+
 [instance/init.js]
 
 ```javascript
@@ -66,13 +79,14 @@ export function initMixin (Vue: Class<Component>) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
+      //这里并不会将Vue.options上的属性给到vm.options
       initInternalComponent(vm, options)
     } else {
       //进入这个分支
       //2.1
       vm.$options = mergeOptions(
-        resolveConstructorOptions(vm.constructor),
-        options || {},
+        resolveConstructorOptions(vm.constructor),//Vue.options
+        options || {},//new Vue(options)中的options
         vm
       )
     }
@@ -147,7 +161,11 @@ Vue.options = {
 在util/options.js中,下面是mergeOptions函数，同时这个文件中声明了starts对象，该对象中包括
 
 ```javascript
-starts.data  starts.watch. starts.props. starts.methods  starts.computed. starts.provide. starts.components. starts.filters.  starts.directives 
+starts.data  starts.watch. starts.props. starts.methods  starts.computed. starts.provide. starts.components. starts.filters.  starts.directives starts.beforeCreate 
+//以及生命周期的合并策略
+LIFECYCLE_HOOKS.forEach(hook => {
+  strats[hook] = mergeHook
+})
 ```
 
 starts对象中这些属性都是对应new Vue(options)中的对应的属性，比如data,methods,computed等如何进行合并的函数
@@ -382,6 +400,30 @@ function mergeData (to: Object, from: ?Object): Object {
 
 ```
 
+#####starts.beforeCreate. starts.created. starts.beforeMount.  starts.mounted. starts.beforeUpdate. starts.updated. starts.beforeDestroy等
+
+```javascript
+//以及生命周期的合并策略
+LIFECYCLE_HOOKS.forEach(hook => {
+  strats[hook] = mergeHook
+})
+```
+
+```javascript
+function mergeHook (
+  parentVal: ?Array<Function>,
+  childVal: ?Function | ?Array<Function>
+): ?Array<Function> {
+  return childVal
+    ? parentVal
+      ? parentVal.concat(childVal)
+      : Array.isArray(childVal)
+        ? childVal
+        : [childVal]
+    : parentVal
+}
+```
+
 最后返回的vm.$option 的值如下
 
 ```javascript
@@ -400,6 +442,8 @@ vm.$option = {
   el: '#app',
   data: function mergedInstanceDataFn(){},
   computed:{reverseMessage:f}
+  //生命周期相关的是一个数组
+  beforeCreate:[f1,f2,f3]
 }
 
 ```
@@ -668,7 +712,7 @@ Vue.prototype.$mount = function (
   //如果没有render函数，则获取template，template可以是#id、模板字符串、dom元素，
   //如果没有template，则获取el以及其子内容作为模板。
   //从这里也就可以看到，如果对于一个子组件，传入的option对象一般没有el属性，但是都会有template属性，对于根组件一般有el属性，却没有template属性；
-  if (!options.render) {//如果没有写render函数，那么Vue会解析成ast生成render函数；
+  if (!options.render) {//如果没有写render函数，那么Vue会解析成ast生成render函数；如果有template,Vue会去解析template,如果没有template,Vue会去解析el.outerHTML
     let template = options.template
     if (template) {
       //提供了template属性
@@ -1036,6 +1080,7 @@ export function mountComponent (
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
     vm._isMounted = true
+    //此时mounted函数可以操作DOM，因为真实DOM已经挂载完成；
     callHook(vm, 'mounted')
   }
   return vm
@@ -1222,7 +1267,9 @@ Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
 
 至此，一个`Vue`对象的创建到显示到页面上的流程基本介绍完了
 
+###  不正规的图片
 
+![整体流程](../img/newVue.JPG)
 
 
 

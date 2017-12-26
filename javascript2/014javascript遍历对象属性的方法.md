@@ -33,6 +33,11 @@ Object.defineProperty(person,'gender',{value:'male',enumerable:true});
 Object.defineProperty(person,'weight',{value:'200kg',enumerable:false});
 ```
 
+```javascript
+Object.defineProperty(obj, prop, descriptor)
+descriptor的默认值:{configurable:false,enumerable:false,value:undefined,writable:false,get:undefined,set:undefined}
+```
+
 ### 3 遍历自身属性
 
 * 自身属性--可枚举属性

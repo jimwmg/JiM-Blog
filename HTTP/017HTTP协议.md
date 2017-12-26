@@ -86,8 +86,7 @@ XMLHttpRequest 对象提供了对 HTTP 协议的完全的访问，包括做出 P
 * origion : 其具体流程是，当一个链接或者XMLHttpRequest去请求跨域操作，浏览器事实上的确向目标服务器发起了连接请求，并且携带这origin。 
   当服务器返回时，浏览器将检查response中是否包含Access-Control-Allow-Origin字段，当缺少这个字段时，浏览器将abort，abort的意思是不显示，不产生事件，就好像没有请求过，甚至在network区域里面都看不到。 
   当存在这个header时，浏览器将检查当前请求所在域是否在这个access-control-allow-origin所允许的域内，如果是，继续下去，如果不存在，abort！
-* if-None-Match： 参数为服务器先前发送的Etag，与服务器回应的Etag比较判断是否改变；
-* ​
+* if-None-Match： 参数为服务器先前发送的Etag，与服务器回应的Etag比较判断是否改变；​
 
 [HTTP1](http://www.jianshu.com/p/80e25cb1d81a)
 

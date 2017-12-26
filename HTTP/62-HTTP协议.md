@@ -49,8 +49,6 @@ Accept：*/* 接受的文档MIME类型
 
 ```
 
-
-
 User-Agent：很重要
 
 Referer：从哪个URL跳转过来的

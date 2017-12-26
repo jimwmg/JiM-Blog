@@ -151,6 +151,14 @@ function handle(self, deferred) {
 }
 ```
 
+同理，Promsie.prototype.catch
+
+```javascript
+Promise.prototype['catch'] = function (onRejected) {
+  return this.then(null, onRejected);
+};
+```
+
 此时再来看下p这个promise实例的属性值
 
 ```javascript
@@ -241,11 +249,14 @@ p =>{
 
 ####2.4  finale(self);//最后处理这个promise对象 
 
+这里可以看到，当处理最后一个promsie的时候，最后一个promsie对象由于没有then注册函数，所以该promise对象_deferredState值为0，处理它的时候，不会有任何操作
+
 ```javascript
 function finale(self) {
   //进入这个if语句
   if (self._deferredState === 1) {
     handle(self, self._deferreds);
+    //每处理一个promise实例对象，该对象上的包含 onFulfilled  onRejected res的deferreds数组都会置空；
     self._deferreds = null;
   }
   if (self._deferredState === 2) {
