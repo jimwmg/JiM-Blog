@@ -83,8 +83,8 @@ const store = createStore(reducers)
 
 ```
            counterReducer(counter, action) -------------------- counter
-                              ↗                                                           ↘
-rootReducer(state, action) —→∑  ↗ optTimeReducer(optTime, action) ------ optTime ↘      nextState
+                              ↗                                                        ↘
+rootReducer(state, action) —→∑  ↗ optTimeReducer(optTime, action) --- optTime ↘   nextState
                               ↘—→∑                                                 todo  ↗
                                    ↘ todoListReducer(todoList,action) ----- todoList ↗
 ```

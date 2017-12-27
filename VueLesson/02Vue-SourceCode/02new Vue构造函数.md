@@ -766,6 +766,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  //如果有render函数，那么直接执行mount函数
   return mount.call(this, el, hydrating);//这个函数返回值就是Vue实例；
 }
 ```
@@ -1072,7 +1073,7 @@ export function mountComponent (
     }
   }
   /* istanbul ignore if */
-  vm._watcher = new Watcher(vm, updateComponent, noop)
+  vm._watcher = new Watcher(vm, updateComponent, noop) //会执行updateComponent，进而调用__patch__进行vnode到DOM的渲染
   //给hydrating 赋值为false
   hydrating = false
 
@@ -1091,6 +1092,8 @@ export function mountComponent (
 * 新建了一个`Watcher`对象，绑定在`vm._watcher`上，
 * 之后就是判断如果`vm.$vnode == null`，则设置`vm._isMounted = true`并调用`mounted`钩子函数
 * 最后返回`vm`对象。
+
+**至此整体流程基本完毕** 
 
 在new Watcher的时候会执行Watcher类的构造函数，而该构造函数会执行传入的updateComponent函数；
 

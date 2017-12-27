@@ -199,6 +199,17 @@ arr1.forEach(function(item){
 })
 ```
 
+对于数组的遍历函数，它们都是接受一个函数callback作为参数，如果函数内遇到了return语句，那么本次循环所执行的callback结束,进行下一个元素的callback执行
+
+```javascript
+var arr = ['a','b','c','d'];
+arr.forEach((value,index,arr)=>{
+  if(value == 'c') return 
+  console.log(value)
+}) 
+//a. b. d 
+```
+
 5 Array.prototype.every( callback , thisArg  )  数组的every方法向callback回调函数中传递3 个参数，依次是每个数组元素，当前数组元素的索引，当前数组,返回值是布尔类型；当执行某个元素返回值是false的时候，终止every函数的执行，返回false;只有当每个元素执行结果为true，最终才能返回true;
 
 而 Array.prototype.some(callback ,thisArg) 和every基本上一样，只要有一个数组元素执行callback结果是true，那么就返回true，停止当前循环，不再进行后面的循环遍历操作；
@@ -372,3 +383,12 @@ var ret = arr.indexOf(obj)
 console.log(ret)  //0
 ```
 
+总结 ：
+
+不会改变原数组的API
+
+concat  slice
+
+会改变原数组的API
+
+reverse  pop. push  shift unshift  sort splice
