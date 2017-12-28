@@ -65,6 +65,12 @@ componentWillMount() {
 
 这里可以看到，当路由改变（push,go,goback等）的时候，都会调用这里监听的函数，Router组件会执行setState,那么就相当于整个应用都会重新render;
 
+对比Router和Redux
+
+* Redux ==> store ==> 订阅者模式给**每一个**（所有组件）组件订阅 setState函数 ==> dispatch更新state ==> 执行所有注册的listerer ==> 所有被connect过的组件都会执行他们的setState ==> 组件更新
+* Router ==> history ==>订阅者模式给**主组件**（就一个组件）Router订阅setState函数==> push, go,goBack调用主组件中注册的setState函数 ==> 主组件更新 ==> 子组件更新
+* store和history都是利用React传递context的方式将其传递下去，方便所有的子孙组件可以共享这两个对象
+
 ### React性能优化
 
 * 对比Redux和Router的实现：Redux-React其实是将每个组件注册了一个setState函数，dispatch一个action更新state之后，所有的组件都会重新执行`setState`拿到新的state值，给到wrappedComponent组件；而Router只是给Router组件注册了一个setState函数，其作为根组件进行UI的更新
