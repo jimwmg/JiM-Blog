@@ -21,9 +21,11 @@ export default {
 
 ### 2 看下辅助函数是如何使用的
 
-主要是在组件中将store中某个属性，映射给每个组件中应用
+主要是在组件中将store中某个属性，映射给每个组件中应用，下面是某一个Vue组件的部分代码
 
 在不使用辅助函数的时候
+
+count.vue
 
 ```javascript
 export default {
