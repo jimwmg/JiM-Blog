@@ -73,7 +73,7 @@ var createBrowserHistory = function createBrowserHistory() {
     _extends(history, nextState);
 
     history.length = globalHistory.length;
-//这里将会执行listener函数，也就是说会执行setState；这也是为什么UI更新的各奔原因；
+//这里将会执行listener函数，也就是说会执行setState；这也是为什么UI更新的原因；
     transitionManager.notifyListeners(history.location, history.action);
   };
 

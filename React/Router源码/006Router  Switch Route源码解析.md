@@ -149,7 +149,7 @@ var Switch = function (_React$Component) {
       if (!_react2.default.isValidElement(element)) return;
 
       var _element$props = element.props,
-          //这个就是Route  作为Switch组件的Children的时候，Route组件上的path属性；
+          //这个就是Route  作为Switch组件的Children的时候，Route组件上的path,exact,strict,sensitive属性；
           pathProp = _element$props.path,
           exact = _element$props.exact,
           strict = _element$props.strict,

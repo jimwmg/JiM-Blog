@@ -546,7 +546,7 @@ performUpdateIfNecessary: function (transaction) {
   }
 },
 
-  //执行更新React组件的props. state。context函数
+  //执行更新React组件的props. state  context函数
   updateComponent: function (transaction, prevParentElement, nextParentElement, prevUnmaskedContext, nextUnmaskedContext) {
     var inst = this._instance;
     var willReceive = false;

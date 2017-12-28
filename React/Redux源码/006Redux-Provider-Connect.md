@@ -199,7 +199,7 @@ export default function connect(mapStateToProps, mapDispatchToProps, mergeProps,
         render() {
           // 生成包裹组件Connect
           return (
-            //这里的props就是mapStateToProps, mapDispatchToProps, mergeProps融合后的最后的大对象；
+            //这里的props就是mapStateToProps(storeState), mapDispatchToProps, mergeProps融合后的最后的大对象；
             <WrappedComponent {...Props} />
           )
         }
