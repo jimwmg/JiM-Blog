@@ -63,7 +63,7 @@ componentWillMount() {
 }
 ```
 
-这里可以看到，当路由改变（push,go,goback等）的时候，都会调用这里监听的函数，Router组件会执行setState,那么就相当于整个应用都会重新render;
+这里可以看到，当路由改变（push,go,goback等）的时候，都会调用这里监听的函数，Router组件会执行setState,那么就相当于整个应用都会重新render，生成ReactElement对象
 
 对比Router和Redux
 
