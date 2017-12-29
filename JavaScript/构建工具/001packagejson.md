@@ -77,6 +77,16 @@ webpack中经常看到如下配置,webpack  -h 可以查看所有支持的命令
 
 [webpack-CLI](https://doc.webpack-china.org/api/cli/)
 
+```javascript
+"scripts":{
+  //上面的写法是先运行npm run build-js，然后再运行npm run build-css，两个命令中间用&&连接。如果希望两个命令同时平行执行，它们中间可以用&连接。
+  "build": "npm run build-js && npm run build-css",
+    //以下npm run watch 和 nodemon server.js将会同时运行
+  "start": "npm run watch & nodemon server.js",
+
+}
+```
+
 如果你完善了自己的JavaScript库，使之实现了CommonJS的包规范，那么你可以通过NPM来发布自己的包，为NPM上5000+的基础上再加一个模块。
 
 ```

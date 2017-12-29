@@ -73,7 +73,9 @@ npm install react react-dom --save
   "description": "create yourself react",
   "main": "index.js",
   "scripts": {
+    //npm 会自动找到 node_modules/.bin/webpack-dev-server文件执行：node webpack-dev-server
     "dev": "webpack-dev-server --progress --profile --colors --hot --inline --open",
+      //node_modules/.bin/webpack  node webpack命令会找到webpack.config.js进行执行
     "build": "webpack --progress --profile --colors",
     "watch":"webpack --watch"
   },
