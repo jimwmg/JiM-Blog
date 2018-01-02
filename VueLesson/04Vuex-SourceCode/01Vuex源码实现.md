@@ -155,6 +155,7 @@ export default function (Vue) {
     } else if (options.parent && options.parent.$store) {
       this.$store = options.parent.$store
     }
+    //相当于所有的组件上都可以访问到通过$store这个store实例对象
   }
 }
 
@@ -296,15 +297,20 @@ export class Store {
 
 ```javascript
 store:{
+  commit:f,
+  dispatch:f,
+  getters:{...} //这个是__ob__
   committing :false  //标志一个提交状态，作用是保证对 Vuex 中 state 的修改只能在 mutation 的回调函数中，而不能在外部随意修改 state。
-  actions :Object.create(null)//用来存储用户定义的所有的 actions。
+  actions :{type1:[f],type2:[f]}//用来存储用户定义的所有的 actions。
   _actionSubscribers : []//
-  _mutations :{...}//用来存储用户定义所有的 mutatins。
-  _wrappedGetters : {..}//用来存储用户定义的所有 getters 。
+  _mutations :{type1:[f],type2:[f]}//用来存储用户定义所有的 mutatins。
+  _wrappedGetters : {...}//用来存储用户定义的所有 getters 。
   _modules : new ModuleCollection(options)//用来存储所有的运行时的 modules。
-  _modulesNamespaceMap : {..}
+  _modulesNamespaceMap : {...}
   _subscribers : []//用来存储所有对 mutation 变化的订阅者。
   _watcherVM : new Vue()
+  _wrappedGetters:{...} //这个就是拿到getters对象中的每一个getter;
+  state:{...}
   __proto__:commit dispatch subscribe subscribeAction watch .....
 }
 ```

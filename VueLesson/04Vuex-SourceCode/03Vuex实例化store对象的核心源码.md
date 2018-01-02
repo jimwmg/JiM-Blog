@@ -65,7 +65,7 @@ function installModule (store, rootState, path, module, hot) {
     installModule(store, rootState, path.concat(key), child, hot)
   })
 }
-//
+//以上操作之后，store._mutation  store._action  store._wrappedGetters  store.getters上就有了主模块以及所有子模块里面的 getters  mutations  actions  
 function getNestedState (state, path) {
   return path.length
     ? path.reduce((state, key) => state[key], state)
@@ -117,17 +117,75 @@ function makeLocalContext (store, namespace, path) {
         : () => makeLocalGetters(store, namespace)
     },
     state: {
+      //个体local对象注册state属性，local.state可以通过该get函数取到模块的state
       get: () => getNestedState(store.state, path)
     }
   })
 
   return local
 }
+
+function registerMutation (store, type, handler, local) {
+  const entry = store._mutations[type] || (store._mutations[type] = [])
+  entry.push(function wrappedMutationHandler (payload) {
+    //注册在store对象中options中的mutations中的函数接受的参数如下：local.state   payload
+    handler.call(store, local.state, payload)
+  })
+}
+
+function registerAction (store, type, handler, local) {
+  const entry = store._actions[type] || (store._actions[type] = [])
+  entry.push(function wrappedActionHandler (payload, cb) {
+    let res = handler.call(store, {
+      dispatch: local.dispatch,
+      commit: local.commit,
+      getters: local.getters,
+      state: local.state,
+      rootGetters: store.getters,
+      rootState: store.state
+    }, payload, cb)
+    if (!isPromise(res)) {
+      res = Promise.resolve(res)
+    }
+    if (store._devtoolHook) {
+      return res.catch(err => {
+        store._devtoolHook.emit('vuex:error', err)
+        throw err
+      })
+    } else {
+      return res
+    }
+  })
+}
+
+function registerGetter (store, type, rawGetter, local) {
+  // getters只允许存在一个处理函数，若重复需要报错
+  if (store._wrappedGetters[type]) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(`[vuex] duplicate getter key: ${type}`)
+    }
+    return
+  }
+  store._wrappedGetters[type] = function wrappedGetter (store) {
+    //rawGetter就是每一个getter对应的函数，该函数其实是接受四个参数，如下local表示每一个模块的，store表示全局唯一个store
+    return rawGetter(
+      local.state, // local state
+      local.getters, // local getters
+      store.state, // root state
+      store.getters // root getters
+    )
+  }
+}
 ```
+
+**最重要的一点：以上操作之后，`store._mutation  store._action  store._wrappedGetters  store.getters`上就有了主模块以及所有子模块里面的 getters  mutations  actions  ，这里为为什么在任何子组件中可以通过辅助函数，拿到store中不同模块中的getters  mutations  actions埋下了伏笔**
+
+![store上模块的注册](../img/vuexModules.png)
 
 ### 2     resetStoreVM(this, state)
 
 ```javascript
+//const state = this._modules.root.state
 function resetStoreVM (store, state) {
   const oldVm = store._vm // 缓存前vm组件
  

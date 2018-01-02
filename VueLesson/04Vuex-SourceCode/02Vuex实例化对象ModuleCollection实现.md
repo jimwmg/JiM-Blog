@@ -24,7 +24,14 @@ const userStore = new Vuex.Store({
     setUserInfo({ commit }, user) {
       commit('setUserInfo', user);
     }
-  }
+  },
+  /**
+  cart 和 products也是类似于这个结构
+  modules: {
+    cart,
+    products
+  },
+  */
 });
 console.log(userStore);//可以输出看下结果
 ```

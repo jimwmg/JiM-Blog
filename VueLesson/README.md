@@ -19,3 +19,12 @@
 * Vuex的插入，Vuex的使用，Vuex.Store的实例生成
 * Vuex实例生成：ModuleCollection installModule resetStoreVM等核心创建store实例的时候实现
 * Vuex对象中的辅助函数 mapGetters. mapActions等的源码实现
+* Vuex.Store生成的实例对象commit(同步)和dispatch(异步)的源码实现与区别
+
+### 对比VueRouter和Vuex
+
+* new VueRouter(options).   new Vuex.Store(options) 中的options都支持route嵌套和module嵌套
+* route的嵌套，无论主路由还是子路由，都映射到了matcher对象上
+* module的嵌套，无论主模块还是子模块，actions getters mutations都映射到了store对象上，所以后面在任何子组件中都可以通过辅助函数得到modules中的getters actions mutations等
+* router-view组件根据matcher匹配到的组件进行渲染对应的组件
+* 辅助函数可以在各个组件中获取到store实例对象上的actions. getters. mutations等；
