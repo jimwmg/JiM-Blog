@@ -382,3 +382,15 @@ Vue.use(VueRouter);
 console.dir(Vue._installedPlugins);//[VueRouter]
 ```
 
+### 5 Vue.mixin()
+
+```javascript
+export function initMixin (Vue: GlobalAPI) {
+  Vue.mixin = function (mixin: Object) {
+    this.options = mergeOptions(this.options, mixin)
+    return this
+  }
+}
+```
+
+使得传入Vue.mixin(Object)中的Object对象融入Vue.options对象；
