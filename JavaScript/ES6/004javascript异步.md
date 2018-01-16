@@ -91,13 +91,32 @@ p.then(function(value) {
 
 二是，函数体内部使用`yield`表达式，定义不同的内部状态（`yield`在英语里的意思就是“产出”），通过return语句定义结束执行。
 
-三是，Generaotr函数的调用方法和普通函数调用方法一样，也是在函数名后面加上一对（），不同的是调用Generator函数之后，该函数并不执行，返回的也不是函数的运行之后的结果，而是返回一个指向内部状态的指针对象，也就是一个遍历器对象，这个遍历器对象代表着Generator函数的内部指针。
+三是，Generaotr函数的调用方法和普通函数调用方法一样，也是在函数名后面加上一对（），**不同的是调用Generator函数之后，该函数并不执行，返回的也不是函数的运行之后的结果，而是返回一个指向内部状态的指针对象，也就是一个遍历器对象，这个遍历器对象代表着Generator函数的内部指针。**
 
 四是，返回的遍历器对象都有一个next方法，必须调用next方法，才能开始执行Generator函数，这种执行有两种情况：1，第一次执行next函数，将从Generator函数头部开始执行 ，2，以后在执行next函数，将从上次停下来的地方开始执行。直到遇到下一个yield或者return，也就是说Generator函数是分段执行的。3，yield指令用来暂停Generotor函数的执行next方法可以恢复Generator函数的执行。4，如果没有return语句，那么将会一直执行Generator函数找到结束
+
+**当然，generator函数也可以直接通过for-of进行遍历**
 
 **每次执行next方法，返回的结果是一个有着value和done属性的一个对象；value属性值是yield指令后面的表达式的值，done属性是一个布尔值，表示是否遍历结束。**
 
 首先需要理解yeild关键字：它的作用是“命令”。和var不同，不是用来声明，但是和return一样，用来告知程序某种状态，return告诉程序要返回什么值（也意味着结束，结束的时候才会返回值嘛），而yield告诉程序当前的状态值，而且你运行到这里给我暂停一下。
+
+```javascript
+function* foo() {
+  yield 1;
+  yield 2;
+  yield 3;
+  yield 4;
+  yield 5;
+  return 6;
+}
+
+for (let v of foo()) {
+  console.log(v);
+}
+// 1 2 3 4 5
+
+```
 
 **yield指令只能用在Generator函数中，用在其他函数中都会报错**
 
@@ -138,15 +157,18 @@ function* demo() {
     function* gene(){
       yield 'hello';
       yield 'world';
-      // return 
+      // return 'returnValue'
     }
+    //即该函数有三个状态：hello，world 和 return 语句（结束执行）,yield和return后面的值或作为value值
   console.log(gene)
   let gen = gene()
   console.log(gen)
   console.log(gen.next())  //{value:'hello',done:false}
   console.log(gen.next())  //{value:'world',done:fale}
-  console.log(gen.next())  //{value:'undefined,done:true}
-  console.log(gen.next())  //{value:'undefined,done:true}
+  console.log(gen.next())  
+    //return没有返回值的时候，{value:undefined,done:true}
+    //return有返回值的时候， //{value:'returnVaule',done:true}
+  console.log(gen.next())  //{value:undefined,done:true}
   </script>
 ```
 
@@ -161,17 +183,18 @@ function foo(a,b){
 }
 function* demo() {
   foo(yield 'a', yield 'b'); // OK
-  let input = yield; // OK
+  let input = yield; // OK yield表达式如果用在另一个表达式之中，必须放在圆括号里面。
 }
 let d = demo()
 console.log(d.next()) //{value:'a',false}
 console.log(d.next()) //{value:'b',false}
+//如果没有以下next函数，那么foo函数也不会执行；
 console.log(d.next()) //{value:'undefined',false}   let input = yield 遇到yield表达式，没有返回值则返回undefined
 console.log(d.next()) //{value:'undefined',true}
 console.log(d.next()) //{value:'undefined',true}
 ```
 
-**next函数的参数：next函数的参数将会作为上一个yield表达式整体的表达式的值，如果没有参数，那么yield表达式的值将是undefined **
+**next函数的参数：next函数的参数将会作为上一个yield表达式整体的表达式的值，如果没有参数，那么yield表达式的值将是undefined ，yeild表达式后面的值可以理解为是一个异步容器内部的标记，代表执行到某一句停止执行，该表达式执行的时候，本身是没有返回值的，或者说返回值是undefined**
 
 ```javascript
 function foo(a,b){
@@ -231,7 +254,7 @@ function* gen(){
 
 ```javascript
 var g = gen();
-var result = g.next();
+var result = g.next();//yield后面的表达式执行的结果会给到next函数执行的返回值{value,done}中的value
 
 result.value.then(function(data){
   return data.json();
@@ -273,7 +296,8 @@ function run(fn) {
   function next(err, data) {
     var result = gen.next(data);
     if (result.done) return;
-    result.value(next);
+    result.value(next);//基于thunk函数
+    // result.value.then(next);//基于promise对象，promise对象resolve之后才会执行next,然后重新回到generator函数；
   }
   next();
 }
@@ -282,6 +306,13 @@ run(gen);
 	有了这个执行器，执行 Generator 函数方便多了。不管有多少个异步操作，直接传入 run 函数即可。当然，前提是每一个异步操作，都要是 Thunk 函数，也就是说，跟在 yield 命令后面的必须是 Thunk 函数。
 	*/
 ```
+
+根据以上总结
+
+* `*` 生成generator函数，该函数内部通过yeild控制该函数内部的执行流程；
+* 先执行generator函数，生成一个控制异步操作的容器g，然后执行next，就会执行generator函数中的代码，next函数的返回值就是yeild表达式的返回值给到value,done表示异步操作的容器是否遍历完毕；
+* 执行的时候遇到yeild,则将函数的控制权交给yeild后面的表达式，并且停止执行generator函数体的代码
+* 只有在此执行g容器的next函数，才可以在此回到generator的函数体去执行；
 
 ### 4.2 async函数
 
@@ -312,12 +343,31 @@ function timeout(ms) {
 async function asyncPrint(value, ms) {
   await timeout(ms); //此时没有return语句，await语句后面的Promise变为reject之后，也会被catch函数捕获加上return，效果是一样的
   //return await timeout(ms)  这两行代码等价
+  //
 }
 
 asyncPrint('hello world', 4000)
 .then((ret)=>{console.log('resolve',ret)})
 .catch((ret)=>{console.log('reject',ret)})
 //reject ddd
+```
+
+```javascript
+
+function foo(){
+  console.log('foo函数执行')
+}
+async function asyncPrint(value, ms) {
+  await foo();  //如果await后面是原始数据类型，那么会直接转化为resolve的Promise对象，但此时必须要有return 才能有返回值被then函数的回调函数调用
+  console.log('回到async');
+  return "resolveit"
+}
+asyncPrint('hello world', 4000)
+  .then((ret) => { console.log('resolve', ret) })
+  .catch((ret) => { console.log('reject', ret) })
+//foo函数执行
+//回到async
+//resolve resolveit 
 ```
 
 ```javascript
@@ -354,15 +404,17 @@ asyncPrint('hello world', 4000)
 
 * async声明的函数返回的Promise对象的状态的变化
   * 从上面的demo可以看出来，如果await返回的promise对象抛出异常或者变成reject状态，那么async函数生成的Promise对象也会直接变成reject对象，然后会执行后面的catch方法
-  * 如果await命令返回的promise对象变成resolve状态，那么async函数会接着执行，直到执行完所有的代码，或者遇到了return语句，此时async函数生成的Promise对象会变成resolve对象，然后会执行后面的then方法。
+  * 如果await命令返回的promise对象变成resolve状态，那么async函数会接着执行，直到执行完所有的代码，或者遇到了return语句，此时async函数生成的Promise对象会变成resolve对象，=然后会执行后面的then方法。
 * await命令，其实就是then方法的语法糖，当async函数执行的时候，如果遇到了await命令，那么将会执行其后面的函数
-  * await命令后面可以跟原始数据类型（此时就和同步代码一样，async函数执行的时候，不会发生延迟等待的情况，会立刻转化为一个resolve的Promise对象
+  * await命令后面可以跟原始数据类型（此时就和同步代码一样，async函数执行的时候，不会发生延迟等待的情况，会立刻转化为一个resolve的Promise对象,所以可以直接执行await后续的代码；（应该是类似于Promise.resolve() ;）
   * await命令后面正常情况下是一个Promise对象，
     * 如果await后面的Promise对象状态变为reject，那么会立刻中断async函数的执行，后面的代码不会执行
     * 如果await后面的Promise对象状态变为resolve，那么会接着执行后面的代码。
     * 执行async函数的时候，如果遇到了await命令，那么函数将会等待其后面的异步执行完毕，再去向下执行
     * await命令只能在async函数中，在其他函数中会报错
 
+
+以上可以参考promise中then注册函数返回一个新的promise的解释；[《实例promise - resolve源码解析》](https://github.com/jimwmg/JiM-Blog/tree/master/JavaScript/ES6)
 
 
 

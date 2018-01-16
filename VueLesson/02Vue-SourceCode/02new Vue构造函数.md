@@ -1081,7 +1081,7 @@ export function mountComponent (
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
     vm._isMounted = true
-    //此时mounted函数可以操作DOM，因为真实DOM已经挂载完成；
+    //此时生命周期mounted函数可以操作DOM，因为真实DOM已经挂载完成；
     callHook(vm, 'mounted')
   }
   return vm
@@ -1225,6 +1225,8 @@ Vue.prototype._render = function (): VNode {
 所以，从上面可以看出，`render`函数返回的是一个`VNode`对象，也就是我们的虚拟dom对象。它的返回值，将作为`vm._update`的第一个参数。
 
 * 接下来执行vm._update()函数
+
+instance/lifecycle.js
 
 ```javascript
 Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {

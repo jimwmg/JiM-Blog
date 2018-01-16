@@ -57,7 +57,7 @@ categories: vue
 </div>
 ```
 
-需要通过v-bind,传递给子组件的才是数值Number类型（或者Boolean 类型，对象等 v-bind:bool='true'）
+**需要通过v-bind,传递给子组件的才是数值Number类型（或者Boolean 类型，对象等 v-bind:bool='true'）**
 
 ```html
 <div id='dv'>
@@ -66,8 +66,6 @@ categories: vue
   <my-comp parent-increase='increatment' msg='msg' v-bind:num='123'></my-comp>
 </div>
 ```
-
-
 
 ####1. 2 父组件向子组件传递父组件中的数据
 

@@ -7,7 +7,8 @@
 - React中context如何传递的源码分析（解释了Provider利用React传递context的思路来传递store的原理）
 - React中的注册机制
 - React中setState之后到底发生了什么
-- …..
+- 父组件setState之后，父组件会执行自己的更新组件生命周期函数,同样其内部所有的子组件也会执行子组件自身的更新组件的生命周期函数 ，包括comonentWillUpdate,render,componentDidUpdate
+- 如果父组件通过shouldComponentUpdate函数返回false,那么父组件以及其所有的子组件都不会执行组件更新的生命周期函数，包括comonentWillUpdate,render,componentDidUpdate
 
 ### Redux源码 -介绍了
 

@@ -1,4 +1,4 @@
-## 主要参考https://github.com/liutao/vue2.0-source
+## [主要参考](https://github.com/liutao/vue2.0-source)
 
 ## 同时有一些自己的理解思路和思考方式
 

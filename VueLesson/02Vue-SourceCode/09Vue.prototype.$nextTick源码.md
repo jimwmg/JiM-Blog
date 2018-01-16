@@ -168,7 +168,5 @@ export function nextTick (cb?: Function, ctx?: Object) {
 </script>
 ```
 
-```javascript
 
-```
 

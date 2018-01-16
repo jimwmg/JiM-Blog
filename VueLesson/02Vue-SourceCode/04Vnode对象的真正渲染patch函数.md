@@ -10,6 +10,7 @@ categories: vue
 Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     if (vm._isMounted) {
+      //这里当组件更新的时候，会执行到这里，首先调用beforeUpdate钩子函数
       callHook(vm, 'beforeUpdate')
     }
     const prevEl = vm.$el
@@ -119,9 +120,10 @@ export function createPatchFunction (backend) {
             }
           }
         }
-    //如果vnode未定义，如果oldVnode定义，那么就销毁这个DOM元素
+    //如果vnode未定义，oldVnode定义，那么就销毁这个DOM元素
       if (isUndef(vnode)) {
         //这个是createPatchFunction中定义的函数；
+        //这个函数在执行的时候，会执行该组件以及其子组件中生命周期
         if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
         return
       }

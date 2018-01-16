@@ -143,7 +143,7 @@ module.exports = {
     },
     output : {
       //打包好的文件存放的路径
-        path : path.resolve(BUILD_PATH),
+        path : path.resolve(BUILD_PATH),//注意这个必须是绝对路径
         filename : 'js/bundle.js'
     },
    resolve: {
@@ -190,7 +190,7 @@ console.log('test')
 
 在reactdemo目录下打开终端执行 webpack命令，webpack会找到webpack.config.js进行打包，此时打开dist目录下会多一个js.bundle.js文件，但是此时还不支持ES6以及JSX的语法，所以还需要进行一些配置。
 
-在reactdemo目录下新建一个文件 .barbelrc,内容如下(webpack在打包的过程中会自动找到该文件)
+在reactdemo目录下新建一个文件 .babelrc,内容如下(webpack在打包的过程中会自动找到该文件)
 
 Babel其实可以完全在webpack.config.js中进行配置
 

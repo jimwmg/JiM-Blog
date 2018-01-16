@@ -176,7 +176,7 @@ export function install (Vue) {
   })
 
   Object.defineProperty(Vue.prototype, '$route', {
-    get () { return this._routerRoot._route }
+    get () { return this._routerRoot._route } //history.current
   })
 //给Vue构造函数注册组件，Vue.options.components上就有了RouterView 和 RouterLink组件
   //这是全局注册组件的方式，所以所有Vue的组件都可以使用通过全局注册的组件；

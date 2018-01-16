@@ -43,7 +43,7 @@ descriptor的默认值:{configurable:false,enumerable:false,value:undefined,writ
 * 自身属性--可枚举属性
 
 ```javascript
-//Object.keys(o) 只能遍历   自身的   可枚举的属性
+//Object.keys(o) 只能遍历   自身的   可枚举的属性；注意对于传入Object.keys(o)中的参数，只要具有Iterator接口即可，也就是说参数可以是字符串（拆分字符串组成的数组），数组（下标组成的数组），对象（key值组成的数组）
 var keys = Object.keys(person);
 console.log(keys)
 ```
