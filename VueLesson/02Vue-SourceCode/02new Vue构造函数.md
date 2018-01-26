@@ -130,6 +130,8 @@ export function initMixin (Vue: Class<Component>) {
 
 #### 2.1 vm.$options 
 
+[Vue官网选项系列取值：new Vue(options)](https://cn.vuejs.org/v2/api/#extends)
+
 ```javascript
 vm.$options = mergeOptions(
   resolveConstructorOptions(vm.constructor),
@@ -194,11 +196,28 @@ export function mergeOptions (
   if (extendsFrom) {
     parent = mergeOptions(parent, extendsFrom, vm)
   }
+  /**
+  var CompA = { ... }
+  // 在没有调用 `Vue.extend` 时候继承 CompA
+  var CompB = {
+    extends: CompA,
+    ...
+  }
+  */
   if (child.mixins) {
     for (let i = 0, l = child.mixins.length; i < l; i++) {
       parent = mergeOptions(parent, child.mixins[i], vm)
     }
   }
+  /**
+  var mixin = {
+    created: function () { console.log(1) }
+  }
+  var vm = new Vue({
+    created: function () { console.log(2) },
+    mixins: [mixin]
+  })
+  */
   //这里声明一个空对象，用于存放最后返回的数据，最后返回的值给到了  vm.$options
   const options = {}
   let key
@@ -211,7 +230,7 @@ export function mergeOptions (
     }
   }
   function mergeField (key) {
-    //这里，如果有starts中对应属性的合并策略，则start == starts[key] 如果没有，则start == defaultStart
+  //这里，如果有starts中对应属性的合并策略，则start == starts[key] 如果没有，则start == defaultStart
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }

@@ -85,6 +85,18 @@ categories: vue
 
 向子组件传递的时候，通过v-on（简写@）向子组件传递数据，v-on向子组件传递数据的时候，其实就是给子组件的 `_events`添加了传递的对象，通过`vm._$children._events`中可以看到传递过去了，所以这个时候可以通过子组件的$emit方法触发传递进来的函数执行；
 
+**同样，$emit可以发出一个广播，即使这个广播没有注册响应的事件，也可以出发，只不过此时不会有其他反应**
+
+在instance/events.js中可以看到，如果触发一个没有注册的事件，那么Vue不会做任何处理，直接返回vm实例对象
+
+```vue
+<!-- 通过 $props 将父组件的 props 一起传给子组件 -->
+<child-component v-bind="$props"></child-component>
+<!-- 绑定一个有属性的对象 -->
+<div v-bind="{ id: someProp, 'other-attr': otherProp }"></div>
+
+```
+
 ```html
     <div id='dv'>
         <span>{{total}}</span>
@@ -132,6 +144,16 @@ categories: vue
 ```
 
 还是上面的例子，父组件实例 vm.$refs.compChild就可以获取到my-comp组件实例对象
+
+```vue
+<my-comp @parent-increase='increatment' @change='$emit(myGroupChange,$event)' ref='compChild' :msg.sync='msg'></my-comp>
+这样在组件上可以绑定两个事件，事件的名字分别是 parent-increase 和 change
+执行this.$emit('parent-increase') 会触发increatment函数;
+执行this.$emit('change') 会触发$emit(myGroupChange,$event)函数;
+这样用于嵌套父子组件传递事件；
+```
+
+
 
 ### 2 非父子组件之间的通信机制
 

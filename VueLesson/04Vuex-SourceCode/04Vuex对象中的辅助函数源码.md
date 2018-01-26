@@ -107,10 +107,17 @@ function normalizeNamespace (fn) {
       namespace += '/'
     }
     //就上面的例子来讲
-    //namespace:'/'  map:[ 'doneTodosCount','anotherGetter'...]
+    //namespace:''  map:[ 'doneTodosCount','anotherGetter'...]
     return fn(namespace, map)
   }
 }
+/**
+不使用 namespaced:true;
+...mapState(['statename1','statename2'])
+使用 namespaced：true
+...mapState('moduleName', ['statename1','statename2']),
+
+*/
 // mapMutations,  mapState,  mapActions,都是类似的实现
 export const mapGetters = normalizeNamespace((namespace, getters) => {
   const res = {}

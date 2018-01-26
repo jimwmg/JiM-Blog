@@ -490,7 +490,7 @@ resolve(self,newValue)    ==>		    <== == == == ==  == ==  ||
 																^
 ==>handleResolved处理then中注册的函数；							  ||
 																^
-==>接着处理下一个promise==>resolve(deferred.promise, ret);    ===> ||
+==>接着处理下一个promise==>resolve(deferred.promise, ret);    ===>||
 ```
 
 整个promise链如下

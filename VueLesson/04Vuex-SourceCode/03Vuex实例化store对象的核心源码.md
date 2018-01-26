@@ -16,7 +16,16 @@ function installModule (store, rootState, path, module, hot) {
   const isRoot = !path.length  //true
   //获取我们传入options中的namespace 获取命名空间
   const namespace = store._modules.getNamespace(path)
-
+	/**
+	getNamespace (path) {
+    	let module = this.root
+    	return path.reduce((namespace, key) => {
+      	module = module.getChild(key)
+      		return namespace + (module.namespaced ? key + '/' : '')
+    	}, '')
+  	}
+  	//这里可以看到如果我们设置了module.namespaced:true,那么它的所有 getter、action 及 mutation 都会自动根据模块注册的路径调整命名。所以在commit的变化如下：commit('mutationName') ==>commit('moduleName/mutationName')
+	**/
   // register in namespace map
   if (module.namespaced) {
     store._modulesNamespaceMap[namespace] = module

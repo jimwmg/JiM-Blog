@@ -154,6 +154,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
       definition: Function | Object
     ): Function | Object | void {
       if (!definition) {
+        //	这里可以通过 Vue.component('my-component')来获取注册的组件
         return this.options[type + 's'][id]
       } else {
         /* istanbul ignore if */
@@ -179,7 +180,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         //无论我们传入Vue.component(id,defination)中的defination是一个纯对象or一个函数，都会执行到这里，这里的this指的是Vue构造函数，将我们传递进来的defination给到Vue.options[type]
         //其中type可以是component ,filter directive
         //当我们全局注册之后，然后注册在Vue.options中的components组件在new Vue(options)的时候，会将Vue.options上的组件给到实例对象的vm.$options.components;
-        this.options[type + 's'][id] = definition
+        this.options[type + 's'][id] = definition //这个this指的是Vue构造函数
         return definition
       }
     }
@@ -309,6 +310,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
       definition: Function | Object
     ): Function | Object | void {
       if (!definition) {
+        //	这里可以通过 Vue.filter('my-filter')来获取注册的过滤器
         return this.options[type + 's'][id]
       } else {
         /* istanbul ignore if */
@@ -394,3 +396,63 @@ export function initMixin (Vue: GlobalAPI) {
 ```
 
 使得传入Vue.mixin(Object)中的Object对象融入Vue.options对象；
+
+### 6 Vue.directive()
+
+```javascript
+export const ASSET_TYPES = [
+  'component',
+  'directive',
+  'filter'
+]
+export function initAssetRegisters (Vue: GlobalAPI) {
+  /**
+   * Create asset registration methods.
+   */
+  ASSET_TYPES.forEach(type => {
+    Vue[type] = function (
+      id: string,
+      definition: Function | Object
+    ): Function | Object | void {
+      if (!definition) {
+        //	这里可以通过 Vue.directive('my-directive')来获取注册的指令
+        return this.options[type + 's'][id]
+      } else {
+        /* istanbul ignore if */
+        if (process.env.NODE_ENV !== 'production') {
+          if (type === 'component' && config.isReservedTag(id)) {
+            warn(
+              'Do not use built-in or reserved HTML elements as component ' +
+              'id: ' + id
+            )
+          }
+        }
+        if (type === 'component' && isPlainObject(definition)) {
+          definition.name = definition.name || id
+          definition = this.options._base.extend(definition)
+        }
+    //如果传给Vue.directive(id,definition) 中的definition是一个函数，则会走这里重新定义definition
+        if (type === 'directive' && typeof definition === 'function') {
+          definition = { bind: definition, update: definition }
+        }
+        //如果传给Vue.direction(id,definition)中的definition是一个对象，则直接走这里
+        this.options[type + 's'][id] = definition
+        return definition
+      }
+    }
+  })
+}
+```
+
+```javascript
+// 注册一个全局自定义指令 `v-focus`
+Vue.directive('focus', {
+  // 当被绑定的元素插入到 DOM 中时……
+  inserted: function (el) {
+    // 聚焦元素
+    el.focus()
+  }
+})
+//Vue.directive(id,definition)的返回值就是处理后的definition;
+```
+

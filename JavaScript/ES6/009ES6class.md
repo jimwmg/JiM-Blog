@@ -221,6 +221,8 @@ console.log(Dog.prototype.__proto__ === Animal.prototype) //true 这个是extend
 //当我们通过new操作赋创建一个实例对象的时候，实例对象的__proto__属性会指向构造函数的prototype属性
 //所以当我们new一个子类 的时候，实例对象dog.__proto__ = Dog.prototype 
 //而在Dog.prototype.__proto__ = Animal.prototype ，所以实现了基于原型的继承；
+//所以可以在子类里面重写继承的属性或者方法
+
 console.log(Dog.__proto__ === Animal);//true  
 //下面有关于new和__proto__的解释；
 var dog = new Dog();
@@ -290,9 +292,8 @@ class Child extends Parent{
     //此处的super虽然代表了父类的构造函数,但是其返回的是子类Child的实例对象,即super内部的this指的是Child类,相当于super( ) ==>  Parent.prototype.constructor.call(this)
   }
 }
+//这个在项目中有使用，要注意这个特性，勿忘记；
 ```
-
-
 
 2.5.2 super有三种作用， **第一是作为构造函数直接调用**，**第二种是在普通方法中指向父类的原型对象prototype**， 第三种是在子类中的静态方法中指向父类(class函数)；super关键字，它指代父类的实例（即父类的this对象）。子类必须在constructor方法中调用super方法，否则新建实例时会报错。这是因为子类没有自己的this对象，而是继承父类的this对象，然后对其进行加工。如果不调用super方法，子类就得不到this对象
 

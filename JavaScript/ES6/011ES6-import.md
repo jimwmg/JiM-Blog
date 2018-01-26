@@ -42,7 +42,7 @@ ES6 模块不是对象，而是通过`export`命令显式指定输出的代码�
 
 主要有export和import两个命令组成;export用于规定模块对外的接口;import用于输入其他模块提供的功能接口
 
-2.1 export
+####2.1 export
 
 profile.js文件
 
@@ -105,7 +105,7 @@ export default {userData : null , msg : "login"}
 
 正是因为`export default`命令其实只是输出一个叫做`default`的变量，所以它后面不能跟变量声明语句。
 
-2.2 import 
+####2.2 import 
 
 import命令接受一堆大括号,用于引出模块中的接口,from后面接的是模块的路径,可以是相对路径,也可以是绝对路径,如果是模块标识,需要进行配置,告诉浏览器引擎如何加载该模块中的接口;
 
@@ -137,3 +137,118 @@ if (x === 1) {
 ```
 
 由于`import`是静态执行，所以不能使用表达式和变量，这些只有在运行时才能得到结果的语法结构。
+
+**运行时加载:import()**
+
+`import`和`export`命令只能在模块的顶层，不能在代码块之中（比如，在`if`代码块之中，或在函数之中）。
+
+这样的设计，固然有利于编译器提高效率，但也导致无法在运行时加载模块。在语法上，条件加载就不可能实现。如果`import`命令要取代 Node 的`require`方法，这就形成了一个障碍。因为`require`是运行时加载模块，`import`命令无法取代`require`的动态加载功能。
+
+```javascript
+const main = document.querySelector('main');
+
+import(`./section-modules/${someVariable}.js`)
+  .then(module => {
+    module.loadPageInto(main);
+  })
+  .catch(err => {
+    main.textContent = err.message;
+  });
+```
+
+### 3 ES6模块和Common.js模块的差异
+
+- CommonJS 模块输出的是一个值的拷贝，ES6 模块输出的是值的引用。
+  - Common值的拷贝包括两种情况，第一基础数据类型，直接拷贝该值，复杂数据类型，拷贝的是地址；
+  - ES6模块输出的值都是引用；
+- CommonJS 模块是运行时加载，ES6 模块是编译时输出接口。
+
+```javascript
+// lib.js
+var counter = 3;
+function incCounter() {
+  counter++;
+}
+module.exports = {
+  counter: counter,
+  incCounter: incCounter,
+};
+
+```
+
+```javascript
+// main.js
+var mod = require('./lib');
+
+console.log(mod.counter);  // 3
+mod.incCounter();
+console.log(mod.counter); // 3
+```
+
+上面代码说明，`lib.js`模块加载以后，它的内部变化就影响不到输出的`mod.counter`了。这是因为`mod.counter`是一个原始类型的值，会被缓存。除非写成一个函数，才能得到内部变动后的值。
+
+```javascript
+// lib.js
+var counter = 3;
+function incCounter() {
+  counter++;
+}
+module.exports = {
+  get counter() {
+    return counter
+  },
+  incCounter: incCounter,
+};
+
+```
+
+当然也可以如下改动
+
+```javascript
+// lib.js
+var counter = {v:3};
+function incCounter() {
+  counter.v++;
+}
+module.exports = {
+  counter: counter,
+  incCounter: incCounter,
+};
+```
+
+```javascript
+// main.js
+var mod = require('./lib');
+
+console.log(mod.counter.v);  // 3
+mod.incCounter();
+console.log(mod.counter.v); // 4
+```
+
+```javascript
+// anotherMain.js
+var mod = require('./lib');
+
+console.log(mod.counter.v);  // 4
+mod.incCounter();
+console.log(mod.counter.v); // 5
+```
+
+**对于ES6模块也是如此，也就是说，只要是加载模块内的引用值，那么，如果第一次加载某个模块的时候，改变了模块的内部导出值，那么如果在在此加载该模块，值是变化了的**
+
+ES6加载的是模块的引用
+
+```javascript
+// lib.js
+export let counter = 3;
+export function incCounter() {
+  counter++;
+}
+
+// main.js
+import { counter, incCounter } from './lib';
+console.log(counter); // 3
+incCounter();
+console.log(counter); // 4
+```
+

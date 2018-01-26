@@ -320,6 +320,8 @@ async函数其实就是Generator，只不过是Generator函数的语法糖，asy
 
 async关键字声明的async函数执行后的返回值是一个Promise对象,async函数也有多种声明方式，[参考](http://es6.ruanyifeng.com/?search=yeild&x=0&y=0#docs/async)
 
+`async`函数返回的 Promise 对象，必须等到内部所有`await`命令后面的 Promise 对象执行完，才会发生状态改变，除非遇到`return`语句或者抛出错误。也就是说，只有`async`函数内部的异步操作执行完，才会执行`then`方法指定的回调函数
+
 ```javascript
 var asyncFun = async function(){
 }
@@ -350,6 +352,21 @@ asyncPrint('hello world', 4000)
 .then((ret)=>{console.log('resolve',ret)})
 .catch((ret)=>{console.log('reject',ret)})
 //reject ddd
+```
+
+```javascript
+async function asyncPrint(value, ms) {
+  var innerret = await timeout(ms); //此时没有return语句，await语句后面的Promise变为reject之后，也会被catch函数捕获加上return，效果是一样的
+  //return await timeout(ms)  这两行代码等价
+  //
+  console.log('innerret',innerret)
+}
+
+asyncPrint('hello world', 1000)
+.then((ret)=>{console.log('resolve',ret)})
+.catch((ret)=>{console.log('reject',ret)})
+//innerret ddd
+//resolve undefined
 ```
 
 ```javascript
@@ -403,8 +420,8 @@ asyncPrint('hello world', 4000)
 ```
 
 * async声明的函数返回的Promise对象的状态的变化
-  * 从上面的demo可以看出来，如果await返回的promise对象抛出异常或者变成reject状态，那么async函数生成的Promise对象也会直接变成reject对象，然后会执行后面的catch方法
-  * 如果await命令返回的promise对象变成resolve状态，那么async函数会接着执行，直到执行完所有的代码，或者遇到了return语句，此时async函数生成的Promise对象会变成resolve对象，=然后会执行后面的then方法。
+  * 从上面的demo可以看出来，如果await返回的promise对象抛出异常或者变成reject状态，那么async函数生成的Promise对象也会直接变成reject状态，然后会执行后面的catch方法
+  * 如果await命令返回的promise对象变成resolve状态，那么async函数会接着执行，直到执行完所有的代码，或者遇到了return语句，此时async函数生成的Promise对象会变成resolve对象，然后会执行后面的then方法。
 * await命令，其实就是then方法的语法糖，当async函数执行的时候，如果遇到了await命令，那么将会执行其后面的函数
   * await命令后面可以跟原始数据类型（此时就和同步代码一样，async函数执行的时候，不会发生延迟等待的情况，会立刻转化为一个resolve的Promise对象,所以可以直接执行await后续的代码；（应该是类似于Promise.resolve() ;）
   * await命令后面正常情况下是一个Promise对象，
