@@ -285,12 +285,12 @@ updateComponent = () => {
 render = function () {
     //这里的with语句使得可以直接通过 _c访问this上的方法 _c;这个在 2.5 initRender中给vm添加了_c方法
 	with(this){return _c('div',{attrs:{"id":"app"}},
-    [
-//注意这里的理解，在这个数组中，数组中的每个元素都是  _c函数的返回值，也就是说数组中的值都是vnode对象
-      _c('p',[_v(_s(message))]),
-      _c(myComp,{attrs:{"parent":"parentData","msg":"message"}})
-    ])}
-}
+      [
+  //注意这里的理解，在这个数组中，数组中的每个元素都是  _c函数的返回值，也就是说数组中的值都是vnode对象
+        _c('p',[_v(_s(message))]),
+        _c(myComp,{attrs:{"parent":"parentData","msg":"message"}})
+      ])}
+	}
 //上面的例子，每个 _c函数返回值都是一个vnode对象；
 ```
 
@@ -373,11 +373,11 @@ const ALWAYS_NORMALIZE = 2
 
 export function createElement (
   context: Component,
-  tag: any,
-  data: any,
-  children: any,
-  normalizationType: any,
-  alwaysNormalize: boolean
+  tag: any,//a
+  data: any,//b
+  children: any,//c
+  normalizationType: any,//d
+  alwaysNormalize: boolean//false 或者 true
 ): VNode {
   //兼容不传data的情况
   if (Array.isArray(data) || isPrimitive(data)) {
@@ -514,7 +514,16 @@ vm.$option.components 中有如下key-value值：
 }
 ```
 
-所以传入createComponent函数的Ctor可能是对象，也可能是函数；
+**所以传入createComponent函数的Ctor可能是对象，也可能是异步组件函数，也可能是组件`<Componnet>`；**
+
+```javascript
+//异步组件函数
+Vue.component(
+  'async-webpack-example',
+  // 该 `import` 函数返回一个 `Promise` 对象。
+  () => import('./my-async-component')
+)
+```
 
 ```javascript
 vnode = createComponent(Ctor, data, context, children, tag)
@@ -551,10 +560,11 @@ Ctor: Class<Component> | Function | Object | void,
     }
     return
   }
-
-  // async component
+//具体查看 《Vue中异步组件的加载源码》
+  //https://github.com/jimwmg/JiM-Blog/tree/master/VueLesson/02Vue-SourceCode
+  // async component  //这个就是异步组件； () => import('./my-async-component')
   let asyncFactory
-  if (isUndef(Ctor.cid)) {
+  if (isUndef(Ctor.cid)) { //很明显这个import没有定义uid这个参数；
     asyncFactory = Ctor
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
     if (Ctor === undefined) {

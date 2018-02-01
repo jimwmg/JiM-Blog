@@ -39,7 +39,7 @@ export default class VueRouter {
   constructor (options: RouterOptions = {}) {
     this.app = null
     this.apps = []
-    this.options = options
+    this.options = options  //这里就是传入 new VueRouter(routes)中的routers,这个是是固定不变的
     this.beforeHooks = []
     this.resolveHooks = []
     this.afterHooks = []
@@ -155,7 +155,7 @@ export function install (Vue) {
     beforeCreate () {
       if (isDef(this.$options.router)) {
         this._routerRoot = this
-        this._router = this.$options.router
+        this._router = this.$options.router  //这个router就是 new VueRouter(routes)的返回值
         this._router.init(this)
         //这里 会启动对页面地址变更的监听，从而在变更时更新 vm 的数据（$route），进而触发视图的更新。
         //这样对 vm._route 的赋值会被 Vue 拦截到，并且触发 Vue 组件的更新渲染流程。
@@ -171,13 +171,14 @@ export function install (Vue) {
   })
   //将_router 和 _route 对象给到Vue.prototype 这样所有的Vue组件都可以访问到路由对象；
 
-  Object.defineProperty(Vue.prototype, '$router', {
+  Object.defineProperty(Vue.prototype, '$router', {  //$router其实就是vueRouter实例对象
     get () { return this._routerRoot._router }
   })
 
   Object.defineProperty(Vue.prototype, '$route', {
     get () { return this._routerRoot._route } //history.current
   })
+  //$router 是不变的，但是 $route是随着地址栏变化而变化的；
 //给Vue构造函数注册组件，Vue.options.components上就有了RouterView 和 RouterLink组件
   //这是全局注册组件的方式，所以所有Vue的组件都可以使用通过全局注册的组件；
   Vue.component('RouterView', View)
@@ -271,11 +272,11 @@ Vue.mixin({
 看下它们的执行
 
 ```javascript
-this._router = this.$options.router
-this._router.init(this)
+this._router = this.$options.router  //vm._router = router
+this._router.init(this) 
 ```
 
-vue-router.src/index.js
+vue-router/src/index.js
 
 ```javascript
 init (app: any /* Vue component instance */) {

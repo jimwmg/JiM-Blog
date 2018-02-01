@@ -4,6 +4,53 @@ date: 2017-12-05
 categories: vue
 ---
 
+**首先要注意的一些细节就是，**
+
+**1 给组件添加props的时候，只能以 -  链接符，然后再组件内部通过驼峰的形式接受**
+
+**2 组件内部接受props的时候，可以通过制定对象的形式对值的类型进行限定**
+
+**3 传递的props，组件内部没有通过props接受，那么对应的props（组件可以接收任意传入的特性）特性都会被添加到组件的根元素上。**
+
+**4 组件内部定义的props,没有传递，可以为其设置默认值**
+
+```javascript
+Vue.component('example', {
+  props: {
+    // 基础类型检测 (`null` 指允许任何类型)
+    propA: Number,
+    // 可能是多种类型
+    propB: [String, Number],
+    // 必传且是字符串
+    propC: {
+      type: String,
+      required: true
+    },
+    // 数值且有默认值
+    propD: {
+      type: Number,
+      default: 100
+    },
+    // 数组/对象的默认值应当由一个工厂函数返回
+    propE: {
+      type: Object,
+      default: function () {
+        return { message: 'hello' }
+      }
+    },
+    // 自定义验证函数
+    propF: {
+      validator: function (value) {
+        return value > 10
+      }
+    }
+  }
+})
+
+```
+
+
+
 ### 1 父子组件之间的额通信
 
 **父子组件的之间的额通信在工作中使用的也是特别频繁，接下来简单分析下**

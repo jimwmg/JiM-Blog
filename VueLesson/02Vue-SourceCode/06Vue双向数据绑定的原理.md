@@ -72,6 +72,61 @@ let data = vm.$options.data
 observe(data, true /* asRootData */);//监听某个属性
 ```
 
+src/core/observe/array.js
+
+```javascript
+/*
+ * not type checking this file because flow doesn't play well with
+ * dynamically accessing methods on Array prototype
+ */
+
+import { def } from '../util/index'
+
+const arrayProto = Array.prototype
+export const arrayMethods = Object.create(arrayProto)
+
+/**
+ * Intercept mutating methods and emit events
+ */
+;[
+  'push',
+  'pop',
+  'shift',
+  'unshift',
+  'splice',
+  'sort',
+  'reverse'
+]
+  .forEach(function (method) {
+  // cache original method
+  const original = arrayProto[method]
+  //这里覆盖掉原来的数组方法；所以说如果对new Vue(options) 中的data:{list:[1,2,3]}中的list,使用push,pop，shift,unshift,splice,sort,reverse这些改变数组本身的方法，结果也是响应式的；
+  //这里也就是解决数组不能通过getter,setter监听删除，增加数组元素同步UI更新的问题；
+  //对于对象而言，增加和删除对象的属性，则需要通过Vue.set. Vue.delete方法来解决这样的问题；
+  def(arrayMethods, method, function mutator (...args) {
+    const result = original.apply(this, args)
+    const ob = this.__ob__
+    let inserted
+    switch (method) {
+      case 'push':
+      case 'unshift':
+        inserted = args
+        break
+        case 'splice':
+        inserted = args.slice(2)
+        break
+    }
+    if (inserted) ob.observeArray(inserted)
+    // notify change
+    ob.dep.notify()
+    return result
+  })
+})
+
+```
+
+
+
 src/core/observe/index.js
 
 ```java
@@ -79,12 +134,39 @@ import Dep from './dep'
 export const observerState = {
   shouldConvert: true
 }
+//引用数组重写方法
+import { arrayMethods } from './array'
 /**
  * Observer class that are attached to each observed
  * object. Once attached, the observer converts target
  * object's property keys into getter/setters that
  * collect dependencies and dispatches updates.
  */
+
+const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+  /**
+ * Augment an target Object or Array by intercepting
+ * the prototype chain using __proto__
+ */
+function protoAugment (target, src: Object, keys: any) {
+  /* eslint-disable no-proto */
+  target.__proto__ = src
+  /* eslint-enable no-proto */
+}
+
+/**
+ * Augment an target Object or Array by defining
+ * hidden properties.
+ */
+/* istanbul ignore next */
+function copyAugment (target: Object, src: Object, keys: Array<string>) {
+  for (let i = 0, l = keys.length; i < l; i++) {
+    const key = keys[i]
+    def(target, key, src[key])
+  }
+}
+
+//对于对象和数组的监听情况，在《Vue双向数据绑定实现原理2》中有案例解释；
 export class Observer {
   value: any;
   dep: Dep;
@@ -97,14 +179,16 @@ export class Observer {
       //给value值定义 __ob__ 属性，表示该对象已经处于被观察的状态
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
+//env.js   export const hasProto = '__proto__' in {}
       const augment = hasProto
         ? protoAugment
         : copyAugment
+       //如果是数组，首先重写数组原型上的这些方法，
       augment(value, arrayMethods, arrayKeys)
-          //如果传入的value是一个数组，则对数组中的每一个元素进行监听
+       //如果传入的value是一个数组，则对数组中的每一个元素进行监听
       this.observeArray(value)
-          //如果传入的value是一个对象，则对对象中的每一个元素进行监听
     } else {
+       //如果传入的value是一个对象，则对对象中的每一个元素进行监听；
       this.walk(value)
     }
   }
@@ -133,7 +217,8 @@ export class Observer {
   //observe用于观察一个对象，返回一个与被观察对象相关的对象
 export function observe (value: any, asRootData: ?boolean): Observer | void {
   if (!isObject(value) || value instanceof VNode) {
-    //如果传入observe的不是对象，则直接返回
+    //如果传入observe的不是对象，则直接返回，不会进行监听，也就是说，如果data:{items:[1,2,3]}
+    //那么 this.items[0] = 1000 ;不会触发更新；
     return
   }
   let ob: Observer | void
@@ -157,6 +242,11 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
   return ob
 }
 //这里主要实现对data中的每个属性，以及data深层次的属性的监听（props computed等的监听也是类似的实现）
+//比如 data:{deepName:{name:'deepJhon'}} 
+//这里会对deepName，name 属性都会进行监听
+//比如 this.deepName 变化会触发视图更新，this.deepName.name的变化也会触发视图的更新；
+//但是对于属性的删除或者增加，Vue是无法感知的，比如通过 delete vm.$data.deepName.name. 执行之后，UI视图是不会发生变化的
+//但是在控制台输出 vm.$data.deepName.name确实是 undefined
 export function defineReactive (obj,key,val) {
   //对于每一个被观察的属性，都有一个dep对象，用来维护Observe和Watcher的关系；
   //对于监听到数据的变化的时候，那么监听到变化之后就是怎么通知订阅者？很简单，维护一个数组，用来收集订阅者，数据变动触发notify，再调用订阅者的update方法；这里的dep就是这样的一个数组；
@@ -170,6 +260,8 @@ export function defineReactive (obj,key,val) {
   const getter = property && property.get
   const setter = property && property.set
 //....
+    //这里对对象的嵌套对象属性进行监听；
+  let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,

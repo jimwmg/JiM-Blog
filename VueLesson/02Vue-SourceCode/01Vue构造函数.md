@@ -50,6 +50,12 @@ export default Vue
 
 ```javascript
 import Vue from 'core/index'
+// install platform specific utils
+Vue.config.mustUseProp = mustUseProp
+Vue.config.isReservedTag = isReservedTag
+Vue.config.isReservedAttr = isReservedAttr
+Vue.config.getTagNamespace = getTagNamespace
+Vue.config.isUnknownElement = isUnknownElement
 //Vue.options.directives.model  Vue.options.directives.model.show
 extend(Vue.options.directives, platformDirectives)
 //Vue.options.components.Transition. Vue.options.components.TransitionGroup
@@ -170,7 +176,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
 
 ```
 
-#### 3[instance/index.js源码地址](https://github.com/jimwmg/vue/blob/dev/src/core/instance/index.js)
+#### 3 [instance/index.js源码地址](https://github.com/jimwmg/vue/blob/dev/src/core/instance/index.js)
 
 ```javascript
 import { initMixin } from './init'
@@ -191,15 +197,15 @@ function Vue (options) {
 //添加Vue的一些静态属性  
 //Vue.prototype._init (也就是上面this._init函数的执行的函数)
 initMixin(Vue)
-//Vue.prototype.$set  Vue.prototype.$del. Vue.prototype.$watch
+//Vue.prototype.$set  Vue.prototype.$del. Vue.prototype.$watch  Vue.prototype.$data  Vue.prototype.$props
 stateMixin(Vue)
 //Vue.prototype.$on  Vue.prototype.$off   Vue.prototype.$once  Vue.prototype.$emit
 eventsMixin(Vue)
 //Vue.prorotype._update  Vue.prototype.$forceUpdate. Vue.prototype.$destory 
 lifecycleMixin(Vue)
-//Vue.prototype._render. Vue.prototype.$nextTick
+//Vue.prototype._render. Vue.prototype.$nextTick 
 renderMixin(Vue)
-
+//  installRenderHelpers(Vue.prototype) _o. _l. _s等
 export default Vue
 ```
 
@@ -258,6 +264,7 @@ Vue.prototype.$forceUpdate
 Vue.prototype.$mount
 Vue.prototype.$set
 Vue.prototype.$watch
+Vue.prototype.$nextTick
 Vue.prototype._init
 Vue.prototype._render
 Vue.prototype._update
@@ -267,5 +274,9 @@ Vue.prototype.$props
 Vue.prototype.$data
 Vue.prototype.$ssrContext
 Vue.prototype.$isServer
+//创建节点属性
+Vue.prototype._o
+Vue.prototype._s
+.....
 ```
 

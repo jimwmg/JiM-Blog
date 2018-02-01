@@ -10,11 +10,13 @@ instance/render.js中
 
 ```javascript
 Vue.prototype.$nextTick = function (fn: Function) {
+  //这里通过组件实例调用nextTick函数的时候，绑定了fn函数执行的this值为组件实例
   return nextTick(fn, this)
 }
 ```
 
 ```javascript
+//定义nextTick存放的函数
 const callbacks = []
 let pending = false
 
@@ -112,12 +114,17 @@ export function nextTick (cb?: Function, ctx?: Object) {
   })
   if (!pending) {
     pending = true
+    //将flushCallbacks函数放入异步队列中，等待执行；
     if (useMacroTask) {
       macroTimerFunc()
     } else {
       microTimerFunc()
     }
   }
+  /**
+macrotasks: script ,setTimeout, setInterval, setImmediate, I/O, UI rendering
+microtasks: process.nextTick, Promise, MutationObserver
+  **/
   // $flow-disable-line
   if (!cb && typeof Promise !== 'undefined') {
     return new Promise(resolve => {
@@ -131,6 +138,13 @@ export function nextTick (cb?: Function, ctx?: Object) {
 ### 2 官网定义：
 
 将回调延迟到下次 DOM 更新循环之后执行。在修改数据之后立即使用它，然后等待 DOM 更新。它跟全局方法 `Vue.nextTick` 一样，不同的是回调的 `this` 自动绑定到调用它的实例上。
+
+总结以上源码：
+
+* 首先定义：callbacks. pending. microTimerFunc.  macroTimerFunc useMacroTask(false)，默认使用microTimerFunc将nextTick中的函数 fn 放入异步队列
+*  在下一次事件循环中，会执行这个fn
+
+[重点参考](https://github.com/jimwmg/JiM-Blog/blob/master/JavaScript/ES6/014V8%E5%BC%95%E6%93%8E%E5%A4%84%E7%90%86%E4%BA%8B%E4%BB%B6%E9%98%9F%E5%88%97%E7%9A%84%E6%9C%BA%E5%88%B6.md)
 
 ### 3 基本使用
 
@@ -168,5 +182,7 @@ export function nextTick (cb?: Function, ctx?: Object) {
 </script>
 ```
 
+### 4 项目中实际运用案例
 
+* ​
 

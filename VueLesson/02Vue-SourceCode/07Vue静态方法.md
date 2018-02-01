@@ -456,3 +456,76 @@ Vue.directive('focus', {
 //Vue.directive(id,definition)的返回值就是处理后的definition;
 ```
 
+### 7 Vue.set( )
+
+[这里解释了Vue.set的存在原因](https://github.com/Ma63d/vue-analysis/issues/1)
+
+我们考虑一下这样的情况，比如我的data:{a:{b:true}}，这个时候，如果页面有dom上有个指令`:class="a"`，而我想响应式的删除data.a的b属性，此时我就没有办法了，因为defineReactive中的getter/setter都不会执行(他们甚至还会在delete a.b时被清空)，闭包里的那个dep就无法通知对应的watcher。
+
+**这就是getter和setter存在的缺陷：只能监听到属性的更改，不能监听到属性的删除与添加。**
+
+参考[《Vue双向数据绑定实现原理2》](https://github.com/jimwmg/JiM-Blog/tree/master/VueLesson/02Vue-SourceCode)
+
+Vue的解决办法是提供了响应式的api: vm.$set/vm.$delete/ Vue.set/ Vue.delete /数组的$set/数组的$remove。
+
+observe/index.js
+
+```javascript
+export function set (target: Array<any> | Object, key: any, val: any): any {
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
+    target.length = Math.max(target.length, key)
+    target.splice(key, 1, val)
+    return val
+  }
+  if (key in target && !(key in Object.prototype)) {
+    target[key] = val
+    return val
+  }
+  const ob = (target: any).__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Avoid adding reactive properties to a Vue instance or its root $data ' +
+      'at runtime - declare it upfront in the data option.'
+    )
+    return val
+  }
+  if (!ob) {
+    target[key] = val
+    return val
+  }
+  defineReactive(ob.value, key, val)
+  ob.dep.notify()
+  return val
+}
+
+```
+
+### 8 Vue.delete 
+
+基本原理同Vue.set
+
+```javascript
+export function del (target: Array<any> | Object, key: any) {
+  if (Array.isArray(target) && isValidArrayIndex(key)) {
+    target.splice(key, 1)
+    return
+  }
+  const ob = (target: any).__ob__
+  if (target._isVue || (ob && ob.vmCount)) {
+    process.env.NODE_ENV !== 'production' && warn(
+      'Avoid deleting properties on a Vue instance or its root $data ' +
+      '- just set it to null.'
+    )
+    return
+  }
+  if (!hasOwn(target, key)) {
+    return
+  }
+  delete target[key]
+  if (!ob) {
+    return
+  }
+  ob.dep.notify()
+}
+```
+

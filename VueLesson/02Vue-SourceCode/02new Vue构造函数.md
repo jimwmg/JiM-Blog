@@ -83,7 +83,10 @@ export function initMixin (Vue: Class<Component>) {
       initInternalComponent(vm, options)
     } else {
       //进入这个分支
-      //2.1
+      //2.1  注意这里，
+      //--会将生命周期函数，后面可能还会包括路由生命周期函数，等融合进vm.$options，以便于可以通过callHook执行生命周期函数；
+      //--会将directive. component  filter等选项融合进vm.$options实例对象的属性
+      //--会将el. data. props methods computed 等其他选项融合进vm.$options 
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),//Vue.options
         options || {},//new Vue(options)中的options
@@ -102,11 +105,14 @@ export function initMixin (Vue: Class<Component>) {
     initEvents(vm)
     initRender(vm)
     //组件实例的生命周期中一个函数  beforeCreate执行（如果有的话）
-    callHook(vm, 'beforeCreate')
+    callHook(vm, 'beforeCreate') //上面融合到vm.$options的生命周期函数就可以被调用了
     //以下就是Vue组件实例的创建过程
     //我们看到create阶段，基本就是对传入数据的格式化、数据的双向绑定、以及一些属性的初始化。
     initInjections(vm) // resolve injections before data/props
-    initState(vm)
+    initState(vm)  //initData. initProps. initWatch. initMethods
+    //将props data代理到vm._props. vm._data，同时代理props data中的各个属性
+    //将methods 和 computed 代理到 vm实例对象上
+    //以上处理过程中会进行属性名防止重复的判断
     initProvide(vm) // resolve provide after data/props
     //这里，在组件创建完毕之后，调用组件生命周期函数 created（如果有的话）
     callHook(vm, 'created') //在这里可以进行后台数据的请求，重写vm对象的data数据等
@@ -1110,9 +1116,25 @@ export function mountComponent (
 ```
 
 * 调用了`beforeMount`钩子函数，
+
 * 新建了一个`Watcher`对象，绑定在`vm._watcher`上，
+
 * 之后就是判断如果`vm.$vnode == null`，则设置`vm._isMounted = true`并调用`mounted`钩子函数
+
 * 最后返回`vm`对象。
+
+  以上函数主要流程：重点分析下`_update`函数
+
+```javascript
+updateComponent = () => {
+  vm._update(vm._render(), hydrating) 
+}
+```
+
+* 当组件还没有挂载的时候，该函数内部不会执行beforeUpdate生命周期函数，而是执行beforeMount和mounted；
+* 挂载以后每次执行该函数会先执行beforeUpdate生命周期函数，
+  * 然后在之后的patch中决定执行updated生命周期函数
+  * 或者beforeDestroy和destroyed生命周期函数；
 
 **至此整体流程基本完毕** 
 
