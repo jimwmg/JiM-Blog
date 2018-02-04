@@ -265,6 +265,7 @@ function initData (vm: Component) {
     }
   }
   // observe data  实现双向绑定
+  //详细实现原理参见《Vue双向数据绑定原理》
   observe(data, true /* asRootData */)
 }
 
@@ -303,6 +304,7 @@ vm.aDouble // => 4
 ```
 
 ```javascript
+const computedWatcherOptions = { lazy: true }
 function initComputed (vm: Component, computed: Object) {
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
@@ -379,7 +381,83 @@ export function defineComputed (
 }
 ```
 
+注意这一段代码，和《Vue双向数据绑定的原理》的
+
+```javascript
+vm._watcher = new Watcher(vm, updateComponent, noop)
+```
+
+注意这里的流程，如上案例，这里又会执行getter函数，而这个getter函数就是每个computed属性对应的那个函数，执行该函数的时候，又会重新获取data的每个数据的值，从而又会重新触发data属性的getter函数，又会走和下面这行代码一行的流程；
+
+```javascript
+vm._watcher = new Watcher(vm, updateComponent, noop)
+```
+
+**这里是最核心的实现双向绑定的源代码（data，props）：**
+
+- new watcher() 会执行updateComponent函数，这个函数会执行所有 data 和 props 对象中每个属性的getter,会将updateComponent这个函数放入每个data 对象以及props对象的属性dep依赖中；
+- 所以当给data ，props 这两个对象的属性重新赋值的值，会执行这个属性的setter函数，这个setter函数就会触发dep依赖中的Watcher实例中updateComponent函数，从而实现了双向数据绑定的效果；
+
+```javascript
+//如果不是服务端渲染，那么创建监听
+if (!isSSR) {
+  // create internal watcher for the computed property.
+  watchers[key] = new Watcher(
+    vm,
+    getter || noop,
+    noop,
+    computedWatcherOptions
+  )
+}
+```
+
+**这里是最核心的实现双向绑定的源代码（computed）：**
+
+- new watcher() 会执行getter函数（每个computed属性对应的函数），这个函数执行的时候，可以看到，又会触发其依赖的data属性的getter，从而将每个computed属性对应的函数放入每个data对象的属性dep依赖中；
+- 所以当给data属性重新赋值的值，会执行这个属性的setter函数，这个setter函数就会触发dep依赖中的Watcher实例中updateComponent，computed属性对应的函数，从而实现了双向数据绑定的效果以及data属性更新，computed同样会重新计算的效果；
+
 #### 2.6 initWatch(vm, opts.watch)
+
+```javascript
+var vm = new Vue({
+  data: {
+    a: 1,
+    b: 2,
+    c: 3,
+    d: 4,
+    e: {
+      f: {
+        g: 5
+      }
+    }
+  },
+  watch: {
+    a: function (val, oldVal) {
+      console.log('new: %s, old: %s', val, oldVal)
+    },
+    // 方法名
+    b: 'someMethod',
+    // 深度 watcher
+    c: {
+      handler: function (val, oldVal) { /* ... */ },
+      deep: true
+    },
+    // 该回调将会在侦听开始之后被立即调用
+    d: {
+      handler: function (val, oldVal) { /* ... */ },
+      immediate: true
+    },
+    e: [
+      function handle1 (val, oldVal) { /* ... */ },
+      function handle2 (val, oldVal) { /* ... */ }
+    ],
+    // watch vm.e.f's value: {g: 5}
+    'e.f': function (val, oldVal) { /* ... */ }
+  }
+})
+vm.a = 2 // => new: 2, old: 1
+
+```
 
 ```javascript
 function initWatch (vm: Component, watch: Object) {
@@ -411,5 +489,208 @@ function createWatcher (
   return vm.$watch(keyOrFn, handler, options)
 }
 ```
+
+```javascript
+  Vue.prototype.$watch = function (
+    expOrFn: string | Function,
+    cb: any,
+    options?: Object
+  ): Function {
+    const vm: Component = this
+    if (isPlainObject(cb)) {
+      return createWatcher(vm, expOrFn, cb, options)
+    }
+    options = options || {}
+    options.user = true
+    //这里传入的Watcher构造函数的expOrFn为字符串，参见《Vue双向数据绑定原理》，会将这个cb函数添加到keyOrFn这个字符串对应的data，props属性的依赖dep中，当对应的某个属性值变化的时候，这个函数也会执行，进而实现了watch的监控；
+    const watcher = new Watcher(vm, expOrFn, cb, options)
+    if (options.immediate) {
+      cb.call(vm, watcher.value)
+    }
+    return function unwatchFn () {
+      watcher.teardown()
+    }
+  }
+}
+```
+
+### 3 最后看下当重新给监听的数据赋值，触发data或者props的setter的时候，此时会触发其dep对象的notify函数
+
+observe/dep.js
+
+==> 给data或者props重新赋值，触发其setter函数，进而执行notify,触发这个属性的依赖数组中的所有Watcher实例对象的update函数
+
+```javascript
+notify () {
+  // stabilize the subscriber list first
+  const subs = this.subs.slice()
+  for (let i = 0, l = subs.length; i < l; i++) {
+    subs[i].update()  //执行每一个Watcher实例对象的update函数
+  }
+}
+```
+
+==> 执行notify的时候，会执行该属性(data或者props)中所有依赖的Watcher的update函数，进而会执行 比如 updateComponent 或者computed 对应的函数
+
+observe/watcher.js
+
+```javascript
+update () {
+    /* istanbul ignore else */
+    if (this.lazy) {
+      //这个this.lazy对于computed对应的Wather实例来水就是惰性求值，
+      this.dirty = true
+      //如果这个watcher是同步的话，那么就执行执行run,如果不是，那么就
+    } else if (this.sync) {
+      this.run()
+    } else {
+      //否则将这个Watcher实例放入queueWatcher函数中
+      queueWatcher(this)
+    }
+  }
+```
+
+==>执行每个Watcher实例对象的update的时候，会将每个Watcher实例对象放入queue中
+
+observer/scheduler.js
+
+```javascript
+const queue: Array<Watcher> = []
+const activatedChildren: Array<Component> = []
+let has: { [key: number]: ?true } = {}
+let circular: { [key: number]: number } = {}
+let waiting = false
+let flushing = false
+//这里将所有数据的更新先放入queue中
+export function queueWatcher (watcher: Watcher) {
+  const id = watcher.id
+  if (has[id] == null) {
+    has[id] = true
+    if (!flushing) { //在没有执行下一次nextTick的代码的时候，flushing的值一直是false，所以会将所有的Watcher实例对象放入queue数组中
+      queue.push(watcher)
+    } else {
+      // if already flushing, splice the watcher based on its id
+      // if already past its id, it will be run next immediately.
+      let i = queue.length - 1
+      while (i > index && queue[i].id > watcher.id) {
+        i--
+      }
+      queue.splice(i + 1, 0, watcher)
+    }
+    //这里将flushSchedulerQueue函数放入异步队列，等这里代码执行完毕之后，在执行flushSchedulerQueue函数
+    // queue the flush
+    if (!waiting) {
+      waiting = true
+      nextTick(flushSchedulerQueue)
+    }
+  }
+}
+```
+
+==> 以上，假如某个data属性的值改变了
+
+* 首先将该属性dep依赖中的所有的Watcher实例对象放入queue数组
+* 然后将flushSchedulerQueue函数放入异步队列，等待所有的Watcher实例对象放入queue数组以及这次的代码执行完毕之后，异步执行；
+
+==> 这里开始执行flushSchedulerQueue函数，也就是将会执行上一步中的queue数组中的Watcher实例对象中的run函数
+
+observer/scheduler.js
+
+```javascript
+function flushSchedulerQueue () {
+  flushing = true  //注意这个标记
+  let watcher, id
+
+  // Sort queue before flush.
+  // This ensures that:
+  // 1. Components are updated from parent to child. (because parent is always
+  //    created before the child)
+  // 2. A component's user watchers are run before its render watcher (because
+  //    user watchers are created before the render watcher)
+  // 3. If a component is destroyed during a parent component's watcher run,
+  //    its watchers can be skipped.
+  queue.sort((a, b) => a.id - b.id)
+
+  // do not cache length because more watchers might be pushed
+  // as we run existing watchers
+  for (index = 0; index < queue.length; index++) {
+    watcher = queue[index]
+    id = watcher.id
+    has[id] = null
+    watcher.run()
+    // in dev build, check and stop circular updates.
+    if (process.env.NODE_ENV !== 'production' && has[id] != null) {
+      circular[id] = (circular[id] || 0) + 1
+      if (circular[id] > MAX_UPDATE_COUNT) {
+        warn(
+          'You may have an infinite update loop ' + (
+            watcher.user
+              ? `in watcher with expression "${watcher.expression}"`
+              : `in a component render function.`
+          ),
+          watcher.vm
+        )
+        break
+      }
+    }
+  }
+
+  // keep copies of post queues before resetting state
+  const activatedQueue = activatedChildren.slice()
+  const updatedQueue = queue.slice()
+
+  resetSchedulerState()
+
+  // call component updated and activated hooks
+  callActivatedHooks(activatedQueue)
+  callUpdatedHooks(updatedQueue)
+
+  // devtool hook
+  /* istanbul ignore if */
+  if (devtools && config.devtools) {
+    devtools.emit('flush')
+  }
+}
+```
+
+==> 这里就执行每个Watcher实例对象中对应的函数 run 函数
+
+observe/watcher.js  
+
+```javascript
+ run () {
+    if (this.active) {
+      const value = this.get()  
+ //注意这里：对于watch选项的产生的Watcher实例对象，该实例对象的get函数返回的是要观察的data或者props属性的值；
+ // 
+      if (
+        //undefined !== undefined （false ) 所以对于updateComponent函数没有返回值，对应的Watcher实例对象不会进入这里
+        value !== this.value ||
+        // Deep watchers and watchers on Object/Arrays should fire even
+        // when the value is the same, because the value may
+        // have mutated.
+        isObject(value) ||
+        this.deep
+      ) {
+        // set new value
+        const oldValue = this.value
+        this.value = value
+        if (this.user) {  //watch选项对应的Watcher实例对象的user属性为true
+          try {
+            this.cb.call(this.vm, value, oldValue)
+          } catch (e) {
+            handleError(e, this.vm, `callback for watcher "${this.expression}"`)
+          }
+        } else {
+          this.cb.call(this.vm, value, oldValue)
+        }
+      }
+    }
+  }
+```
+
+
+
+
 
 Q:以上源码中发现都会有一个observe函数去监听对应的属性值然后响应到UI中，另外会有文章分析如何实现的；

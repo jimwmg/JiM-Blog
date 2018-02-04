@@ -204,8 +204,7 @@ eventsMixin(Vue)
 //Vue.prorotype._update  Vue.prototype.$forceUpdate. Vue.prototype.$destory 
 lifecycleMixin(Vue)
 //Vue.prototype._render. Vue.prototype.$nextTick 
-renderMixin(Vue)
-//  installRenderHelpers(Vue.prototype) _o. _l. _s等
+renderMixin(Vue)    			//  installRenderHelpers(Vue.prototype) _o. _l. _s等
 export default Vue
 ```
 
