@@ -56,8 +56,6 @@ console.log(vm);//输出看下vm._watchers vm._watcher
 </script>
 ```
 
-
-
 **原理实现：** vue.js 则是采用数据劫持结合发布者-订阅者模式的方式，通过`Object.defineProperty()`来劫持各个属性的`setter`，`getter`，在数据变动（set函数执行）时发布消息给订阅者，触发相应的监听回调。
 
 ### 首先来看一下整体的实现流程 
@@ -269,7 +267,7 @@ export function defineReactive (obj,key,val) {
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
-        //dep.depend()会执行实例Watcher类的addDep()函数，而该函数，又会执行dep实例的dep.addSub,会在subs数组中放入一个Dep实例对象；
+        //dep.depend()会执行实例Watcher类的addDep()函数，而该函数，又会执行dep实例的dep.addSub,会在subs数组中放入一个Watcher实例对象；
         dep.depend()
         if (childOb) {
           childOb.dep.depend()
@@ -298,6 +296,7 @@ export function defineReactive (obj,key,val) {
       }
       //这里，每次给vm.$option.data中的属性等进行赋新值操作的时候，发布一个通知，告诉所有的依赖更新model层面的数据；
       childOb = !shallow && observe(newVal)
+        //这里当改变监听的数据的值的时候，会触发new Watcher传入的函数
       dep.notify()
     }
   })
@@ -307,6 +306,8 @@ export function defineReactive (obj,key,val) {
 **Watcher**：作为订阅者，只需要通过获取一下被监听的属性值，就可以添加订阅者；
 
 * 设置完observer（getter,setter）之后,添加watcher:《new Vue构造函数》2.10.2
+
+如果没有computed和watcher属性，那么可能所有的data属性也就只有这一个Watcher实例
 
 ```javascript
 vm._watcher = new Watcher(vm, updateComponent, noop)
@@ -406,6 +407,7 @@ constructor (
       this.newDepIds.add(id)
       this.newDeps.push(dep)
       if (!this.depIds.has(id)) {
+        //这个this指的是每一个Watcher实例对象
         dep.addSub(this)
       }
     }
@@ -470,6 +472,7 @@ export default class Dep {
   }
 
   addSub (sub: Watcher) {
+    //sub就是Watcher实例对象
     this.subs.push(sub)
   }
 
@@ -479,7 +482,8 @@ export default class Dep {
 
   depend () {
     if (Dep.target) {
-      //这里执行Watcher类的addDep
+      //这里执行Watcher类的addDep，Dep.target就是Watcher实例对象，
+      //this指的是dep实例对象
       Dep.target.addDep(this)
     }
   }
@@ -512,15 +516,19 @@ export function popTarget () {
 
 我们先来看看`Watcher`的两种主要用途：一种是更新模板，另一种就是监听某个值的变化。
 
-** 模板更新 **
+首先从整体上来了解，new Watcher（vm,expOrFn,cb,options)的时候，会执行传入的expOrFn
+
+* 模板更新 
 
 ```
  vm._watcher = new Watcher(vm, updateComponent, noop)
 ```
 
-这是因为创建`Watcher`会调用`this.get`，也就是这里的`updateComponent`。在`render`的过程中，会调用`data`的`getter`方法，以此来建立数据的双向绑定，当数据改变是，会重新触发`updateComponent`。在这里`this.get`的返回值是`undefined`，所以主要是用于渲染模板。
+这是因为创建`Watcher`会调用`this.get`，也就是这里的`updateComponent`。在`render`的过程中，会调用`data`的`getter`方法，以此来建立数据的双向绑定，给每个属性添加dep依赖添加watcher实例对象；当数据改变的时候，会通知watcher实例对象，该实例对象负责重新触发`updateComponent`。
 
-** 监听数据 **
+**注意这里的Watcher实例对象的this.get方法返回值是updateComponent函数的返回值，也就是undefined,所以此时仅仅用来作为数据的渲染**
+
+* 监听数据 
 
 另一个用途就是我们的`computed`、`watch`等，即监听数据的变化来执行响应的操作。
 

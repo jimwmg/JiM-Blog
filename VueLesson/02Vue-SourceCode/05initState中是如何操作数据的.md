@@ -277,7 +277,30 @@ export function isReserved (str: string): boolean {
 
 #### 2.5 initComputed(vm, opts.computed) 
 
-主要作用是
+```vue
+var vm = new Vue({
+  data: { a: 1 },
+  computed: {
+    // 仅读取
+    aDouble: function () {
+      return this.a * 2
+    },
+    // 读取和设置
+    aPlus: {
+      get: function () {
+        return this.a + 1
+      },
+      set: function (v) {
+        this.a = v - 1
+      }
+    }
+  }
+})
+vm.aPlus   // => 2
+vm.aPlus = 3
+vm.a       // => 2
+vm.aDouble // => 4
+```
 
 ```javascript
 function initComputed (vm: Component, computed: Object) {
@@ -287,7 +310,7 @@ function initComputed (vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
-    //如果computed对象key对应的value值是函数，那么getter就去改value值
+    //如果computed对象key对应的value值是函数，那么getter就去改value值,如果是一个对象，那么就去取设置的get
     const getter = typeof userDef === 'function' ? userDef : userDef.get
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(

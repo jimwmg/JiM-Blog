@@ -475,6 +475,116 @@ vm.$option = {
 
 ```
 
+#### 2.2 initState(vm)
+
+```javascript
+export function initState (vm: Component) {
+  vm._watchers = []
+  const opts = vm.$options
+  //这里对props实现代理以及监听，同时处理了props是对象，数组，以及其中的type,default字段
+  if (opts.props) initProps(vm, opts.props)
+  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.data) {
+    initData(vm)
+  } else {
+    observe(vm._data = {}, true /* asRootData */)
+  }
+  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.watch && opts.watch !== nativeWatch) {
+    initWatch(vm, opts.watch)
+  }
+}
+```
+
+##### 2.2.1 initProps()
+
+```javascript
+function initProps (vm: Component, propsOptions: Object) {
+  const propsData = vm.$options.propsData || {}
+  const props = vm._props = {}
+  // cache prop keys so that future props updates can iterate using Array
+  // instead of dynamic object key enumeration.
+  const keys = vm.$options._propKeys = []
+  const isRoot = !vm.$parent
+  // root instance props should be converted
+  observerState.shouldConvert = isRoot
+  for (const key in propsOptions) {
+    keys.push(key)
+    //1 获取{type:String,default:...}default字段的值；2 验证required和validator 3 返回default的值；（注意defalut如果要返回数组或者对象，则必须以函数的形式）
+    const value = validateProp(key, propsOptions, propsData, vm)
+    /* istanbul ignore else */
+    if (process.env.NODE_ENV !== 'production') {
+      const hyphenatedKey = hyphenate(key)
+      if (isReservedAttribute(hyphenatedKey) ||
+          config.isReservedAttr(hyphenatedKey)) {
+        warn(
+          `"${hyphenatedKey}" is a reserved attribute and cannot be used as component prop.`,
+          vm
+        )
+      }
+      defineReactive(props, key, value, () => {
+        if (vm.$parent && !isUpdatingChildComponent) {
+          warn(
+            `Avoid mutating a prop directly since the value will be ` +
+            `overwritten whenever the parent component re-renders. ` +
+            `Instead, use a data or computed property based on the prop's ` +
+            `value. Prop being mutated: "${key}"`,
+            vm
+          )
+        }
+      })
+    } else {
+      defineReactive(props, key, value)
+    }
+    // static props are already proxied on the component's prototype
+    // during Vue.extend(). We only need to proxy props defined at
+    // instantiation here.
+    //实现实例对象代理
+    if (!(key in vm)) {
+      proxy(vm, `_props`, key)
+    }
+  }
+  observerState.shouldConvert = true
+}
+
+export function validateProp (
+  key: string,
+  propOptions: Object,
+  propsData: Object,
+  vm?: Component
+): any {
+  const prop = propOptions[key]
+  const absent = !hasOwn(propsData, key)
+  let value = propsData[key]
+  // handle boolean props
+  if (isType(Boolean, prop.type)) {
+    if (absent && !hasOwn(prop, 'default')) {
+      value = false
+    } else if (!isType(String, prop.type) && (value === '' || value === hyphenate(key))) {
+      value = true
+    }
+  }
+  // check default value
+  if (value === undefined) {
+    //这个函数对default字段的值进行判断，如果没有default字段，则返回undefined;如果是对象（数组或者object类型的数据）则会警告；如果是函数，则返回该函数执行后的返回值；
+    value = getPropDefaultValue(vm, prop, key)
+    // since the default value is a fresh copy,
+    // make sure to observe it.
+    const prevShouldConvert = observerState.shouldConvert
+    observerState.shouldConvert = true
+    observe(value)
+    observerState.shouldConvert = prevShouldConvert
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    assertProp(prop, key, value, vm, absent)
+  }
+  //返回default字段的值或者函数返回值
+  return value
+}
+```
+
+##### 2.2.2 initMethods(). initData().  initComputed().  initWatch
+
 #### 2.3 initLifycycle(vm)
 
 这个方法主要是给Vue组件实例对象vm上添加一些属性 ，包括$parent $root $children $refs 以及一些生命周期的标识
