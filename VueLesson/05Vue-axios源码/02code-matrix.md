@@ -44,8 +44,8 @@ function next(middlewares,now,resolve){
     let nnext=next.bind(this,middlewares,now+1,resolve);
     if(!inBlackList&&inWhiteList){ //对于符合黑白名单列表的use注册函数，都会进入执行，直接next
         let r=cb.call(this,nnext);//	这里类似于递归进入所有通过use注册的函数，然后再一层层的退出
-        if(!(r instanceof Promise)&&this.__now==now){
-            resolve(this);
+        if(!(r instanceof Promise)&&this.__now==now){ 
+            resolve(this); //这里resolve的this,指的就是send中的context上下文，所以在链式调用中下一个then中的函数参数context就是传入的send中的context
             return;
         }
     }
@@ -98,14 +98,80 @@ router.use('/test/output2',function(next){
     console.log(2);
     next();
 });
+router.use('/result/analysis', function (next) {
+  const { result } = this;//这里对请求回来的结果进行判断
+  if (!(result instanceof Error)) {
+    if (result.status === 200) {
+      if (result.data.code === 0) {
+        this.result = result.data.data;
+      } else {
+        console.error([result.config.url, result]);
+        this.result = Error(result.data.msg || '未知错误');
+        this.result.data = result;
+      }
+    } else if (result.data.code >= 500) {
+      console.error([result.config.url, result]);
+      this.result = Error('系统错误，请联系管理员');
+    }
+  } else {
+    this.result.message = '网络异常';
+  }
+  next();
+});
+router.use('/result/handle-error', function (next) {
+  const { result } = this
+  if (result instanceof Error) {
+    result.code = result.data.data.code;
+    Message.closeAll();
+    Message.error({
+      message: result.message,
+    });
+  }
+  next();
+});
 router.send({
     whiteList:['/test'],
     blackList:['/test/output1'],
     text:''
   //这里的context就是use注册的函数中要使用的this
-}).then(function(context){
+}).then(function(context){  //这个context就是send中的参数
     console.log(context.text);
 });
 
+```
+
+```javascript
+export function ajax(config, whiteList = [], blackList = []) {
+  return new Promise((resolve, reject) => {
+    ajaxRouter.send({ //第一次使用，配置请求参数
+      whiteList: ['/config'].concat(whiteList),
+      blackList,
+      config, //这里就是要配置的参数
+    }).then(context => {
+      return new Promise((resolve) => {
+        axios
+          .request(context.config)
+          .then(response => {
+            resolve(response);
+          })
+          .catch(error => {
+            resolve(error);
+          });
+      });
+    }).then(result => {
+      return ajaxRouter.send({
+        whiteList: ['/result'].concat(whiteList),
+        blackList,
+        result, //这里就是请求回来的结果，根据请求回来的结果
+      }).then((context) => {
+        if (context.result instanceof Error) {
+          reject(context.result);
+        } else {
+          resolve(context.result);
+        }
+      });
+    });
+  });
+}
 ```
 
