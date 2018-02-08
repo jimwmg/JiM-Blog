@@ -142,7 +142,7 @@ export function createPatchFunction (backend) {
       //!isRealElement 为false
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
-        //更新组件的时候会执行到治理，进行虚拟DOM的diff算法
+        //更新组件的时候会执行到这里，进行虚拟DOM的diff算法
         patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly)
       } else {
         //所以执行到这里

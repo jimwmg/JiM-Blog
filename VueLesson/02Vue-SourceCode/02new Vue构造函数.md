@@ -583,11 +583,13 @@ export function validateProp (
 }
 ```
 
-##### 2.2.2 initMethods(). initData().  initComputed().  initWatch
+##### 2.2.2 initMethods(). initData().  initComputed().  initWatch()
+
+详情参见《initState中是如何操作数据的》
 
 #### 2.3 initLifycycle(vm)
 
-这个方法主要是给Vue组件实例对象vm上添加一些属性 ，包括$parent $root $children $refs 以及一些生命周期的标识
+这个方法主要是给Vue组件实例对象vm上添加一些属性 ，包括`$parent $root $children $refs` 以及一些生命周期的标识
 
 ```javascript
 export function initLifecycle (vm: Component) {
@@ -801,7 +803,7 @@ vm.message
 
 至此，创建一个Vue组件的全部过程已经完毕
 
-#### 2.10 vm.$mount(vm.$options.el) 
+#### 2.10 `vm.$mount(vm.$options.el)` 
 
 2.1——>2.9创建完vm实例对象之后，并且实现了一些数据的双向绑定等操作之后，就要执行将vm实例对象挂载到对应的DOM节点上了；
 
@@ -1172,6 +1174,8 @@ Vue.prototype.$mount = function (
   return mountComponent(this, el, hydrating)
 }
 ```
+
+**注意这里主vnode对象(可以理解为挂载点 id='app')生成以后，在挂载该主vnode对象的时候，如果其中的子节点有组件，那么子节点组件又会重新走`$mount`这个流程(2.10 `vm.$mount(vm.$options.el)`这个流程)，重根据这个组件生成ast树，然后根据ast树生成render 函数，这个render函数会触发data或者props数据的getter，进行watcher的绑定，所以每个组件上都绑定了updateComponent这个函数，当某个组件data或者props更新的时候，会执行这个组件的updateComponent函数，生这个组件的vnode对象，对这个组件进行更新，这也就是Vue比React更新组件的时候，粒度更细的原因**
 
 src/core/instance/ifecycle.js
 

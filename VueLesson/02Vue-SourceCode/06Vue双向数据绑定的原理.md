@@ -309,7 +309,7 @@ export function defineReactive (obj,key,val) {
 
 如果没有computed和watcher属性，那么可能所有的data属性也就只有这一个Watcher实例
 
-**这里是最核心的实现双向绑定的源代码：**
+**这里是最核心的实现双向绑定的源代码：所有的组件都会有`_watcher`，中绑定了updateComponent**
 
 * new watcher() 会执行updateComponent函数，这个函数会执行所有data对象中每个属性的getter,会将updateComponent这个函数放入每个data对象的属性dep依赖中
 * 所以当给data属性重新赋值的值，会执行这个属性的setter函数，这个setter函数就会触发dep依赖中的Watcher实例中updateComponent函数，从而实现了双向数据绑定的效果；
