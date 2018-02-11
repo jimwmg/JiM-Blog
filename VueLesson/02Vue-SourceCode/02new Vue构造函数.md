@@ -1221,7 +1221,7 @@ export function mountComponent (
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
-    vm._isMounted = true
+    vm._isMounted = true  //这里将该组件的生命周期标识 _isMounted设置为true;
     //此时生命周期mounted函数可以操作DOM，因为真实DOM已经挂载完成；
     callHook(vm, 'mounted')
   }

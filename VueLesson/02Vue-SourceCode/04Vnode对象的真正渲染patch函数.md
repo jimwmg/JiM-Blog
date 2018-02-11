@@ -7,10 +7,20 @@ categories: vue
 ### 1 当生成虚拟DOM对象之后，需要将其渲染成真实DOM
 
 ```javascript
+updateComponent = () => {
+  vm._update(vm._render(), hydrating)
+}
+```
+
+`vm._render( )` 生成vnode对象 ；`vm._update( )`  则负责将虚拟vnode挂载成真正DOM的节点；
+
+instance/lifeCycle.js
+
+```javascript
 Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     if (vm._isMounted) {
-      //这里当组件更新的时候，会执行到这里，首先调用beforeUpdate钩子函数
+      //这里当组件更新的时候，会执行到这里，首先调用beforeUpdate钩子函数;但是当组件第一次挂载的时候，由于vm._isMounted为false,所以不会进入这里
       callHook(vm, 'beforeUpdate')
     }
     const prevEl = vm.$el
@@ -102,16 +112,16 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
 src/core/vdom/patch.js
 
 ```javascript
-const hooks = ['create', 'activate', 'update', 'remove', 'destroy
+const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 export function createPatchFunction (backend) {
   //.....
-  //注意传入的这个形参 oldVnode，对应的实参是 vm.$el ;
+  //注意传入的这个形参 oldVnode，初始化渲染的时候，对应的实参是 vm.$el ;
     return function patch (oldVnode, vnode, hydrating, removeOnly, parentElm, refElm) {
         let i, j
         const cbs = {}
 
         const { modules, nodeOps } = backend
-//这里将modules数组中对应的hooks钩子函数放在cbs对象中，每一个cbs[hooks[i]]对应的是modules中所有的钩子函数组成的一个数组；
+//这里将modules数组中对应的hooks钩子函数放在cbs对象中，每一个cbs[hooks[i]]对应的是modules中所有的钩子函数组成的一个数组；数组中的函数用来更新attrs. class. styles domProps events
         for (i = 0; i < hooks.length; ++i) {
           cbs[hooks[i]] = []
           for (j = 0; j < modules.length; ++j) {
@@ -120,6 +130,7 @@ export function createPatchFunction (backend) {
             }
           }
         }
+        //......省略中间其他代码
     //如果vnode未定义，oldVnode定义，那么就销毁这个DOM元素
       if (isUndef(vnode)) {
         //这个是createPatchFunction中定义的函数；
@@ -132,7 +143,6 @@ export function createPatchFunction (backend) {
     const insertedVnodeQueue = []
 //如果oldVnode未定义，isInitialPatch置为true，然后调用createElm，我们这个例子是定了vm.$el的；
     if (isUndef(oldVnode)) {
-      //如果是子组件的挂载过程，会执行到这里；
       // empty mount (likely as component), create new root element
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue, parentElm, refElm)
@@ -374,7 +384,7 @@ init (
       )
       //在这里执行挂载方法；child就是子组件的vm实例对象
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
-//又会重复执行  ==> 编译该子组件的render函数 ==> beforeMount ==> 执行编译之后的render函数生成vnode对象 ==> createElm(vnode,...) ==> 生成真实的DOM ==> monted 
+//又会重复执行  ==> 编译该子组件的render函数 ==> beforeMount ==> 执行编译之后的render函数生成vnode对象 ==> createElm(vnode,...) 这里又可能继续挂载子组件 ==> 生成真实的DOM ==> monted 
     } else if (vnode.data.keepAlive) {
       // kept-alive components, treat as a patch
       const mountedNode: any = vnode // work around flow
