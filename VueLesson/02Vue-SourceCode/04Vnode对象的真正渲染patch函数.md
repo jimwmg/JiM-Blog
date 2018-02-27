@@ -4,6 +4,8 @@ date: 2017-11-29
 categories: vue
 ---
 
+接上[《new Vue构造函数》](https://github.com/jimwmg/JiM-Blog/tree/master/VueLesson/02Vue-SourceCode)
+
 ### 1 当生成虚拟DOM对象之后，需要将其渲染成真实DOM
 
 ```javascript
@@ -17,13 +19,17 @@ updateComponent = () => {
 instance/lifeCycle.js
 
 ```javascript
+export let activeInstance: any = null
+export let isUpdatingChildComponent: boolean = false
 Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     if (vm._isMounted) {
       //这里当组件更新的时候，会执行到这里，首先调用beforeUpdate钩子函数;但是当组件第一次挂载的时候，由于vm._isMounted为false,所以不会进入这里
       callHook(vm, 'beforeUpdate')
     }
+    //vm.$el就是具体的要挂载的DOM实例对象,根组件就是我们传入的el或者挂载的根元素，子组件就是被挂载的父元素
     const prevEl = vm.$el
+    //这里的vm._vnode是在initRender中初始化为null的；
     const prevVnode = vm._vnode
     const prevActiveInstance = activeInstance
     activeInstance = vm
@@ -71,21 +77,25 @@ Vue.prototype.$destroy = function () {
 
 在platforms/web/runtime/patch.js中,这里就解释了src/core/vdom/patch.js中的nodeOps和modules都是哪些内容咯
 
+先看下传入createPatchFunction的参数对象到底实现了什么功能
+
 ```javascript
 //node-ops主要是封装了操作节点的方法，比如如何创建元素，创建文本，创建注释节点，操作DOM节点（增加和删除等）和设置节点属性
 import * as nodeOps from 'web/runtime/node-ops'
 import { createPatchFunction } from 'core/vdom/patch'
 //baseModules主要封装了如何处理元素上的directive和refs
 import baseModules from 'core/vdom/modules/index'
-//platformModules主要封装了如何处理真实DOM元素的属性，类名，和style,事件，以及
+//platformModules主要封装了如何处理真实DOM元素的属性，类名，和style,事件的处理
 import platformModules from 'web/runtime/modules/index'
-
+//两个modules都是最后export{ create,update,remove,destroy}这些封装的函数，用于操作DOM
 // the directive module should be applied last, after all
 // built-in modules have been applied.
 const modules = platformModules.concat(baseModules)
 
 export const patch: Function = createPatchFunction({ nodeOps, modules })
 ```
+
+[详细源码自行查看](https://github.com/jimwmg/vue/blob/dev/src/platforms/web/runtime/patch.js)
 
 先看下`__patch__`函数所能接受的参数
 
@@ -111,11 +121,53 @@ export const patch: Function = createPatchFunction({ nodeOps, modules })
 
 src/core/vdom/patch.js
 
+先从整体上看下patch.js中有什么
+
 ```javascript
+import VNode from './vnode'
+import config from '../config'
+import { SSR_ATTR } from 'shared/constants'
+import { registerRef } from './modules/ref'
+import { traverse } from '../observer/traverse'
+import { activeInstance } from '../instance/lifecycle'
+import { isTextInputType } from 'web/util/element'
+export const emptyNode = new VNode('', {}, [])
+
+const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
+function sameVnode(){}
+function sameInputType(){}
+function createKeyToOldIdx(){}
+export function createPatchFunction(backend){
+    //....
+    const { modules, nodeOps } = backend
+    return function patch(){
+        //.....
+    }
+}
+```
+
+然后看下具体的实现
+
+```javascript
+import { activeInstance } from '../instance/lifecycle'
+//activeInstance 这个导入的变量在每次patch的时候被赋值为当前组件实例对象的值 vm
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 export function createPatchFunction (backend) {
   //.....
-  //注意传入的这个形参 oldVnode，初始化渲染的时候，对应的实参是 vm.$el ;
+  function invokeDestroyHook (vnode) {
+    let i, j
+    const data = vnode.data
+    if (isDef(data)) {
+      if (isDef(i = data.hook) && isDef(i = i.destroy)) i(vnode)
+      for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
+    }
+    if (isDef(i = vnode.children)) {
+      for (j = 0; j < vnode.children.length; ++j) {
+        invokeDestroyHook(vnode.children[j])
+      }
+    }
+  }
+ //注意传入的这个形参 oldVnode，初始化渲染的时候，对应的实参是 vm.$el ;vm.prototype._update上有详细过程
     return function patch (oldVnode, vnode, hydrating, removeOnly, parentElm, refElm) {
         let i, j
         const cbs = {}
@@ -133,8 +185,9 @@ export function createPatchFunction (backend) {
         //......省略中间其他代码
     //如果vnode未定义，oldVnode定义，那么就销毁这个DOM元素
       if (isUndef(vnode)) {
-        //这个是createPatchFunction中定义的函数；
-        //这个函数在执行的时候，会执行该组件以及其子组件中生命周期
+    //这个是createPatchFunction中定义的函数；
+    //这个函数在执行的时候，会执行该组件以及其子组件中生命周期
+//注册的所有destroy函数，包括style attr等的destroy函数，以及componentVNodeHooks（createComponent.js)中的destroy都会执行，同时这里也解释了为什么keep-alive的组件不会被destroy,而是会执行deactivated生命周期函数
         if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
         return
       }
@@ -152,7 +205,9 @@ export function createPatchFunction (backend) {
       //!isRealElement 为false
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
-        //更新组件的时候会执行到这里，进行虚拟DOM的diff算法
+        //更新组件的时候会执行到这里，进行虚拟DOM的diff算法，
+        //如果父组件数据更新，那么只会执行副组件更新的生命周期函数，子组件更新的生命周期函数不一定会执行，除非父组件 的数据传递给子组件，也进行了依赖的收集，并且通过v-bind进行了双向绑定，那么该父组件中数据变化的时候，会执行该数据所依赖的所有的相关的组件的updateComponent函数，进而会执行子组件的生命周期更新函数
+        
         patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly)
       } else {
         //所以执行到这里
@@ -259,7 +314,7 @@ export function createPatchFunction (backend) {
       return
     }
 //对于不是 我们自定义的组件，这里处理；生成原生DOM元素；
-    const data = vnode.data
+    const data = vnode.data  //data是一个描述的是节点信息的javascript对象
     const children = vnode.children
     const tag = vnode.tag
     if (isDef(tag)) {
@@ -335,7 +390,7 @@ function createChildren (vnode, children, insertedVnodeQueue) {
 
 处理自定义组件的时候，createComponent返回true,所以会在createComponent里面处理我们自定义的组件逻辑；
 
-patch.js
+patch.js. 可以看出在创建组件的vnode实例对象的时候，又会生成组件的Vue实例对象
 
 ```javascript
 function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
@@ -373,7 +428,7 @@ init (
     parentElm: ?Node,
     refElm: ?Node
   ): ?boolean {
-  //对于keep-alive组件，我们暂且不管。如果vnode.componentInstance不存在或已经销毁，则通过createComponentInstanceForVnode方法来创建新的Vue实例。
+  //如果vnode.componentInstance不存在或已经销毁，则通过createComponentInstanceForVnode方法来创建新的Vue实例。
     if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
       //这里执行 new Sub(options),所以会接着执行Vue.prototype._init函数 ==>beforeCreate==> 生成Vue组件实例对象==>created
       const child = vnode.componentInstance = createComponentInstanceForVnode(
@@ -533,6 +588,75 @@ function initInternalComponent (vm: Component, options: InternalComponentOptions
 
 * modules数组中platformsModules和baseModules中操作各种节点，操作属性，操作类名等的封装以及指令的封装
 * node-opts中操作元素，注释，文本，以及属性的原生操作；
+
+
+
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://unpkg.com/vue"></script>
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="app">
+    {{ message}}
+    <div>{{pMessage}}</div>
+    <button @click='appChange'>按钮</button>
+    <my-comp v-bind:parent='pMessage'></my-comp>
+  </div>
+  <script>
+     var myComp = Vue.extend({
+      data() {
+        return {
+          msg: 'has not changed'
+        };
+      },
+      props:['parent'],
+      methods: {
+        change() {
+          this.msg = 'I was changed'
+        }
+      },
+      beforeCreate() { console.log('myComp beforeCreate') },
+      beforeUpdate() {
+        console.log('myComp beforeUpdate')
+      },
+      template: '<h3 @click="change">{{msg+"  "+parent}}</h3>'
+    })
+    var app = new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue!',
+        pMessage:'parentMessage'
+      },
+      methods:{
+        appChange(){
+          this.pMessage = 'app change'
+        }
+      },
+      components: {
+        'myComp': myComp
+      },
+      beforeCreate() {
+        console.log('App beforeCreate')
+      },
+      beforeUpdate() {
+        console.log('App beforeUpdate')
+      }
+    })
+//当更新父组件的石斛，除非对传递给子组件的属性parent进行v-bind,否则，当更新父组件的pMessage的时候，不会执行子组件的生命周期更新函数
+  </script>
+</body>
+
+</html>
+```
 
 
 

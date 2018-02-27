@@ -34,13 +34,14 @@ VNode对象：
 
 export default class VNode {
   constructor (
-    tag?: string,
-    data?: VNodeData,
-    children?: ?Array<VNode>,
-    text?: string,
+    tag?: string,//宿主节点或者组件节点 
+    data?: VNodeData,  //data存放了该节点的描述对象，包括style attr key ref is on directive等属性
+    children?: ?Array<VNode>,//子vnode对象信息
+    text?: string,//文本节点
     elm?: Node,
     context?: Component,
     componentOptions?: VNodeComponentOptions,
+     //组件节点的信息，包括Ctor,tag,vnodeData,children(vnode对象)
     asyncFactory?: Function
   ) {
     this.tag = tag
@@ -50,11 +51,11 @@ export default class VNode {
     this.text = text
     this.elm = elm
     this.ns = undefined
-    this.context = context
+    this.context = context  //每一个vnode对应的组件实例对象vm
     this.functionalContext = undefined
     this.functionalOptions = undefined
     this.functionalScopeId = undefined
-    this.key = data && data.key
+    this.key = data && data.key  //每一个标签上的key属性值
     this.componentOptions = componentOptions
     this.componentInstance = undefined
     this.parent = undefined
@@ -79,7 +80,7 @@ export default class VNode {
 
 
 
-VNode分类：
+VNode分类：(src/core/vdom/vnode.js)
 
 `VNode`可以理解为vue框架的虚拟dom的基类，通过`new`实例化的`VNode`大致可以分为几类
 
@@ -225,52 +226,10 @@ export function cloneVNodes (vnodes: Array<VNode>, deep?: boolean): Array<VNode>
 ### 2 在《new Vue构造函数》 文章中，没有详细解释vnode对象是如何生成的，这里深入来看一下
 
 ```html
-<div id="box">
-  <myComp></myComp>
-<my-component></my-component>
+<div id="app">
+  <p>{{message}}</p>
+  <my-comp parent='parentData' v-bind:msg="message"></my-comp>
 </div>
-<!--
-<div id='box2'>
-  不能使用myComp组件，因为myComp是一个局部组件，它属于#box
-    <myComp></myComp>
-</div>
-      -->
-<script>
-      //声明一个子组件
-      var myComp = Vue.extend({
-        data() {
-          return {
-            msg: '我是标题^^'
-          };
-        },
-        methods: {
-          change() {
-            this.msg = 'changed'
-          }
-        },
-        template: '<h3 @click="change">{{msg}}</h3>'
-      });
-
-var vm = new Vue({
-  el: '#box',
-  data: {
-    bSign: true
-  },
-  components:{
-    'myComp':myComp,
-    'my-component': {
-      template: '<div>children component!</div>'
-    }
-  }
-});
-console.log(vm);//同样可以在这个对象上找到vnode,知道这个对象的属性值都包括哪些；
-//这里在vm.$option.components上可以看到
-//{myComp:f VueComponent(options),my-component:{template: '<div>children component!</div>'}}
-//所以这个就是局部注册的组件
-/**var vm2 = new Vue({
-            el:"#box2"
-        })*/
-</script>
 ```
 
 ```javascript
@@ -372,6 +331,8 @@ vnode = render.call(vm._renderProxy, vm.$createElement)
 
 src/core/vdom/create-element.js中 _c 就是下面这个createElement函数，生成每一个具体的DOM节点的描述，其中的data对象是经过编译后的如下形式：
 
+**data对象参数形式（也就是b这个形参对应的实参）**
+
 ```javascript
 {
   // 和`v-bind:class`一样的 API
@@ -428,7 +389,8 @@ src/core/vdom/create-element.js中 _c 就是下面这个createElement函数，�
   slot: 'name-of-slot',
   // 其他特殊顶层属性
   key: 'myKey',
-  ref: 'myRef'
+  ref: 'myRef',
+  is:''   //动态组件
 }
 
 ```
@@ -464,11 +426,15 @@ export function createElement (
 
 接下来看下 _createElement(context, tag, data, children, normalizationType)的返回值。
 
+src/core/vdom/create-element.js
+
 ```javascript
 export function _createElement (
   context: Component,
+   //tag用于标识是原声的DOM还是自定义的Vue组件
   tag?: string | Class<Component> | Function | Object,
-   //这里的data就是标签上所有的属性键值对组成的对象集合： {attrs:{"id":"app"}}
+   //这里的data就是标签上所有的属性键值对组成的对象集合： 
+ //{attrs:{"id":"app"},style:{}}等,详情如上data对象
   data?: VNodeData,
    //children就是标签下面的的子元素
   children?: any,
@@ -492,7 +458,7 @@ export function _createElement (
     )
     return createEmptyVNode()
   }
-  // object syntax in v-bind
+  // object syntax in v-bind  动态组件
   if (isDef(data) && isDef(data.is)) {
     tag = data.is
   }
@@ -533,7 +499,7 @@ export function _createElement (
     let Ctor
     //获取标签的命名空间
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
-    //是否是保留标签
+    //是否是保留标签，
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       //如果是则创建保留标签的虚拟vnode对象
@@ -597,6 +563,33 @@ vnode = createComponent(Ctor, data, context, children, tag)
 
 最后我们来看下Vue是如何创建组件的虚拟dom vnode对象的：createComponent的具体实现：
 
+**需要重点注意的一点就是对于Vue组件的Vnode对象的创建，会在次将描述这个节点的data对象进行处理，比如增加一些生命周期函数，处理props等，保证组件生成的vnode对象上也有清晰的描述该组件节点的信息，包括生命周期，接受来自父组件的props等**
+
+先整体看下这个文件中有什么内容 src/core/vdom/create-component.js
+
+```javascript
+import {
+  callHook,
+  activeInstance,
+  updateChildComponent,
+  activateChildComponent,
+  deactivateChildComponent
+} from '../instance/lifecycle'
+
+// hooks to be invoked on component VNodes during patch
+const componentVNodeHooks = {
+    init:function(){},
+    prepatch:function(){},
+    insert:function(){},
+    destroy:function(){}
+}
+const hooksToMerge = Object.keys(componentVNodeHooks)
+export function createComponent(){};
+export function createComponentInstanceForVnode(){}
+```
+
+接下来看下具体的实现细节
+
 ```javascript
 export function createComponent (
 Ctor: Class<Component> | Function | Object | void,
@@ -658,7 +651,8 @@ Ctor: Class<Component> | Function | Object | void,
   if (isDef(data.model)) {
     transformModel(Ctor.options, data)
   }
-  // extract props 这里解释一下，在一个组件上的其实如果不写props,那么这些值在子组件中是无法访问的；也就是说如果往子组件中传递值了，那么子组件必须在props中接受一这些值的对应的key值，才可以在子组件中使用，因为每个子组件也都是一个闭合的作用域；
+//这里，如果通过props给子组件传递了值，那么在定义子组件的时候，就会覆盖掉定义子组件的props中的default的值
+//将子组件中定义的props和通过属性值传递到子组件的props进行整合，给到vnode.data(描述节点信息的对象)
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component   router-view组件会走这里
@@ -687,8 +681,8 @@ Ctor: Class<Component> | Function | Object | void,
 
   // merge component management hooks onto the placeholder node
   //这里给data一些钩子函数，生成的VNode上会有这些函数；在挂载组件生成真实的DOM的时候会用到；
+    //包括init prepatch insert destroy
   mergeHooks(data)
-
   // return a placeholder vnode
   const name = Ctor.options.name || tag
   //最终生成组件的vnode对象；

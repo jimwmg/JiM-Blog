@@ -22,6 +22,26 @@ updated :
 - `process.version`：返回一个字符串，表示当前使用的 Node 版本，比如`v7.10.0`。
 
 
+```javascript
+// print process.argv
+//process-args.js文件
+process.argv.forEach((val, index) => {
+  console.log(`${index}: ${val}`);
+});
+//然后执行
+node process-args.js one two=three four
+```
+
+```
+0: /usr/local/bin/node
+1: /Users/mjr/work/node/process-args.js
+2: one
+3: two=three
+4: four
+```
+
+
+
 #### 方法 
 
 - `process.chdir()`：切换工作目录到指定目录。

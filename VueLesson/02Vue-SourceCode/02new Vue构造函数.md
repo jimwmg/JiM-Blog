@@ -589,7 +589,7 @@ export function validateProp (
 
 #### 2.3 initLifycycle(vm)
 
-这个方法主要是给Vue组件实例对象vm上添加一些属性 ，包括`$parent $root $children $refs` 以及一些生命周期的标识
+这个方法主要是给Vue组件实例对象vm上添加一些属性 ，包括`$parent $root $children $refs` 以及一些生命周期的标识,每一个Vue的组件实例的创建都会走这个new Vue的流程
 
 ```javascript
 export function initLifecycle (vm: Component) {
@@ -608,14 +608,14 @@ export function initLifecycle (vm: Component) {
   vm.$root = parent ? parent.$root : vm
 
   vm.$children = []
-  vm.$refs = {}
+  vm.$refs = {}   //存放该组件实例上的ref引用的DOM实例对象，组件实例对象
 
-  vm._watcher = null
-  vm._inactive = null
-  vm._directInactive = false
-  vm._isMounted = false
-  vm._isDestroyed = false
-  vm._isBeingDestroyed = false
+  vm._watcher = null   //存放该组件实例的Watcher实例对象
+  vm._inactive = null  //标识组件是否是缓存组件
+  vm._directInactive = false //标识组件是否是缓存组件
+  vm._isMounted = false  //标识组件是否挂载，后面会根据这个属性执行组件不同的生命周期
+  vm._isDestroyed = false //标识组件是否被销毁
+  vm._isBeingDestroyed = false 
 }
 ```
 
@@ -625,7 +625,7 @@ export function initLifecycle (vm: Component) {
 
 ```javascript
 export function initEvents (vm: Component) {
-  vm._events = Object.create(null)
+  vm._events = Object.create(null)  //通过Object.create创建一个空的对象，没有原型
   vm._hasHookEvent = false
   // init parent attached events
   const listeners = vm.$options._parentListeners
@@ -641,9 +641,10 @@ export function initEvents (vm: Component) {
 
 ```javascript
 export function initRender (vm: Component) {
-  vm._vnode = null // the root of the child tree
+  vm._vnode = null // the root of the child tree，解析ast对象生成的vnode对象将会挂载到这里,
+    //每个组件实例对象上的vm._vnode的值会在updateComponent函数中 vm._update(vm._render())中赋值
   vm._staticTrees = null // v-once cached trees
-  const options = vm.$options
+  const options = vm.$options 
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
   const renderContext = parentVnode && parentVnode.context
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
@@ -820,6 +821,7 @@ if (vm.$options.el) {
 //如果在new Vue(options)中options没有el参数，那么该组件则不会挂载
 //需要手动执行挂载函数
 const vm = new Vue(options}).$mount('#app');//$mount函数返回值依然是new Vue(options)这个实例对象vm
+//对于子组件一般都是这样的实现
 ```
 
 [platforms/web/entry-runtime-with-compiler.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
@@ -1214,7 +1216,7 @@ export function mountComponent (
     }
   }
   /* istanbul ignore if */
-  vm._watcher = new Watcher(vm, updateComponent, noop) //会执行updateComponent，进而调用__patch__进行vnode到DOM的渲染
+  vm._watcher = new Watcher(vm, updateComponent, noop) //会执行updateComponent，进而调用__patch__进行vnode到DOM的渲染，同时触发data和props的get函数，首次执行该函数，会进行数据的双向绑定
   //给hydrating 赋值为false
   hydrating = false
 
@@ -1252,6 +1254,8 @@ updateComponent = () => {
 
 **至此整体流程基本完毕** 
 
+以下主要解释DOM挂载的时机：
+
 在new Watcher的时候会执行Watcher类的构造函数，而该构造函数会执行传入的updateComponent函数；
 
 src/core/observer/watcher.js
@@ -1279,6 +1283,7 @@ constructor (
       : ''
 
     if (typeof expOrFn === 'function') {
+  //这里就是那个updateComponent函数，该函数作用时生成vnode（vm._render()) 然后将vnode挂载成真实DOM
       this.getter = expOrFn
     } else {
       this.getter = parsePath(expOrFn)
@@ -1386,14 +1391,20 @@ Vue.prototype._render = function (): VNode {
 instance/lifecycle.js
 
 ```javascript
+export let activeInstance: any = null
+export let isUpdatingChildComponent: boolean = false
 Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
-    if (vm._isMounted) {
+    if (vm._isMounted) { 
+//组件挂载的时候，不会进入这里，只有在更新的时候，才会进入这里，因为组件更新的时候vm._isMounted属性值为true
       callHook(vm, 'beforeUpdate')
     }
     const prevEl = vm.$el
+    //如果是某个组件第一次挂载，那么执行到这里的时候vm._vnode为null(这是在initRender中初始化为null的)
     const prevVnode = vm._vnode
+    //缓存 activeInstance : null ，在 __patch__ 中会用到这个变量，会被improt引入patch.js
     const prevActiveInstance = activeInstance
+    //这个变量会被导入 patch.js中，详情见《vnode对象的真正渲染》
     activeInstance = vm
     vm._vnode = vnode
     
@@ -1426,6 +1437,8 @@ Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
 从`mountComponent`中我们知道创建`Watcher`对象先于`vm._isMounted = true`。所以这里的`vm._isMounted`还是`false`，不会调用`beforeUpdate`钩子函数。
 
 下面会调用`vm.__patch__`，在这一步之前，页面的dom还没有真正渲染。该方法包括真实dom的创建、虚拟dom的diff修改、dom的销毁等，具体细节且等之后在分析。
+
+详细参考[《vnode对象的真正渲染patch函数》](https://github.com/jimwmg/JiM-Blog/tree/master/VueLesson/02Vue-SourceCode)
 
 至此，一个`Vue`对象的创建到显示到页面上的流程基本介绍完了
 

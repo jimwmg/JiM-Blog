@@ -20,7 +20,93 @@ layout :
 
 ### nodejs fs
 
-1 读取文件操作readFile(file,options,callback)
+#### fs.exists(path,cb)  用于判断给定的路径是否存在，无论是否存在都会执行回调函数，true表示存在，false表示不存在
+
+```javascript
+fs.exists('index.html',function(isExists){
+  console.log(isExists)
+})
+```
+
+#### fs.open(path,flag,cb)
+
+```javascript
+fs.open('index.html','r',(err,data))=>{
+    if(err){
+        throw err
+    }
+    //如果读取到了数据则操作读取到的数据
+    dealData(data)
+}
+```
+
+**write (不推荐)**
+
+```
+fs.exists('myfile', (exists) => {
+  if (exists) {
+    console.error('myfile already exists');
+  } else {
+    fs.open('myfile', 'wx', (err, fd) => {
+      if (err) throw err;
+      writeMyData(fd);
+    });
+  }
+});
+
+```
+
+**write (推荐)**
+
+```
+fs.open('myfile', 'wx', (err, fd) => {
+  if (err) {
+    if (err.code === 'EEXIST') {
+      console.error('myfile already exists');
+      return;
+    }
+
+    throw err;
+  }
+
+  writeMyData(fd);
+});
+
+```
+
+**read (不推荐)**
+
+```
+fs.exists('myfile', (exists) => {
+  if (exists) {
+    fs.open('myfile', 'r', (err, fd) => {
+      readMyData(fd);
+    });
+  } else {
+    console.error('myfile does not exist');
+  }
+});
+
+```
+
+**read (推荐)**
+
+```
+fs.open('myfile', 'r', (err, fd) => {
+  if (err) {
+    if (err.code === 'ENOENT') {
+      console.error('myfile does not exist');
+      return;
+    }
+
+    throw err;
+  }
+
+  readMyData(fd);
+});
+```
+
+####fs.readFile(file,options,callback)
 
 * file是要读取的文件的路径
 * options
@@ -35,6 +121,7 @@ layout :
 //创建文件读取对象
 var fs = require('fs');
 fs.readFile('input.txt',function(err,data){ //假如input.txt里面的内容是  hello world
+    //   ./input.txt是一样可以读取到，但是 /input.txt是表示绝对路径，读取不到
   console.log(arguments);//我们可以打印出来回调函数的参数进行查看，即使文件读取失败，回调函数也会执行
   console.log(err);
   console.log(data);//readFile返回的data数据是buffer类型的数据
@@ -58,7 +145,7 @@ fs.readFile('etc/passwd',(err,data)=>{
 //readFile用于异步读取文件内容，
 ```
 
-2 写入文件的操作writeFile(file,data,[option],callback)
+####fs.writeFile(file,data,[option],callback)
 
 * file可以是文件名或者文件描述
 * data是异步地写入的数据内容，可以是一个string或者buffer

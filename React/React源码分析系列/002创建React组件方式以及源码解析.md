@@ -295,7 +295,7 @@ if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined' && typeof __REACT_DEVT
 
 ```javascript
 var ReactMount = {
-  //nextElement就是ReactELement，jsx语法将组件或者div，span等转化为一个ReactElement对象
+  //nextElement就是ReactELement，jsx语法将组件或者div，span，以及自定义组件等转化为一个ReactElement对象
   render: function (nextElement, container, callback) {
     //将ReactElement对象和container元素传递给_renderSubtreeIntoContainer函数；
     return ReactMount._renderSubtreeIntoContainer(null, nextElement, container, callback);
@@ -347,6 +347,10 @@ function mountComponentIntoNode(wrapperInstance, container, transaction, shouldR
   }
   //Flag2 下面会有源码解释
   //markup是经过解析成功的HTML元素，该元素通过_mountImageIntoNode加载到对应的DOM元素上；
+//1 这个markup在处理DOM诉诸元素的时候，会根据JSX处理后的ReactELement对象，生成对应的DOM元素的字符串表示
+//2 对于自定义组件的时候，会将该自定义组件的render函数返回值（jsx的返回值也是ReactElement对象，递归的处理，直到对应的JSX生成的对象是DOM宿主元素，则生成对应的DOM字符串表示；
+//3 如此一层层的进入自定义组件，执行componentWillMount render componentDidMount ，然后再一层层的出来，直到所有的组件生成真实的DOM元素，最后执行最外层的App组件的componentDidMount函数
+//4 将最后生成的markup挂载到对应的节点上
   var markup = ReactReconciler.mountComponent(wrapperInstance, transaction, null, ReactDOMContainerInfo(wrapperInstance, container), context, 0 /* parentDebugID */
                                              );
 
@@ -406,7 +410,13 @@ _mountImageIntoNode: function (markup, container, instance, shouldReuseMarkup, t
 
 **至此，从创建React组件，到组件加载到DOM 节点上的大致过程已经理顺；**
 
-下面写的有点乱，不建议看啦；
+
+
+
+
+
+
+===========>以上完毕；下面的所有核心是解释markup是如递归 的生成的；
 
 ####接下来解释下Flag1 和Flag2标记处源码
 
@@ -435,8 +445,8 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
     //situation1:ReactEmptyComponent组件实例,这个也是在ReactDOM.js中注册的函数；ReactDOMEmptyComponent.js中声明的这个函数；
     instance = ReactEmptyComponent.create(instantiateReactComponent);
   } else if (typeof node === 'object') {
-    var element = node;//element是ReactElement对象
-    var type = element.type;
+    var element = node;//element是ReactElement对象，这个对象可能描述的是原声DOM元素的信息，也可能描述的是我们自定义的组件的信息
+    var type = element.type;//type开头是小写则证明是原生DOM元素的描述信息，如果是大写开头，则证明是自定义的React组件的描述信息
     if (typeof type !== 'function' && typeof type !== 'string') {
       var info = '';
       if (process.env.NODE_ENV !== 'production') {
