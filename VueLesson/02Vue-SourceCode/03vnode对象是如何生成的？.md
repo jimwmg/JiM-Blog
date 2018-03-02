@@ -321,7 +321,7 @@ render = function () {
 
 ```javascript
 vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
-//vm.$creaateElement 这个函数是当组件自己写了render函数的时候会调用,表示会对子元素进行最高级的归一化处理。
+//vm.$createElement 这个函数是当组件自己写了render函数的时候会调用,表示会对子元素进行最高级的归一化处理。
 vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 // render self
 let vnode

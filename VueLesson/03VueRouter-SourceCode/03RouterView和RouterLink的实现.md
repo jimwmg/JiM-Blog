@@ -72,6 +72,7 @@ export default {
     // has been toggled inactive but kept-alive.
     let depth = 0
     let inactive = false
+    //depth决定当前router-view出口从route.matched数组中选择哪一个route对象进行渲染
     while (parent && parent._routerRoot !== parent) {
       if (parent.$vnode && parent.$vnode.data.routerView) {
         depth++
@@ -130,11 +131,23 @@ export default {
         }
       }
     }
-    //调用createElement 函数 渲染匹配的组件
+    //调用createElement 函数 渲染匹配的组件,
     return h(component, data, children)
   }
 }
 ```
+
+```javascript
+vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
+//vm.$createElement 这个函数是当组件自己写了render函数的时候会调用,表示会对子元素进行最高级的归一化处理。
+vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+// render self
+let vnode
+//这里就执行了那个编译之后的render函数
+vnode = render.call(vm._renderProxy, vm.$createElement)
+```
+
+详情参见Vue-sourceCode ==>《vnode对象是如何渲染的》
 
 对于每一个匹配到的路由对象（matched)
 

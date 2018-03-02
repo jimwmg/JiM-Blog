@@ -907,7 +907,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
-  //如果有render函数，那么直接执行mount函数
+  //如果组件options中有render选项函数，那么直接执行mount函数 
   return mount.call(this, el, hydrating);//这个函数返回值就是Vue实例；
 }
 ```
@@ -1161,6 +1161,8 @@ render = function () {
 
 #####2.10.2 当把Vue实例对象和DOM节点关联起来之后，也就是说render函数拼接完毕之后，并且给到vm实例对象的vm.$options.render，接下来就执行真正的
 
+**注意:如果组件options中有render选项，则会执行执行mount函数**
+
 ```javascript
 return mount.call(this, el, hydrating)
 ```
@@ -1349,7 +1351,7 @@ Vue.prototype._render = function (): VNode {
 }
   **/
     const {
-      render,
+      render, //这个render可以有两个来源：第一个是vue编译之后生成的render函数，如上所示，第二个就是我们自己写的render函数，比如router-view组件；
       staticRenderFns,
       _parentVnode
     } = vm.$options

@@ -349,11 +349,11 @@ init (app: any /* Vue component instance */) {
 
 ==>Vue.util.defineReactive(`this`, `'_route'`, `this._router.history.current`) ：给应用实例注册了响应式属性，当该属性值更新的时候，就会触发应用的更新机制
 
-==>router.init    history.push     history.replace 都会触发history.transitionTo
+==>router.init    history.push     history.replace  都会触发history.transitionTo
 
 ==> history.transitionTo:根据当前地址栏更新route对象
 
-==>router.match:根据当前地址栏生成对应的route对象
+==>router.match(location, this.current):根据当前地址栏生成对应的route对象(这里会从createRouteMap生成的字典中去取) 详情参见《matcher和history创建源码解析》
 
 ==>confirmTransition :根据生成的route对象确认跳转
 
