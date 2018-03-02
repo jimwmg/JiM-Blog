@@ -69,13 +69,16 @@ export function createMatcher (
   routes: Array<RouteConfig>,
   router: VueRouter
 ): Matcher {
+    //详情自行查看 create-matcher.js文件
   const { pathList, pathMap, nameMap } = createRouteMap(routes)
+  //createRouteMap在调用addRouteRecord的时候会进行path和component的断言，也就是说要求routes配置中必须有path选项，component不能是一个字符串；
 //createRouteMap处理完routes之后
   /***
   pathList:['/','/foo','/bar'];
   pathMap:{'/',recordHome,'/foo':recordFoo,'/bar':recordBar}
   nameMap:{'home':recordHome,'foo':recordFoo,'bar':recordBar}
   **/
+  //闭包
   function addRoutes (routes) {
     createRouteMap(routes, pathList, pathMap, nameMap)
   }
@@ -99,7 +102,7 @@ const record: RouteRecord = {
   components: route.components || { default: route.component },
   instances: {},
   name,
-  parent,
+  parent,    //注意这个parent，这个关联了当前路由的父路由，后面会根据这个找到对应路由的父路由，放到matched数组中
   matchAs,
   redirect: route.redirect,
   beforeEnter: route.beforeEnter,
@@ -119,6 +122,140 @@ matcher对象
 ```javascript
 matcher:{match,addRoutes}
 ```
+
+`router.push(location, onComplete?, onAbort?)`
+
+```javascript
+// 字符串
+router.push('home')
+
+// 对象
+router.push({ path: 'home' })
+
+// 命名的路由
+router.push({ name: 'user', params: { userId: 123 }})
+
+// 带查询参数，变成 /register?plan=private
+router.push({ path: 'register', query: { plan: 'private' }})
+```
+
+* 具体看下match的实现,针对push的不同参数，vue-router的具体处理如下：
+
+```javascript
+ function match (
+    raw: RawLocation,
+    currentRoute?: Route,
+    redirectedFrom?: Location
+  ): Route {
+    const location = normalizeLocation(raw, currentRoute, false, router)
+    const { name } = location
+//处理push了 name
+    if (name) {
+       // createMatcher中处理了我们配置的routes对象之后生成了nameMap pathMap pathList
+      const record = nameMap[name]
+      if (process.env.NODE_ENV !== 'production') {
+        warn(record, `Route with name '${name}' does not exist`)
+      }
+        //如果没有在nameMap中找到，则返回null路由对象
+      if (!record) return _createRoute(null, location)
+      const paramNames = record.regex.keys
+        .filter(key => !key.optional)
+        .map(key => key.name)
+
+      if (typeof location.params !== 'object') {
+        location.params = {}
+      }
+	//	如果找到了路由对象，那么将当前路由的params对象给到匹配到的新路由
+      if (currentRoute && typeof currentRoute.params === 'object') {
+        for (const key in currentRoute.params) {
+          if (!(key in location.params) && paramNames.indexOf(key) > -1) {
+            location.params[key] = currentRoute.params[key]
+          }
+        }
+      }
+	//
+      if (record) {
+        location.path = fillParams(record.path, location.params, `named route "${name}"`)
+        return _createRoute(record, location, redirectedFrom)
+      }
+        //处理push 了 path
+    } else if (location.path) {
+      location.params = {} //这一行代码也就解释了官网上如下一段话的描述
+        //注意：如果提供了 path，params 会被忽略，上述例子中的 query 并不属于这种情况。取而代之的是下面例子的做法，你需要提供路由的 name 或手写完整的带有参数的 path：
+      for (let i = 0; i < pathList.length; i++) {
+        const path = pathList[i]
+        const record = pathMap[path]
+        if (matchRoute(record.regex, location.path, location.params)) {
+          return _createRoute(record, location, redirectedFrom)
+        }
+      }
+    }
+    // no match
+    return _createRoute(null, location)
+  }
+```
+
+```javascript
+function _createRoute (
+    record: ?RouteRecord,
+    location: Location,
+    redirectedFrom?: Location
+  ): Route {
+    if (record && record.redirect) {
+      return redirect(record, redirectedFrom || location)
+    }
+    if (record && record.matchAs) {
+      return alias(record, location, record.matchAs)
+    }
+    return createRoute(record, location, redirectedFrom, router)
+  }
+```
+
+```javascript
+
+export function createRoute (
+  record: ?RouteRecord,
+  location: Location,
+  redirectedFrom?: ?Location,
+  router?: VueRouter
+): Route {
+  const stringifyQuery = router && router.options.stringifyQuery
+
+  let query: any = location.query || {}
+  try {
+    query = clone(query)
+  } catch (e) {}
+
+  const route: Route = {
+    name: location.name || (record && record.name),
+    meta: (record && record.meta) || {},
+    path: location.path || '/',
+    hash: location.hash || '',
+    query,
+    params: location.params || {},
+    fullPath: getFullPath(location, stringifyQuery),//这个就是根据path query hash 动态计算的fullpath
+    matched: record ? formatMatch(record) : []  //如果有对应的record,那么就找到该record对应的所有父 record
+  }
+  if (redirectedFrom) {
+    route.redirectedFrom = getFullPath(redirectedFrom, stringifyQuery)
+  }
+  return Object.freeze(route)
+}
+```
+
+```javascript
+//将所有的父 子 record 都放入 matched数组中
+function formatMatch (record: ?RouteRecord): Array<RouteRecord> {
+  const res = []
+  while (record) {
+    res.unshift(record)
+    record = record.parent
+  }
+  return res
+}
+```
+
+
 
 ### 3 创建history对象的流程
 

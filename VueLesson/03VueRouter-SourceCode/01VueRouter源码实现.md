@@ -70,9 +70,15 @@ export default class VueRouter {
         }
     }
   }
+  match (
+    raw: RawLocation,
+    current?: Route,
+    redirectedFrom?: Location
+  ): Route {
+    return this.matcher.match(raw, current, redirectedFrom)
+  }
   init();
   beforeEach();
-  match();
   afterEach();
   go();
   forward();
@@ -178,7 +184,9 @@ export function install (Vue) {
   Object.defineProperty(Vue.prototype, '$route', {
     get () { return this._routerRoot._route } //history.current
   })
+   //所有的组件实例对象上都有 $router和 $route对象；
   //$router 是不变的，但是 $route是随着地址栏变化而变化的；
+  //$route.matched是当前路由所匹配到的所有组件数组集合；
 //给Vue构造函数注册组件，Vue.options.components上就有了RouterView 和 RouterLink组件
   //这是全局注册组件的方式，所以所有Vue的组件都可以使用通过全局注册的组件；
   Vue.component('RouterView', View)
@@ -202,6 +210,24 @@ const router = new VueRouter({
     ]
 });
 
+```
+
+路由信息对象
+
+```
+ <router-link to="/foo/baz?name=jim">Go to Foo</router-link>
+```
+
+```javascript
+$route:Object
+fullPath:"/foo/bbbbz?name=jim"
+hash:""
+matched:[{…}]  //匹配到的组件信息
+meta:{}
+name:undefined
+params:{id: "bbbbz"}
+path:"/foo/baz"
+query:{name: "jim"}
 ```
 
 创建router实例对象的时候，会执行VueRouter的构造函数，其中有两行重要的代码
@@ -243,7 +269,7 @@ let vm = new Vue({
 
 这里，当我们new Vue(options)的时候，会首先执行callHook(vm, 'beforeCreate')生命周期函数数组
 
-由于beforeCreate该函数是Vue构造函数Vue.options.beforeCreate  Vue.options.destroyed上，所以在实例化Vue组件的时候，就会在vm.$options.beforeCreate.    vm.$options.destroy有这两个生命周期函数
+由于beforeCreate该函数是Vue构造函数Vue.options.beforeCreate  Vue.options.destroyed上，所以在实例化Vue组件的时候，就会在`vm.$options.beforeCreate.    vm.$ptions.destroy`有这两个生命周期函数
 
 由于子组件中没有router这个属性，所以即时子组件上有这个beforeCreate钩子函数，也不会在此对router这个对象执行init函数；
 
@@ -323,7 +349,7 @@ init (app: any /* Vue component instance */) {
 
 ==>Vue.util.defineReactive(`this`, `'_route'`, `this._router.history.current`) ：给应用实例注册了响应式属性，当该属性值更新的时候，就会触发应用的更新机制
 
-==>router.init  history.push     history.replace 都会触发history.transitionTo
+==>router.init    history.push     history.replace 都会触发history.transitionTo
 
 ==> history.transitionTo:根据当前地址栏更新route对象
 
@@ -337,16 +363,101 @@ init (app: any /* Vue component instance */) {
 
 ==>响应式属性值的改变，就会触发Vue的更新机制，从而实现了DOM的更新
 
+==> Vue更新的时候，router-view组件就会根据最新的`vm._route.matched`上的匹配到的组件，对应的输出组件；
+
+==>完毕
+
 **以上基本流程基本完毕，下面稍微详细分析下各个函数大致的实现**
 
 ###4 细节总结
 
+#### `router.push(location, onComplete?, onAbort?)`
+
+```javascript
+// 字符串
+router.push('home')
+
+// 对象
+router.push({ path: 'home' })
+
+// 命名的路由
+router.push({ name: 'user', params: { userId: 123 }})
+
+// 带查询参数，变成 /register?plan=private
+router.push({ path: 'register', query: { plan: 'private' }})
+```
+
+`router.push.  router.replace`
+
+```javascript
+push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    this.history.push(location, onComplete, onAbort)
+}
+replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    this.history.replace(location, onComplete, onAbort)
+}
+```
+
+`history.push  history.replace`
+
+```javascript
+  push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    const { current: fromRoute } = this
+    this.transitionTo(location, route => {
+      pushState(cleanPath(this.base + route.fullPath))
+      handleScroll(this.router, route, fromRoute, false)
+      onComplete && onComplete(route)
+    }, onAbort)
+  }
+  replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    const { current: fromRoute } = this
+    this.transitionTo(location, route => {
+      replaceState(cleanPath(this.base + route.fullPath))
+      handleScroll(this.router, route, fromRoute, false)
+      onComplete && onComplete(route)
+    }, onAbort)
+  }
+```
+
+```javascript
+export function pushState (url?: string, replace?: boolean) {
+  saveScrollPosition()
+  // try...catch the pushState call to get around Safari
+  // DOM Exception 18 where it limits to 100 pushState calls
+  const history = window.history
+  try {
+    if (replace) {
+      history.replaceState({ key: _key }, '', url)
+    } else {
+      _key = genKey()
+      history.pushState({ key: _key }, '', url)
+    }
+  } catch (e) {
+    window.location[replace ? 'replace' : 'assign'](url)
+  }
+}
+//这里和pushState差别就是多传入了一个参数 true ,然后会调用history.replace
+export function replaceState (url?: string) {
+  pushState(url, true)
+}
+
+```
+
+这里的逻辑是先根据  location 得到 route对象 ==> 然后更新路由 updateRoute（更新路由的时候会重新给$route赋值，由于该属性是响应式的，所以会更新视图组件） ==> 然后执行 transitionTo 中的第二个参数，也就是回调函数 ==> 此时才真正改变地址栏，向地址栏历史访问记录中添加访问记录；
+
+history文件夹：
+
 ```javascript
  transitionTo (location: RawLocation, onComplete?: Function, onAbort?: Function) {
    //this.router.match==>this.matcher.match==>_createRoute()创建匹配之后的route:如果匹配不到创建null
+     //location就是我们传入的地址，可能是一个字符串，也可能是一个描述组件的对象，参见
+     //https://router.vuejs.org/zh-cn/essentials/navigation.html
+    
     const route = this.router.match(location, this.current)
+    //这里会执行：return this.matcher.match(raw, current, redirectedFrom)
+    //详情《matcher和history创建源码解析》
     this.confirmTransition(route, () => {
-      this.updateRoute(route)
+      this.updateRoute(route)  
       onComplete && onComplete(route)
       this.ensureURL()
 

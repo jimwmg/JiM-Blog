@@ -69,7 +69,7 @@ commit (_type, _payload, _options) {
       }
       return
     }
-  /** 利用_withCommit方法执行本次批量触发mutation处理函数，并传入payload参数。
+  /** 利用_withCommit方法执行本次批量触发mutation处理函数，并传入payload参数。如果批量触发store中的mutation，则一个个的处理；
     _withCommit (fn) {
         const committing = this._committing
         this._committing = true
