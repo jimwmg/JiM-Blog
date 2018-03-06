@@ -300,6 +300,8 @@ vm._update()  用于将vnode对象挂载，而如果vnode对象还是一个组�
 
 #### 2.2 更新阶段 beforUpdate  updated
 
+[Vue异步更新组件](https://cn.vuejs.org/v2/guide/reactivity.html#%E5%BC%82%E6%AD%A5%E6%9B%B4%E6%96%B0%E9%98%9F%E5%88%97)
+
 当我们对某个组件的data或者props进行更改的时候，会触发该组件上的 updateComponent，他的触发流程是下面这样的
 
 * 首先触发该属性依赖dep数组中的Watcher实例对象的update函数；将该属性依赖的的所有Watcher实例对象放入queueWatcher
@@ -312,6 +314,7 @@ notify () {
             subs[i].update()
         }
 }  
+//触发某个data属性或者props属性 依赖的dep数组中存放的所有的watcher实例对象中所有的update函数
 update () {
     /* istanbul ignore else */
     if (this.lazy) {
@@ -319,26 +322,30 @@ update () {
     } else if (this.sync) {
         this.run()
     } else {
+        //Vue默认异步更新，this指的是每一个Watcher实例对象
         queueWatcher(this)
     }
 }
 
 ```
 
+observe/scheduler.js
+
 ```javascript
-export const MAX_UPDATE_COUNT = 100
+export const MAX_UPDATE_COUNT = 100 //用于标记某次循环的次数，最大循环次数默认是一百次
 
 const queue: Array<Watcher> = []
 const activatedChildren: Array<Component> = []
-let has: { [key: number]: ?true } = {}
-let circular: { [key: number]: number } = {}
-let waiting = false
-let flushing = false
+let has: { [key: number]: ?true } = {}  
+//has对象用于存放watcher实例对象的id(每一个watcher实例对象是唯一的)
+let circular: { [key: number]: number } = {} //设置被循环的watcher实例对象的id
+let waiting = false  //标记是否进行  queue flush
+let flushing = false //标记当前queue队列是否被flush
 let index = 0
 
 export function queueWatcher (watcher: Watcher) {
-  const id = watcher.id
-  if (has[id] == null) {
+  const id = watcher.id  //获取watcher实例对象的id
+  if (has[id] == null) { //不存在则标记has
     has[id] = true
     if (!flushing) {
       queue.push(watcher)
@@ -354,6 +361,7 @@ export function queueWatcher (watcher: Watcher) {
     // queue the flush
     if (!waiting) {
       waiting = true
+     //这里就是异步更新代码的根源，参见《Vue.prototype.$nextTick源码》
       nextTick(flushSchedulerQueue)
     }
   }
@@ -364,13 +372,32 @@ export function queueWatcher (watcher: Watcher) {
 function flushSchedulerQueue () {
   flushing = true
   let watcher, id
+  // Sort queue before flush.
+  // This ensures that:
+  // 1. Components are updated from parent to child. (because parent is always
+  //    created before the child)
+  // 2. A component's user watchers are run before its render watcher (because
+  //    user watchers are created before the render watcher)
+  // 3. If a component is destroyed during a parent component's watcher run,
+  //    its watchers can be skipped.
   queue.sort((a, b) => a.id - b.id)
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
     id = watcher.id
     has[id] = null
-    watcher.run()  //这里就是执行 updateComponent ，也就是执行Vue.prototype._update
+    watcher.run() 
+    //这里就是执行 updateComponent ，也就是执行Vue.prototype._update 或者是watch和computed对应的函数
     // in dev build, check and stop circular updates.
+      /*
+      在测试环境中，检测watch是否在死循环中
+      比如这样一种情况
+      watch: {
+        test () {
+          this.test++;//此时又会执行test的update,更新其依赖的watcher实例对象 存放 has
+        }
+      }
+      持续执行了一百次watch代表可能存在死循环
+    */
     if (process.env.NODE_ENV !== 'production' && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1
       if (circular[id] > MAX_UPDATE_COUNT) {
@@ -406,7 +433,7 @@ function flushSchedulerQueue () {
 
 function callUpdatedHooks (queue) {
   let i = queue.length
-  while (i--) {
+  while (i--) {  //从watcher对象中逐个执行其vm实例对象的updated方法
     const watcher = queue[i]
     const vm = watcher.vm
     if (vm._watcher === watcher && vm._isMounted) {
@@ -415,6 +442,8 @@ function callUpdatedHooks (queue) {
   }
 }
 ```
+
+**以上异步任务flushSchedulerQueue是在所有的同步任务执行完毕之后才去执行的**
 
 ```javascript
  Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
@@ -460,6 +489,14 @@ function callUpdatedHooks (queue) {
      //这里的意思是 updated生命周期函数会在scheduler中执行
   }
 ```
+
+#### 总结以上更新流程
+
+* 当我们改变了某个data或者props属性值的时候，会触发该属性值的依赖dep中的notify,之后会将该属性所依赖的watcher实例对象放入一个queue数组中，然后 通过 flushSchedulerQueue **异步**执行queue中的watcher实例对象的run 函数
+* 后来执行一步任务 flushSchedulerQueue 的时候，又分为以下步骤
+  * 首先会通过for循环执行该属性的依赖的queue数组中watcher实例对象中的cb,比如 updateComponent ，也就是执行`Vue.prototype._update` （执行beforeUpdate生命周期函数）或者是 watch和computed对应的函数
+  * 然后通过 resetSchedulerState 重置状态
+  * 最后执行 callUpdatedHooks ，执行该属的依赖的queue数组中watcher实例对象对应的vm的 updated生命周期函数
 
 #### 2.3 对于更新的过程中遇到keep-alive组件的情况和上面一样
 

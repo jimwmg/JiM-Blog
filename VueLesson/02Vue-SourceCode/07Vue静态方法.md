@@ -466,9 +466,11 @@ Vue.directive('focus', {
 
 参考[《Vue双向数据绑定实现原理2》](https://github.com/jimwmg/JiM-Blog/tree/master/VueLesson/02Vue-SourceCode)
 
-Vue的解决办法是提供了响应式的api: vm.$set/vm.$delete/ Vue.set/ Vue.delete /数组的$set/数组的$remove。
+Vue的解决办法是提供了响应式的api: `vm.$set/vm.$delete/ Vue.set/ Vue.delete /数组的$set/数组的$remove`。
 
 observe/index.js
+
+**注意对象不能是 Vue 实例，或者 Vue 实例的根数据对象。因为对于Vue实例的跟数据对象，并没有在其依赖数组dep中放入依赖,所以不会起到更新的作用**
 
 ```javascript
 export function set (target: Array<any> | Object, key: any, val: any): any {
@@ -494,13 +496,124 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     return val
   }
   defineReactive(ob.value, key, val)
-  ob.dep.notify()
+    //这里对于根数据对象，dep对象中的依赖为空；所以对于根数据调用set函数不会更新视图
+  ob.dep.notify() //触发视图更新，同时实现数据的双向绑定
   return val
 }
 
 ```
 
+**解释下为什么：对象不能是 Vue 实例，或者 Vue 实例的根数据对象**
+
+```javascript
+var vm = new Vue({
+    data:{
+        name:'Jim',
+        shop:{title1:'title1',title2:'title2'}
+    }
+})
+vm.$set(vm._data,'address','NewYork') //不起作用
+vm.$set(vm._data.shop,'title3','title3') //起作用
+```
+
+```javascript
+data就是根数据对象：传入new Vue的 data 对象
+observe(data) ==> new Observe(data) ==> walk(data) ==> defineReactive(data,key,data[key])
+```
+
+```javascript
+export class Observer {
+  value: any;
+  dep: Dep;
+  vmCount: number; // number of vms that has this object as root $data
+
+  constructor (value: any) {
+    this.value = value
+    this.dep = new Dep() //对于根数据，这里不会添加依赖，对于不是根数据的对象，会将依赖添加到这里
+    this.vmCount = 0
+    def(value, '__ob__', this)
+    if (Array.isArray(value)) {
+      const augment = hasProto
+        ? protoAugment
+        : copyAugment
+      augment(value, arrayMethods, arrayKeys)
+      this.observeArray(value)
+    } else {
+      this.walk(value)
+    }
+  }
+//......
+ walk (obj: Object) {
+    const keys = Object.keys(obj)
+    for (let i = 0; i < keys.length; i++) {
+      defineReactive(obj, keys[i], obj[keys[i]])
+    }
+  }
+}
+```
+
+```javascript
+export function defineReactive (
+  obj: Object,
+  key: string,
+  val: any,
+  customSetter?: ?Function,
+  shallow?: boolean
+) {
+  const dep = new Dep()
+
+  const property = Object.getOwnPropertyDescriptor(obj, key)
+  if (property && property.configurable === false) {
+    return
+  }
+
+  // cater for pre-defined getter/setters
+  const getter = property && property.get
+  const setter = property && property.set
+
+  let childOb = !shallow && observe(val)
+  Object.defineProperty(obj, key, {
+    enumerable: true,
+    configurable: true,
+    get: function reactiveGetter () {
+      const value = getter ? getter.call(obj) : val
+      if (Dep.target) {
+          //这里是核心
+        dep.depend()  //对于根数据，会将依赖添加到闭包产生的dep中，而不是observe实例对象的dep中
+        if (childOb) { //对于不是根数据，比如shop对象，则会将依赖添加到observe实例对象的dep中
+          childOb.dep.depend()
+          if (Array.isArray(value)) {
+            dependArray(value)
+          }
+        }
+      }
+      return value
+    },
+    set: function reactiveSetter (newVal) {
+      const value = getter ? getter.call(obj) : val
+      /* eslint-disable no-self-compare */
+      if (newVal === value || (newVal !== newVal && value !== value)) {
+        return
+      }
+      /* eslint-enable no-self-compare */
+      if (process.env.NODE_ENV !== 'production' && customSetter) {
+        customSetter()
+      }
+      if (setter) {
+        setter.call(obj, newVal)
+      } else {
+        val = newVal
+      }
+      childOb = !shallow && observe(newVal)
+      dep.notify()
+    }
+  })
+}
+```
+
 ### 8 Vue.delete 
+
+**目标对象不能是一个 Vue 实例或 Vue 实例的根数据对象。**
 
 基本原理同Vue.set
 
@@ -525,6 +638,7 @@ export function del (target: Array<any> | Object, key: any) {
   if (!ob) {
     return
   }
+    //触发视图的更新
   ob.dep.notify()
 }
 ```
