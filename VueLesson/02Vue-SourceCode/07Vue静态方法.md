@@ -366,9 +366,9 @@ export function initUse (Vue: GlobalAPI) {
 
     // additional parameters 将arguments对象转化为数组，方便后面apply调用
     const args = toArray(arguments, 1)
-    args.unshift(this)
+    args.unshift(this)  //args数组中第一项是Vue构造函数，通过apply进行分割
     if (typeof plugin.install === 'function') {
-      //这个apply用的真巧妙，install函数中只接受第一个参数Vue构造函数，apply将args数组拆分开传过去也不会用到；
+      //这个apply用的真巧妙，
       plugin.install.apply(plugin, args)
     } else if (typeof plugin === 'function') {
       plugin.apply(null, args)
@@ -376,6 +376,15 @@ export function initUse (Vue: GlobalAPI) {
     installedPlugins.push(plugin)
     return this
   }
+}
+export function toArray (list: any, start?: number): Array<any> {
+  start = start || 0
+  let i = list.length - start
+  const ret: Array<any> = new Array(i)
+  while (i--) {
+    ret[i] = list[i + start]
+  }
+  return ret
 }
 ```
 
