@@ -70,7 +70,7 @@ module.exports = {
     devServer:{
         host: '127.0.0.1',
     	port: 8010,
-        publicPath:'anyPath'
+        publicPath:'/anyPath'
     }
 }
 ```
@@ -87,12 +87,12 @@ module.exports = {
     entry:'./src/main.js',
     output:{
         path:path.resolve(__dirname,'dist'),
-      	publicPath:'otherPath'
+      	publicPath:'/otherPath'
     },
     devServer:{
         host: '127.0.0.1',
     	port: 8010,
-        publicPath:'anyPath'
+        publicPath:'/anyPath'
     }
 }
 ```
@@ -101,7 +101,7 @@ module.exports = {
 
 此时服务器的路径是根据 `devServer.publicPath`启动的，但是资源却不在，所以解释了
 
-output.publicPath 是很重要的选项。如果指定了一个错误的值，则在加载这些资源时会收到 404 错误。
+**output.publicPath 是很重要的选项。如果指定了一个错误的值，则在加载这些资源时会收到 404 错误。**
 
 #### 2.5 对于访问资源路径出错的时候，可以通过 `devServer.historyApiFallback`来指定任意的 `404` 响应都可能需要被替代为 的资源路径
 

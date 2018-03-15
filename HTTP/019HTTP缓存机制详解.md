@@ -58,7 +58,11 @@ Expires的值为服务端返回的到期时间，即下一次请求时，请求�
 Cache-Control 是最重要的规则。常见的取值有private、public、no-cache、max-age，no-store，默认为private。
 
 ```
-private:             客户端可以缓存public:              客户端和代理服务器都可缓存（前端的同学，可以认为public和private是一样的）max-age=xxx:   缓存的内容将在 xxx 秒后失效no-cache:          需要使用对比缓存来验证缓存数据（后面介绍）no-store:           所有内容都不会缓存，强制缓存，对比缓存都不会触发
+private:  客户端可以缓存
+public:  客户端和代理服务器都可缓存（前端的同学，可以认为public和private是一样的）
+max-age=xxx:   缓存的内容将在 xxx 秒后失效
+no-cache:需要使用对比缓存来验证缓存数据（后面介绍）
+no-store:所有内容都不会缓存，强制缓存，对比缓存都不会触发
 ```
 
 （对于前端开发来说，缓存越多越好，so…基本上和它说886）

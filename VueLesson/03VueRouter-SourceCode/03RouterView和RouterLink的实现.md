@@ -57,6 +57,7 @@ export default {
       default: 'default'
     }
   },
+    //注意这里的parent就是 router-view组件实例对象的 父组件实例对象
   render (_, { props, children, parent, data }) {
     data.routerView = true
 
@@ -73,6 +74,8 @@ export default {
     let depth = 0
     let inactive = false
     //depth决定当前router-view出口从route.matched数组中选择哪一个route对象进行渲染
+    //在《matcher和history创建源码》中createRoute 生成route对象的时候，matched数组会根据我们的配置，找到对应的路由；这里的 depth 和 formatMatch 生成 matched是对应的
+    //如果parent组件实例对象 _routerRoot 不是指向 parent组件实例自身，那么就代表parent组件是一个子组件
     while (parent && parent._routerRoot !== parent) {
       if (parent.$vnode && parent.$vnode.data.routerView) {
         depth++
@@ -89,7 +92,7 @@ export default {
       return h(cache[name], data, children)
     }
     //得到匹配的路由组件
-    const matched = route.matched[depth]
+    const matched = route.matched[depth] //
     // render empty node if no matched route
     if (!matched) {
       cache[name] = null

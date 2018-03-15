@@ -245,9 +245,47 @@ situation4:
 
 **对于app-loyut组件内，子元素的标签上有slot = 'anyName'的属性的，那么该子元素就会在`<slot name='anyName'></slot>`中显示；**
 
-**可以通过输出vm.$children[0].$slots来深刻理解下，下面就是对$slot的挂载的解释**
+**可以通过输出`vm.$children[0].$slots`来深刻理解下，下面就是对$slot的挂载的解释**
 
-### 4 源码分析 
+###4 作用域插槽
+
+在父级中，具有特殊特性 `slot-scope` 的 `<template>` 元素必须存在，表示它是作用域插槽的模板。`slot-scope` 的值将被用作一个临时变量名，此变量接收从子组件传递过来的 prop 对象：
+
+child.vue 组件，**单个插槽；**
+
+```vue
+<div class="child">
+  <slot text="hello from child"></slot>  //这里的props属性，就是在父组件中slot-scope对应的变量接受
+</div>
+```
+
+parent.vue 组件
+
+```vue
+<div class="parent">
+  <child>
+    <template slot-scope="props">  //props可以为一个变量 a. b.  c 都可以，
+      <span>hello from parent</span>
+      <span>{{ props.text }}</span>  //这里对应的也需要通过 a.text.  b.text来接受
+    </template>
+  </child>
+</div>
+```
+
+最后渲染的结果
+
+```vue
+<div class="parent">
+  <div class="child">
+    <span>hello from parent</span>
+    <span>hello from child</span>
+  </div>
+</div>
+```
+
+
+
+### 5 源码分析 
 
 但是为什么会出现这样的效果呢？
 

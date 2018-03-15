@@ -131,7 +131,7 @@ export const mapGetters = normalizeNamespace((namespace, getters) => {
         console.error(`[vuex] unknown getter: ${val}`)
         return
       }
-      //《03Vuex实例化store对象的核心源码》 中解释了为什么实例对象store上，getters中有所有模块，包括子模块上的getters
+ //《03Vuex实例化store对象的核心源码》 中解释了为什么实例对象store上，getters中有所有模块，包括子模块上的getters
       return this.$store.getters[val]
     }
     // mark vuex getter for devtools

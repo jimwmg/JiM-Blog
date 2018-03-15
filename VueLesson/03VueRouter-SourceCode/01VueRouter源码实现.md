@@ -403,6 +403,7 @@ replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
 ```javascript
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
+    //transitionTo的实现是先根据 location 在路由map中找到对应的路由，组成一个matcher对象，然后执行传入 transitionTo 的第二个参数，即回调函数
     this.transitionTo(location, route => {
       pushState(cleanPath(this.base + route.fullPath))
       handleScroll(this.router, route, fromRoute, false)

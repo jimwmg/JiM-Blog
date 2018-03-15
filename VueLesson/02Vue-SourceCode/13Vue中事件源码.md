@@ -122,6 +122,7 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 //触发注册额函数，如果要触发的事件没有注册，那么不会做任何处理，直接返回vm实例对象
+    //通过 toArray将传入 $emit函数的参数进行转化为数组，注册的函数可以接受对应的参数作为值
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
     if (process.env.NODE_ENV !== 'production') {
@@ -142,7 +143,7 @@ export function eventsMixin (Vue: Class<Component>) {
       const args = toArray(arguments, 1)
       for (let i = 0, l = cbs.length; i < l; i++) {
         try {
-          cbs[i].apply(vm, args)
+          cbs[i].apply(vm, args)  //这里，args 就是传入$emit 函数除第一个参数外剩下的参数
         } catch (e) {
           handleError(e, vm, `event handler for "${event}"`)
         }
@@ -151,6 +152,14 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 }
-
+export function toArray (list: any, start?: number): Array<any> {
+  start = start || 0
+  let i = list.length - start
+  const ret: Array<any> = new Array(i)
+  while (i--) {
+    ret[i] = list[i + start]
+  }
+  return ret
+}
 ```
 

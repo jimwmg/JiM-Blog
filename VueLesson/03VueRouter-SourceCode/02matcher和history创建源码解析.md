@@ -72,6 +72,8 @@ export function createMatcher (
     //详情自行查看 create-matcher.js文件
   const { pathList, pathMap, nameMap } = createRouteMap(routes)
   //createRouteMap在调用addRouteRecord的时候会进行path和component的断言，也就是说要求routes配置中必须有path选项，component不能是一个字符串；
+  //两个作用，第一：根据配置生成的record会有父子record的关系链
+  //第二：将所有的route进行扁平化处理，生成 pathList, pathMap, nameMap这样的映射对象，方便在match函数中取出生成的对应的record对象；
 //createRouteMap处理完routes之后
   /***
   pathList:['/','/foo','/bar'];
@@ -85,11 +87,203 @@ export function createMatcher (
 
  function match(){ //... 
  }
+ function _createRouote(){
+        
+ }
+ function alias(){
+        
+ }
  //....
   return {
     match,
     addRoutes
   }
+}
+```
+
+createRouteMap源码解释
+
+官网中 [**要注意，以 / 开头的嵌套路径会被当作根路径。 这让你充分的使用嵌套组件而无须设置嵌套的路径。**](https://router.vuejs.org/zh-cn/essentials/nested-routes.html)有这样一句话,normalizePath函数解释了这句话的根源
+
+```javascript
+/* @flow */
+
+import Regexp from 'path-to-regexp'
+import { cleanPath } from './util/path'
+import { assert, warn } from './util/warn'
+
+export function createRouteMap (
+  routes: Array<RouteConfig>,
+  oldPathList?: Array<string>,
+  oldPathMap?: Dictionary<RouteRecord>,
+  oldNameMap?: Dictionary<RouteRecord>
+): {
+  pathList: Array<string>;
+  pathMap: Dictionary<RouteRecord>;
+  nameMap: Dictionary<RouteRecord>;
+} {
+  // the path list is used to control path matching priority
+  const pathList: Array<string> = oldPathList || []
+  // $flow-disable-line
+  const pathMap: Dictionary<RouteRecord> = oldPathMap || Object.create(null)
+  // $flow-disable-line
+  const nameMap: Dictionary<RouteRecord> = oldNameMap || Object.create(null)
+
+  routes.forEach(route => {
+    addRouteRecord(pathList, pathMap, nameMap, route)
+  })
+
+  // ensure wildcard routes are always at the end
+  for (let i = 0, l = pathList.length; i < l; i++) {
+    if (pathList[i] === '*') {
+      pathList.push(pathList.splice(i, 1)[0])
+      l--
+      i--
+    }
+  }
+
+  return {
+    pathList,
+    pathMap,
+    nameMap
+  }
+}
+
+function addRouteRecord (
+  pathList: Array<string>,
+  pathMap: Dictionary<RouteRecord>,
+  nameMap: Dictionary<RouteRecord>,
+  route: RouteConfig,
+  parent?: RouteRecord,
+  matchAs?: string
+) {
+  const { path, name } = route
+  if (process.env.NODE_ENV !== 'production') {
+    assert(path != null, `"path" is required in a route configuration.`)
+    assert(
+      typeof route.component !== 'string',
+      `route config "component" for path: ${String(path || name)} cannot be a ` +
+      `string id. Use an actual component instead.`
+    )
+  }
+
+  const pathToRegexpOptions: PathToRegexpOptions = route.pathToRegexpOptions || {}
+  //将 配置中的 path值进行标准化处理：一：如果以 / 开头，则会作为根路由，如果不是以 / k开头，则会拼接上父路由配置中的 path ;下面有normalizePath的实现源码
+  const normalizedPath = normalizePath(
+    path,
+    parent,
+    pathToRegexpOptions.strict
+  )
+
+  if (typeof route.caseSensitive === 'boolean') {
+    pathToRegexpOptions.sensitive = route.caseSensitive
+  }
+
+  const record: RouteRecord = {
+    path: normalizedPath, // 配置中的path如果是以 / 开头，则会返回原值，如果不是以 / 开头，则会拼接父路由的path 
+  //所以我们的根路由必须以 / 开头，这样才能在路由字典中找到对应的匹配路由
+    regex: compileRouteRegex(normalizedPath, pathToRegexpOptions),
+    components: route.components || { default: route.component },
+    instances: {},
+    name,
+    parent,
+    matchAs,
+    redirect: route.redirect,
+    beforeEnter: route.beforeEnter,
+    meta: route.meta || {},
+    props: route.props == null
+      ? {}
+      : route.components
+        ? route.props
+        : { default: route.props }
+  }
+
+  if (route.children) {
+    // Warn if route is named, does not redirect and has a default child route.
+    // If users navigate to this route by name, the default child will
+    // not be rendered (GH Issue #629)
+    if (process.env.NODE_ENV !== 'production') {
+      if (route.name && !route.redirect && route.children.some(child => /^\/?$/.test(child.path))) {
+        warn(
+          false,
+          `Named Route '${route.name}' has a default child route. ` +
+          `When navigating to this named route (:to="{name: '${route.name}'"), ` +
+          `the default child route will not be rendered. Remove the name from ` +
+          `this route and use the name of the default child route for named ` +
+          `links instead.`
+        )
+      }
+    }
+    route.children.forEach(child => {
+      const childMatchAs = matchAs
+        ? cleanPath(`${matchAs}/${child.path}`)
+        : undefined
+      addRouteRecord(pathList, pathMap, nameMap, child, record, childMatchAs)
+    })
+  }
+
+  if (route.alias !== undefined) {
+    const aliases = Array.isArray(route.alias)
+      ? route.alias
+      : [route.alias]
+
+    aliases.forEach(alias => {
+      const aliasRoute = {
+        path: alias,
+        children: route.children
+      }
+      addRouteRecord(
+        pathList,
+        pathMap,
+        nameMap,
+        aliasRoute,
+        parent,
+        record.path || '/' // matchAs
+      )
+    })
+  }
+//将生成的路由record放入路由字典中 pathList  pathMap 
+  if (!pathMap[record.path]) {
+    pathList.push(record.path)
+    pathMap[record.path] = record
+  }
+//将生成的路由record放入路由字典中 nameMap
+  if (name) {
+    if (!nameMap[name]) {
+      nameMap[name] = record
+    } else if (process.env.NODE_ENV !== 'production' && !matchAs) {
+      warn(
+        false,
+        `Duplicate named routes definition: ` +
+        `{ name: "${name}", path: "${record.path}" }`
+      )
+    }
+  }
+}
+
+function compileRouteRegex (path: string, pathToRegexpOptions: PathToRegexpOptions): RouteRegExp {
+  const regex = Regexp(path, [], pathToRegexpOptions)
+  if (process.env.NODE_ENV !== 'production') {
+    const keys: any = Object.create(null)
+    regex.keys.forEach(key => {
+      warn(!keys[key.name], `Duplicate param keys in route with path: "${path}"`)
+      keys[key.name] = true
+    })
+  }
+  return regex
+}
+
+function normalizePath (path: string, parent?: RouteRecord, strict?: boolean): string {
+  if (!strict) path = path.replace(/\/$/, '') //将path后面的 / 去掉，'/fff/'.replace(/\/$/, '')  ==>  /fff
+  if (path[0] === '/') return path  
+
+  if (parent == null) return path 
+//如果path 字符串以 / 开头，或者没有父级路由，则以根路径处理该路由，直接返回该path值，作为基准，取得fullath
+  return cleanPath(`${parent.path}/${path}`)
+  //如果两者都不是，则path不以 / 开头，则会作为子路由，此时其path取值要以父路由path为准进行拼接；
+}
+export function cleanPath (path: string): string {
+  return path.replace(/\/\//g, '/') //将全局的 // => /
 }
 ```
 
@@ -115,8 +309,6 @@ const record: RouteRecord = {
 }
 ```
 
-
-
 matcher对象
 
 ```javascript
@@ -137,9 +329,19 @@ router.push({ name: 'user', params: { userId: 123 }})
 
 // 带查询参数，变成 /register?plan=private
 router.push({ path: 'register', query: { plan: 'private' }})
+
+const route = this.router.match(location, this.current)
+//这里会执行：return this.matcher.match(raw, current, redirectedFrom)
+//详情《matcher和history创建源码解析》
 ```
 
 * 具体看下match的实现,针对push的不同参数，vue-router的具体处理如下：
+
+match的过程分为两个部分：
+
+第一： 根据传入的location对象处理location ,即 normalizeLocation 的过程
+
+第二：根据 normalizeLocation 之后的location ,从路由字典中取出对应的路由record;
 
 ```javascript
  function match (
@@ -147,6 +349,10 @@ router.push({ path: 'register', query: { plan: 'private' }})
     currentRoute?: Route,
     redirectedFrom?: Location
   ): Route {
+        //注意下这个 标准化location函数，该函数的作用主要是
+        //一：根据传入的 location中的path或者name,从路由字典中取出对应的路由record
+        //二：如果传递了name，那么直接通过name的字典，很容易找到对应的路由record
+        //三：但是如果设置了 path,那么，path会根据开头是否是 / 字符串来确定是根路由还是子路由，然后从路由字典中根据标准化后的path值去路由字典中取对应的路由record
     const location = normalizeLocation(raw, currentRoute, false, router)
     const { name } = location
 //处理push了 name
@@ -194,6 +400,116 @@ router.push({ path: 'register', query: { plan: 'private' }})
     return _createRoute(null, location)
   }
 ```
+
+第一： 根据传入的location对象处理location ,即 normalizeLocation 的过程
+
+```javascript
+export function normalizeLocation (
+  raw: RawLocation,
+  current: ?Route,
+  append: ?boolean,
+  router: ?VueRouter
+): Location {
+  let next: Location = typeof raw === 'string' ? { path: raw } : raw
+  // named target
+  //如果传入的location 有 name 属性，那么直接返回该 location ,通过name进行路由匹配
+  if (next.name || next._normalized) {
+    return next
+  }
+//如果传入的location没有path属性，且有params属性
+  // relative params
+  if (!next.path && next.params && current) {
+    next = assign({}, next)
+    next._normalized = true
+    const params: any = assign(assign({}, current.params), next.params)
+    if (current.name) {
+      next.name = current.name
+      next.params = params
+    } else if (current.matched.length) {
+      const rawPath = current.matched[current.matched.length - 1].path
+      next.path = fillParams(rawPath, params, `path ${current.path}`)
+    } else if (process.env.NODE_ENV !== 'production') {
+      warn(false, `relative params navigation requires a current route.`)
+    }
+    return next
+  }
+  //如果传入的location 有path属性
+  const parsedPath = parsePath(next.path || '')
+  const basePath = (current && current.path) || '/'
+  //对于传入的path resolvePath函数会对其进行处理
+  const path = parsedPath.path
+    ? resolvePath(parsedPath.path, basePath, append || next.append)
+    : basePath
+
+  const query = resolveQuery(
+    parsedPath.query,
+    next.query,
+    router && router.options.parseQuery
+  )
+
+  let hash = next.hash || parsedPath.hash
+  if (hash && hash.charAt(0) !== '#') {
+    hash = `#${hash}`
+  }
+
+  return {
+    _normalized: true,
+    path,
+    query,
+    hash
+  }
+}
+```
+
+1. ：如果传入的 path 是以 `/  `开头的路径，那么直接根据这个path值（根路由）去路由字典中取值
+2. ：如果传入的 path 不是以 `/`开头的路径，那么就根据当前路径为基准进行拼接，然后根据这个拼接好的路径，去路由字典中取值
+3. 以上都是在 `createRouteMap`创建路由字典的时候，针对 `/ ` 开头的path 和 不是 `/`开头的path都是有对应的处理的；
+
+```javascript
+export function resolvePath (
+  relative: string,
+  base: string,
+  append?: boolean
+): string {
+  const firstChar = relative.charAt(0)
+  if (firstChar === '/') {
+    return relative
+  }
+
+  if (firstChar === '?' || firstChar === '#') {
+    return base + relative
+  }
+
+  const stack = base.split('/')
+
+  // remove trailing segment if:
+  // - not appending
+  // - appending to trailing slash (last segment is empty)
+  if (!append || !stack[stack.length - 1]) {
+    stack.pop()
+  }
+
+  // resolve relative path
+  const segments = relative.replace(/^\//, '').split('/')
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i]
+    if (segment === '..') {
+      stack.pop()
+    } else if (segment !== '.') {
+      stack.push(segment)
+    }
+  }
+
+  // ensure leading slash
+  if (stack[0] !== '') {
+    stack.unshift('')
+  }
+
+  return stack.join('/')
+}
+```
+
+第二：根据 normalizeLocation 之后的location ,从路由字典中取出对应的路由record;
 
 ```javascript
 function _createRoute (
