@@ -28,6 +28,10 @@ fs.exists('index.html',function(isExists){
 })
 ```
 
+#### fs.existsSync(path) 用于同步的判断某个文件是否存在
+
+
+
 #### fs.open(path,flag,cb)
 
 ```javascript

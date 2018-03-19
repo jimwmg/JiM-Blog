@@ -326,7 +326,7 @@ async关键字声明的async函数执行后的返回值是一个Promise对象,as
 var asyncFun = async function(){
 }
 console.log(asyncFun) //async函数
-console.log(asyncFun()) //promise对象
+console.log(asyncFun()) //一个resolve的promise对象
 ```
 
 * async关键字，其声明的函数表示函数内部有异步操作
@@ -433,7 +433,44 @@ asyncPrint('hello world', 4000)
 
 以上可以参考promise中then注册函数返回一个新的promise的解释；[《实例promise - resolve源码解析》](https://github.com/jimwmg/JiM-Blog/tree/master/JavaScript/ES6)
 
+```html
+<script>
+    function timeout (){
+    return new Promise((resolve,reject)=>{
+        console.log('timeout')
+    })
+}
+async function f(){
+    //1 
+    console.log('sss')
+    //2 
+    // return 'fff'
+    //3 
+    // await timeout()
+    //4 
+    timeout()
+    //5 
+    setTimeout(function(){
+     console.log('异步操作')
+   },1000)
+}
+console.log(f)
+var ret = f();//返回一个resolve的promise对象
+ret.then((data)=>{
+    console.log('this is ',data)
+})
+console.log(ret)
 
+</script>
+```
+
+async函数的返回值是一个promise对象，先给给对象命名为 prosmieASYNC; 该对象的状态可以理解为仅受以下因素影响
+
+* 一：async函数内的await语句的返回值，如果该返回值不是一个promise对象，那么 prosmieASYNC，就会直接变成一个resolve的对象
+* 二：如果async函数内的await语句的返回值是一个prosmie对象，那么prosmieASYNC的状态就会由await语句返回的promsie对象来决定
+* 三：如果async函数内部有多个await语句，会顺序的往下执行
+  * 如果某个await 返回的 promise一直pendding,那么程序就会停滞
+  * 如果某个await 返回的promise reject 了,那么会直接将 prosmieASYNC 状态置为rejected,后续的语句都不会执行
 
 
 
