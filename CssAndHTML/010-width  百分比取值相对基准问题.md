@@ -8,6 +8,10 @@ updated :
 layout : 
 ---
 
+**对于inline元素，宽度由内容决定，不能设置宽度，无效**
+
+**对于inline-block  block 元素可以设置宽高**
+
 width  百分比取值相对基准问题
 
 一 ：标准流下，父元素不定位，不浮动，子元素的100% width相对于哪个元素的width进行取值

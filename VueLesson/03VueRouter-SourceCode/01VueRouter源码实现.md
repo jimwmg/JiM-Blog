@@ -110,7 +110,7 @@ export function initUse (Vue: GlobalAPI) {
     const args = toArray(arguments, 1)
     args.unshift(this)
     if (typeof plugin.install === 'function') {
-      //这个apply用的真巧妙，install函数中只接受第一个参数Vue构造函数，apply将args数组拆分开传过去也不会用到；
+ //这个apply用的真巧妙，install函数中只接受第一个参数Vue构造函数，apply将args数组拆分开传过去也不会用到；
       plugin.install.apply(plugin, args)
     } else if (typeof plugin === 'function') {
       plugin.apply(null, args)
@@ -239,7 +239,7 @@ this.matcher = createMatcher(options.routes || [], this)
 this.history = new HTML5History(this, options.base)
 ```
 
-具体查看《matcher和history创建源码解析》[解析](https://github.com/open-source/jimwmg)
+**重要：具体查看《matcher和history创建源码解析》[解析](https://github.com/open-source/jimwmg)**
 
 router实例对象
 
