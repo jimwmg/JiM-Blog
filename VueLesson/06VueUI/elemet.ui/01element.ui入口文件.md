@@ -28,6 +28,8 @@ Vue.component(Button.name, Button)
 
 ### 2 对于第一种使用方式 Vue.use(Element) 
 
+element-ui/src/index.vue
+
 ```javascript
 const components = [
   Pagination,

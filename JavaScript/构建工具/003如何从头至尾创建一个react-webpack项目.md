@@ -395,6 +395,8 @@ devServer: {
 
 使用webpack-dev-server命令行的时候，会自动查找名为webpack.config.js的配置文件。如果你的配置文件名称不是webpack.config.js，需要在命令行中指明配置文件。例如，如果配置文件是webpack.config.dev.js：`webpack-dev-server --inline --config webpack.config.dev.js`。
 
+对于其中的proxy选项：代理可以理解为 请求某一个地址 http:local.test.com 实际是请求了 代理的那个地址，但是network中的显示还是 http:local.test.com，也就是说代理对于客户端是无感的；
+
 以上
 
 -自动编译ES6  -自动重新打包以及浏览器自动刷新  -生产环境所需基本依赖完毕

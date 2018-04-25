@@ -395,7 +395,7 @@ var idList = [1, 2, 3, 4, 5];
 function getAllIdList(idList) {
   return Promise.all(idList.map((id)=>runAsync(id)))
     .then(function(data){
-    console.log('data:',data)
+    console.log('data:',data) // data是所有异步的结果组成的数组
   }).catch(function(reason){
     console.log('reason:',reason)
   })

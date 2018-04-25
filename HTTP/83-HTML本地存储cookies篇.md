@@ -87,17 +87,27 @@ expries 表示的是失效时间，准确讲是「时刻」，max-age表示的�
 
 默认情况是不指定 httponly，即可以通过 js 去访问。
 
+如果设置了该字段，那么在客户端，就不能通过document.cookies获取；
+
+Cookie都是通过document对象获取的，我们如果能让cookie在浏览器中不可见就可以了，那HttpOnly就是在设置cookie时接受这样一个参数，一旦被设置，在浏览器的document对象中就看不到cookie了。而浏览器在浏览网页的时候不受任何影响，因为Cookie会被放在浏览器头中发送出去(包括Ajax的时候)，应用程序也一般不会在JS里操作这些敏感Cookie的，对于一些敏感的Cookie我们采用HttpOnly，对于一些需要在应用程序中用JS操作的cookie我们就不予设置，这样就保障了Cookie信息的安全也保证了应用。
+
 ###4、如何利用以上属性去设置cookie？
 
 **服务器端设置**
 
 服务器通过发送一个名为 Set-Cookie 的HTTP头来创建一个cookie，作为 Response Headers 的一部分。如下图所示，每个Set-Cookie 表示一个 cookie（**如果有多个cookie,需写多个Set-Cookie**），每个属性也是以名/值对的形式（除了secure），属性间以分号加空格隔开。格式如下：
 
+```javascript
+set-cookie: vcsaas_test16_uid=595177f83a5a44138e611ce2; Max-Age=315360000; Expires=Sun, 16-Apr-2028 09:29:29 GMT; Domain=test.com; Path=/; HttpOnly
+set-cookie: vcsaas_test16_org_id=5ac34b76909483050c8cd52d; Max-Age=315360000; Expires=Sun, 16-Apr-2028 09:29:29 GMT; Domain=test.com; Path=/; HttpOnly
+set-cookie: vcsaas_test16_token=5ad86179cff47e3486c5ed00; Max-Age=315360000; Expires=Sun, 16-Apr-2028 09:29:29 GMT; Domain=test.com; Path=/; HttpOnly
+```
+
 **Set-Cookie: name=value[; expires=GMTDate][; domain=domain][; path=path][; secure]**
 
 只有cookie的名字和值是必需的。
 
-　　**客户端设置**
+　　**客户端设置**(在服务器没有设置httpOnly的情况下)
 
 客户端设置cookie的格式和Set-Cookie头中使用的格式一样。如下：
 

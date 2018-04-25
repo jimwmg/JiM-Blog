@@ -4,6 +4,12 @@ date: 2017-12-22
 categories: vue
 ---
 
+Q: `this.$router.push 会触发watch的$route,this.$router.replace却不会触发watch的$route`?
+
+:不是的，两者都可以触发watch的`$route`对象的函数
+
+Q: 如果父子组件都watch了 `$route` 那么子组件在 `$route` 变化的时候，都会触发子组件自身和父组件上的的watch函数 `$route`函数；
+
 ### 1 使用
 
 options参数配置

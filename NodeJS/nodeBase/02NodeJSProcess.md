@@ -13,7 +13,7 @@ updated :
 
 #### 属性
 
-- `process.argv`：返回一个数组，成员是当前进程的所有命令行参数。
+- `process.argv`：返回一个数组，成员是当前进程的所有命令行参数。由命令行执行脚本时的各个参数组成。它的第一个成员总是`node`，第二个成员是脚本文件名，其余成员是脚本文件的参数。
 - `process.env`：返回一个对象，成员为当前Shell的环境变量，比如`process.env.HOME`。
 - `process.installPrefix`：返回一个字符串，表示 Node 安装路径的前缀，比如`/usr/local`。相应地，Node 的执行文件目录为`/usr/local/bin/node`。
 - `process.pid`：返回一个数字，表示当前进程的进程号。
@@ -61,3 +61,44 @@ node process-args.js one two=three four
 - `SIGINT`事件：接收到系统信号`SIGINT`时触发，主要是用户按`Ctrl + c`时触发。
 - `SIGTERM`事件：系统发出进程终止信号`SIGTERM`时触发
 - `exit`事件：进程退出前触发
+
+### 3 process.argv
+
+```
+node dev.js --host local.test.com --proxy test18"
+```
+
+```javascript
+const argsOption = {
+    string: ['host', 'port', 'proxy'],
+    default: {
+        host: 'localhost',
+        port: '8888',
+        proxy: '',
+    },
+};
+const args = minimist(process.argv, argsOption);
+console.log(process.argv);
+console.log(args);
+// 输出如下
+//process.argv
+[ '/usr/local/bin/node',
+ 'path/to/dev.js',
+ '--host',
+ 'local.test.com',
+ '--proxy',
+ 'test18'
+]
+// args
+{ 
+  _:[ '/usr/local/bin/node',
+  '/Users/jim-w/work/vcsaas-web/node_modules/.bin/gulp',
+  'dev' ],
+  host: 'local.36kr.com',
+  proxy: 'test18',
+  port: '8888' 
+}
+```
+
+
+
