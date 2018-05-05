@@ -28,3 +28,4 @@
 * module的嵌套，无论主模块还是子模块，actions getters mutations都映射到了store对象上，所以后面在任何子组件中都可以通过辅助函数得到modules中的getters actions mutations等
 * router-view组件根据matcher匹配到的组件进行渲染对应的组件
 * 辅助函数可以在各个组件中获取到store实例对象上的actions. getters. mutations等；
+* Vuex和Vue-Router都通过 Vue.mix 混入了 beforeCreate 函数，而该函数会在所有的vue组件中beforeCreate生命周期中的函数数组中的一个函数，并且在每个组件实例化的时候都会执行；

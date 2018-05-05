@@ -263,7 +263,7 @@ router:{
 ```javascript
 //启动应用，将router注入到应用当中,注意这里的属性名必须是router
 let vm = new Vue({
-    router,//VueRouter实例对象
+    router,//VueRouter实例对象，这里的作用是为了将router实例对象，放到vm.$options.router上
 }).$mount('#app');
 ```
 

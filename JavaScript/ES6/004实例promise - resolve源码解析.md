@@ -10,6 +10,8 @@ layout :
 
 ### 1 最简单一个案例
 
+如果传入then回调的不是一个函数，那么传入promise对象的变化将不会有任何反应。
+
 ```javascript
 function runAsync(){
   let p = new Promise(function(resolve,reject){
@@ -336,7 +338,7 @@ function tryCallOne(fn, a) {
 
 ####下一个then中注册的函数会接收到上一个then的返回值作为该then中注册的函数的参数；
 
-####3.1 then注册的函数返回基本数据类型
+####3.1 then注册的函数返回基本数据类型,那么返回的promise对象直接还是原来的那个被resolve的对象，会接着执行下一个then的调用
 
 ```javascript
 function runAsync(){

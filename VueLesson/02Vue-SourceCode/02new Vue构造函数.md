@@ -101,9 +101,9 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
-    initLifecycle(vm)
-    initEvents(vm)
-    initRender(vm)
+    initLifecycle(vm) // 标记生命周期的一些参数，便于知道该组件处理那个生命周期阶段
+    initEvents(vm) // 创建该组件存放事件处理函数的对象
+    initRender(vm) // 组件实例上添加$createElement函数，和 _c 函数，在生成的render函数中用于生成vnode用的
     //组件实例的生命周期中一个函数  beforeCreate执行（如果有的话）
     callHook(vm, 'beforeCreate') //上面融合到vm.$options的生命周期函数就可以被调用了
     //以下就是Vue组件实例的创建过程

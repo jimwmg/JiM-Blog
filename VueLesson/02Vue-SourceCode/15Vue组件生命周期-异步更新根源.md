@@ -234,6 +234,10 @@ if (vm.$options.el) {
 
 ####2.1 挂载阶段 beforeMount.  mounted
 
+1. 父组件的 beforeCreate --> created --> beforeMount -->
+2.  子组件的生命周期 beforeCreate --> created --> beforeMount --> mounted
+3. 父组件的mounted
+
 `vm.$mount`中会执行到下面这个函数
 
 ```javascript
@@ -245,7 +249,7 @@ export function mountComponent (
   vm.$el = el
   //执行定义的生命周期函数 beforeMount
   callHook(vm, 'beforeMount')  //这里相当于执行app组件的beforeMouted’
-
+  
   let updateComponent
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     updateComponent = () => {
@@ -299,6 +303,10 @@ vm._update()  用于将vnode对象挂载，而如果vnode对象还是一个组�
 中间的代码部分会对子组件进行同样的挂载
 
 #### 2.2 更新阶段 beforUpdate  updated
+
+1. 父组件的 beforeUpdate --> 
+2.  子组件的生命周期 beforeUpdate --> updated --> 
+3. 父组件的 updated
 
 [Vue异步更新组件](https://cn.vuejs.org/v2/guide/reactivity.html#%E5%BC%82%E6%AD%A5%E6%9B%B4%E6%96%B0%E9%98%9F%E5%88%97)
 

@@ -337,7 +337,7 @@ const store = new Vuex.Store({
 
 ```javascript
 new Vue({
-    store
+    store, // 这里也是为了将store实例对象放到vm.$options.store
 }).$mount('#app');
 ```
 
@@ -352,7 +352,7 @@ export default function (Vue) {
   const version = Number(Vue.version.split('.')[0])
 
   if (version >= 2) {
-    Vue.mixin({ beforeCreate: vuexInit })
+    Vue.mixin({ beforeCreate: vuexInit }) // 在这里
   } else {
     // override init and inject vuex init procedure
     // for 1.x backwards compatibility.

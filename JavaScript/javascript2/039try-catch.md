@@ -17,7 +17,7 @@ function testTry(){
             throw e
         }
     }catch(e) {
-        throw e
+        throw e;// 捕获到错误之后还可以继续往外抛出错误
     }
 }
 function catchTry() {
@@ -44,5 +44,57 @@ try{
 } catch(e) {
     console.log(e)
 }
+```
+
+###2 try-catch错误捕获
+
+2.1 如果程序抛出一个错误，没有进行catch，那么后续的代码将不会执行;
+
+2.2 如果抛出了错误进行了catch,那么后续的代码还是会继续执行;
+
+2.3 如果不想后续代码执行，需要return;
+
+```javascript
+function testTry() {
+    if(true) {
+        throw new Error();
+    }
+}
+function catchTry() {
+    testTry();
+    console.log('如果抛出的错误没有被catch，那么下面的程序会终止执行') //不会执行
+}
+catchTry()
+```
+
+```javascript
+function catchTry() {
+    try {
+        testTry();
+    } catch(e) {
+        console.log(e)
+    }
+    console.log('如果抛出的错误被catch，那么下面的程序会继续执行') // 这里会执行
+}
+catchTry()
+```
+
+```javascript
+function testTry() {
+    if(true) {
+        throw new Error();
+    }
+}
+function catchTry() {
+    try {
+        testTry();
+        // 这里后面的语句都不会执行
+    } catch(e) {
+        console.log(e);
+        return ;
+    }
+    console.log('如果抛出的错误没有被catch，但是catch中return终止了函数的执行，那么下面的程序会终止执行')
+}
+catchTry()
 ```
 
