@@ -195,6 +195,7 @@ export function createPatchFunction (backend) {
     let isInitialPatch = false
     const insertedVnodeQueue = []
 //如果oldVnode未定义，isInitialPatch置为true，然后调用createElm，我们这个例子是定了vm.$el的；
+    //这个时候是root节点初始化的过程，因此调用了createElm(vnode, insertedVnodeQueue, parentElm, refElm)方法去创建一个新的节点
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element
       isInitialPatch = true
@@ -203,6 +204,7 @@ export function createPatchFunction (backend) {
       //所以会执行到这里,isRealElement返回值为 true ;但是当组件更新的时候，此时传入的oldVnode不是真实DOM节点
       const isRealElement = isDef(oldVnode.nodeType)
       //!isRealElement 为false
+     // 而当oldVnode是vnode且sameVnode(oldVnode, vnode)2个节点的基本属性相同，那么就会进行着两个节点的diff过程
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
         //更新组件的时候会执行到这里，进行虚拟DOM的diff算法，

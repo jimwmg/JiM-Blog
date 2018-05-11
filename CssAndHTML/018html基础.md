@@ -60,7 +60,7 @@ categories: html
 
 1. onchange 在元素值改变时触发。必须满足两个条件：
 
-   第一，text textarea select 属性的value值发生变化，第二，该元素对象失去焦点
+   第一，text textarea select 属性的value值发生变化，**第二，该元素对象失去焦点**(同样不支持脚本改变元素value值触发该事件)
 
    onchange 属性适用于：`<input>、<textarea> 以及 <select> 元素。`
 
@@ -131,3 +131,7 @@ categories: html
 | [onmouseup](http://www.w3school.com.cn/tags/event_onmouseup.asp) | script | 当在元素上释放鼠标按钮时触发。                 |
 | onmousewheel                                                 | script | 当鼠标滚轮正在被滚动时运行的脚本。             |
 | onscroll                                                     | script | 当元素滚动条被滚动时运行的脚本                 |
+
+### 3 HTML标签
+
+* 包含在 <sup> 标签和其结束标签 </sup> 中的内容将会以当前文本流中字符高度的一半来显示，但是与当前文本流中文字的字体和字号都是一样的。

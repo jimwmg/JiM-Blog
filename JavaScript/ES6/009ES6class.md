@@ -88,6 +88,14 @@ console.log(square.__proto__ === Rect.prototype); //true
 //class类的prototype属性和其实例化对象的__proto__ 全等,这点和ES5中的构造函数prototype和其实例化对象的__proto__全等一致
 ```
 
+思考下，为什么ES6中 new 一个class会调用constructor函数？对比上面两种ES5 ES6的写法
+
+```javascript
+console.log(Rect === Rect.prototype.constructor) // true
+```
+
+所以new Rect() ==> 会调用constructor函数，同样因为两者都是指向Rect类，那么通过Rect.prototype.constructor 也可以访问到 Rect 类，以及Rect上的的静态方法等
+
 2.2 类中的方法独立调用的时候，函数内部this指向不同
 
 ES5中:原型上的方法被独立调用，非严格模式下，this会指向window，严格模式下指向undefined
@@ -174,7 +182,13 @@ console.log(Rect.getArea() ); //prototype method 不能直接通过类名调用�
 
 **一，声明一个函数的时候，创建一个类的时候（类也是来自最基本的声明构造函数的封装），会创建一个prototype对象，该对象是所声明函数的一个属性（对象），同时该对象有一个constructor属性，指向所声明的函数（互相引用，无限循环）**
 
-**二，extends关键字的作用就是 ：将子类(函数）的prototype对象上的`__proto__`指向父类（函数）的prototype属性**
+**二，extends关键字的作用就是 ：**主要是以下两个作用：
+
+--**将子类(函数）的prototype对象上的`__proto__`指向父类（函数）的prototype属性,**
+
+**`Dog.prototype.__proto__ = Animal.prototype`**
+
+—**将子类`__proto__` 指向 父类 ` Dog.__proto__ = Animal`**
 
 2.4 先来看下extends关键字的作用 class类实现继承的根本原因就是通过extends关键字，将子类的prototype.__ proto __ 属性指向父类构造函数prototype
 
