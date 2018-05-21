@@ -326,7 +326,7 @@ retFinally
 ```
 
 ### 5 Promise.all( )
-
+主要是根据对传入的每个参数进行处理，根据 remaining 的值判断是否处理完所有的promsies值，来进行判断是否resolve  Promsie.all 返回的promsie实例对象的状态；
 ```javascript
 Promise.all = function (arr) {
   //1 得到传进来的参数，转化为数组
@@ -369,6 +369,7 @@ Promise.all = function (arr) {
         }
       }
       //这里当promises数组中每一个promsie状态变为resolved的时候，会执行res(i,val)==>res(i,val._value)==>args[i] = val 此时将异步请求成功的结果放入args数组中
+      // 这里处理当传入Promise.all(['a','b','c']) 不是promise的时候
       args[i] = val;
       //只有所有的promises数组中的每一个promise都异步成功了，才会进入这个if语句，进而resolve这个Promise.all(promsies)返回的promsie实例对象
       //只要有一个promsies数组中的promsie没有异步成功，就会reject这个Promise.all(promises)返回的promsie实例对象

@@ -126,7 +126,6 @@ export function initMixin (Vue: Class<Component>) {
 //执行到这里，当vm实例对象创建完毕之后，开始将这个对象挂载到DOM上了，这个时候，如果vm实例对象有要挂载的DOM节点，那么就执行 $mount函数
     //2.10
     //http://mp.weixin.qq.com/s/DvV6c_KnKIF68lxnv9nDyQ
-    //这里还不挂方，大家可以看下
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }

@@ -52,7 +52,21 @@ async函数返回的promise对象的状态由其内部的返回值决定，返�
 
 ### 2 await  ： 结合await命令的使用
 
-async/await 的结合，使得异步代码就像同步代码一样去执行，await后面如果是一个promise对象，那么await命令的返回值就是该promise对象resolve或者reject的值
+async/await 的结合，使得异步代码就像同步代码一样去执行，总共分为以下两种情况：
+* await后面如果是一个promise对象，那么await命令的返回值就是该promise对象resolve或者reject的值；
+* await后面的函数的返回值如果是基础数据类型或者直接跟一个基础数据类型，那么会直接resolve该值，作为await指令的返回值；
+```javascript
+async function promiseAll() {
+    const ret = await 2 ;
+    const ret1 = await f();
+    const ret2 = await Promise.all(['a','b','c'])
+    console.log('promiseAll ret',ret,ret1,ret2)
+}
+promiseAll();
+
+// promsieAll ret 2 {name:'jhon'} ['a','b','c']
+
+```
 
 ```javascript
 async function getData(){

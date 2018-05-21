@@ -28,6 +28,17 @@ provide: function () {
 inject: ['getMap']
 ```
 
+```javascript
+const Child = {
+  inject: {
+    foo: {
+      from: 'bar',
+      default: () => [1, 2, 3]
+    }
+  }
+}
+```
+
 ### 2 源码分析
 
 2.1 第一步当一个vue组件初始化的时候，还是会走一遍初始化的流程
@@ -153,6 +164,9 @@ export function resolveInject (inject: any, vm: Component): ?Object {
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
+      // 如果存在from,并且父组件存在对应额度源，那么就将父组件对应的源映射到子组件；然后break,
+      // result[key] = source._provided[provideKey]
+      // result['foo'] 会取值父组件提供的 bar 某个源属性对应的值
       const provideKey = inject[key].from
       let source = vm
       while (source) {
@@ -164,6 +178,8 @@ export function resolveInject (inject: any, vm: Component): ?Object {
         source = source.$parent
       }
       if (!source) {
+          // 如果在父组件中没有找到对应的源，那么直到根父组件的时候，result[key] 会取默认值
+          // result['foo'] = [1,2,3]  default选项对应的值;
         if ('default' in inject[key]) {
           const provideDefault = inject[key].default
           result[key] = typeof provideDefault === 'function'
