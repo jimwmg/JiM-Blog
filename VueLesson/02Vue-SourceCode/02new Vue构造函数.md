@@ -179,6 +179,8 @@ LIFECYCLE_HOOKS.forEach(hook => {
 
 starts对象中这些属性都是对应new Vue(options)中的对应的属性，比如data,methods,computed等如何进行合并的函数
 
+**一般情况下我们也会为组件组册一些常量属性，比如 INDEX  DEFAULT 等等，这些属性值也会给到 $options 对象上**
+
 ```javascript
 export function mergeOptions (
   parent: Object,//Vue.option
@@ -243,6 +245,22 @@ export function mergeOptions (
 }
 
 ```
+
+**对于mixins选项：**
+
+#### 数据（混入的数据优先级按照出现的顺序排序，同时低于组件自身的数据）
+
+* 首先要知道 VUE 会先处理 mixins 中的数据，会先将这些数据合并到组件实例对象上的 data methods 等
+
+  如果 mixins 传入的两个或者混入对象，那么后面的重名属性会覆盖前面的重名属性；
+
+* 然后 VUE  会处理组件实例上的配置的属性，还是同样的规则，重名的属性会覆盖前面重名的属性值
+
+* 总结优先级 ： mixins [ 0]. <  mixing [1]  < mixing [2] < …… < 组件自身属性值
+
+#### 钩子函数（混入的钩子函数将在组件自身的钩子函数被调用之前调用：源码中可以看到会被放入到一个数组中，所以会按 push 进去的顺序执行）
+
+* mixins 中的同名钩子函数将混合为一个数组，因此都将被调用。另外，混入对象的钩子将在组件自身钩子**之前**调用。
 
 ```javascript
 function normalizeProps (options: Object, vm: ?Component) {

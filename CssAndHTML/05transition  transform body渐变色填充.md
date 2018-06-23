@@ -10,7 +10,7 @@ layout :
 
 transition  transform 效果进阶1     body如何渐变色填充
 
-一  transition的拆分写
+### 一  transition的拆分写
 
 *  明确其拥有的四个属性值
 
@@ -34,15 +34,36 @@ transition : all  2s  ease-in 1s
 
 all 代表所有的属性都会有过渡效果，只要设置了，2s代表一个过渡效果的时间，ease-in 代表过渡的方式，1s代表延迟
 
-二  transform属性(2d)(x 正方向水平向右，y正方向垂直向下，z正方向在垂直于窗口向外)
+### 二  transform属性(2d)(x 正方向水平向右，y正方向垂直向下，z正方向在垂直于窗口向外)
 
-*  translate(x,y )  指定对象移动，基准是父盒子左上角，移动 x y z是代表距离左上角的距离translatex(length|percentage),translatey(number)指定x  y的移动距离。如果第二个参数省略，那么默认为0 ；其中百分比的基准是以元素自身的宽高为基准，然后乘以百分比，得到移动的距离值。
+**注意：transform有时候不起作用，注意看下是否是块级元素；**
+
+* translate(x,y )  指定对象移动，基准是父盒子左上角，移动 x y z是代表距离左上角的距离translatex(length|percentage),translatey(number)指定x  y的移动距离。如果第二个参数省略，那么默认为0 ；其中百分比的基准是以元素自身的宽高为基准，然后乘以百分比，得到移动的距离值。
 
    ​	transform：translate(50px,40px)代表向右和向下移动50px  40px；
 
 * scale(x,y) ,代表指定对象缩放比例，x，y分别对应x y轴的缩放。scalex(number) scaley(number),如果第二个参数省略默认和第一个参数相等。
+
 * rotate(angle) 输入角度值，代表元素2d的旋转角度 需要有个transition-origin属性。关于旋转的方向：遵循“左手定则”大拇指指向轴的正方向，四指的方向就是旋转的方向，也是角度值为正的方向;rotate(angle),默认以z轴为基准进行旋转，rotatex(angel)，rotatey(angle),rotatez(angle) 以x和y轴为基准进行旋转(3D)。注意在3d里面才有rotatex(angel)，rotatey(angle),rotatez(angle)，在2d里面只有rotate(angle)
+
 * skew(x,y) 指定x  y的扭曲距离。如果第二个参数省略，那么默认为0 ;skewx(number) skewy(number).
+
+下面是一个实现一个图标切换的小动画，图标的展示会有一个过渡的旋转效果；
+
+```less
+.iconToggle{
+    display:inline-block;
+    transition:transform 400ms cubic-bezier(0.23, 1, 0.32, 1);;
+    &.collapse{
+        transform: rotate(180deg);
+    }
+    &:hover{
+        cursor:pointer;
+    }
+}
+```
+
+
 
 三 : 有关body的渐变色填充问题：
 

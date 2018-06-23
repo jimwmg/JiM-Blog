@@ -55,12 +55,13 @@ function selectSort(arr) {
 console.log(selectSort(arr))
 ```
 
-### 3 插入排序（对于大规模数组，插入排序会很慢）
+### 3 [插入排序（对于大规模数组，插入排序会很慢）](https://www.cnblogs.com/Hua-Min/p/StraightInsertionSort.html)
 
 ```javascript
 function insertSort(arr) {
   let i ,j ;
   for( i = 1 ; i < arr.length ; i++) {
+      //第一次循环，j > 0 false ,不会执行 arr[j] < arr[j-1] 
     for( j = i - 1 ; j > 0 && arr[j] < arr[j-1] ; j--) {
       [arr[j],arr[j-1]] = [arr[j-1],arr[j]]
     }

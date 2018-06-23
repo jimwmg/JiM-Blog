@@ -618,3 +618,74 @@ function foo() {
 }
 ```
 
+### 注释
+
+原则：
+
+- As short as possible（如无必要，勿增注释）：尽量提高代码本身的清晰性、可读性。
+
+- As long as necessary（如有必要，尽量详尽）：合理的注释、空行排版等，可以让代码更易阅读、更具美感。
+
+**单行注释**
+
+  必须独占一行。`//` 后跟一个空格，缩进与下一行被注释说明的代码一致。
+
+  **多行注释**
+
+  避免使用 `/*...*/` 这样的多行注释。有多行注释内容时，使用多个单行注释。
+
+
+**函数/方法注释**
+
+    1. 函数/方法注释必须包含函数说明，有参数和返回值时必须使用注释标识。；
+    2. 参数和返回值注释必须包含类型信息和说明；
+    3. 当函数是内部函数，外部不可访问时，可以使用 @inner 标识；
+
+注释用来提醒一些特殊情况,比如：
+
+| 标记  | 用法                   |
+| ----- | ---------------------- |
+| TODO  | 待做                   |
+| FIXME | 待修复                 |
+| HACH  | 粗糙的解决方案         |
+| XXX   | 危险！这里有重要的问题 |
+
+### 命名
+
+1. 变量和函数使用驼峰命名
+2. 私有属性，方法 命名以 _ 开头
+3. 常量命名全部是大写
+4. 枚举属性全部大写
+5. 布尔类型变量的命名 以 is.  has 开头
+
+```javascript
+var loadingModules = {};
+var _privateMethod = {};
+var HTML_ENTITY = {};
+var TargetState = {
+    READING: 1,
+    READED: 2,
+    APPLIED: 3,
+    READY: 4
+};
+```
+
+### ES6 
+
+* async - await  对于async函数，也可以通过立即执行来写代码
+
+```javascript
+const fs = require('fs')
+// bad
+async function main() {
+	const data = await fs.readFile(path,callback)
+    console.log(data)
+}
+main()
+// good 
+(async () => {
+    const data = await fs.readFile(path,callback)
+    console.log(data)
+})
+```
+

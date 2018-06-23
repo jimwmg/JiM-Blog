@@ -108,6 +108,26 @@ p =>{
 ####2.2执行这行代码的时候： promise.then(function(data){ console.log(data);}); 
 
 ```javascript
+console.log('start')
+new Promise((resolve,reject) => {
+    console.log('22');
+    resolve('this is value');
+}).then(3).then((v) => {
+    console.log('555',v)
+})  
+console.log('end')
+//
+start
+22
+end 
+555  this is value
+```
+
+**注意看下then回调中传入不是函数的情况，在源码中是如何处理的，在new Handlere中**
+
+**在  handleResolved 如果传入的 onFulfilled onRejected 为null ,那么就会直接resolve这个promise,等待下次事件循环 **
+
+```javascript
 Promise.prototype.then = function(onFulfilled, onRejected) {
   if (this.constructor !== Promise) {//这些比较的都是引用地址；
     return safeThen(this, onFulfilled, onRejected);
@@ -195,7 +215,7 @@ res:{
 }
 ```
 
-####2.3 异步操作完成以后：resolve('someData');
+####2.3 异步操作完成以后：resolve('someData');这里的resolve就是负责将处理结果放入then中的异步回调函数的，等待下次事件循环再去执行；
 
 ```javascript
 //真正调用这个函数的是tryCallTwo中的第二个函数入参；self就是p这个promise实例对象；
@@ -300,7 +320,7 @@ function handle(self, deferred) {
 
 ```javascript
 function handleResolved(self, deferred) {
-  asap(function() {
+  asap(function() { // 这个asap就是异步的根源，每个resolve之后的任务都会通过asap放入异步事件队列中
     //得到promise.then(function(data){ console.log(data);});注册的函数
     var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
     if (cb === null) {

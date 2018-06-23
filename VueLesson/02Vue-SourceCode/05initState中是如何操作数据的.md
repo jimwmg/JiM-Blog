@@ -10,6 +10,8 @@ categories: vue
 
 这里主要就是操作数据了，`props`、`methods`、`data`、`computed`、`watch`，从这里开始就涉及到了`Observer`、`Dep`和`Watcher`
 
+**首先需要有个概念，instate中的处理props data computed method的顺序，要注意，**
+
 ```javascript
 export function initState (vm: Component) {
   vm._watchers = []
@@ -278,15 +280,20 @@ export function isReserved (str: string): boolean {
 
 #### 2.5 initComputed(vm, opts.computed) 
 
-```vue
+**重点注意下下面两种computed属性的声明方式，结合源码看下，属性时对象和函数的时候，vue内部是如何处理的**
+
+```javascript
 var vm = new Vue({
   data: { a: 1 },
   computed: {
-    // 仅读取
+// 仅读取
+// 这里不能给计算属性设置值，因为VUE内部默认的set函数会有警告；
     aDouble: function () {
       return this.a * 2
     },
-    // 读取和设置
+// 读取和设置，这里的应用场景就是某个计算属性被读取的时候会通过用户定义的 get 函数执行获取结果；
+// 设置计算属性的值的时候，会执行 set 函数
+//这里的get和set会通过 sharedPropertyDefinition 通过Object.defineProperty(obj,key,despictor) 进行赋值；
     aPlus: {
       get: function () {
         return this.a + 1

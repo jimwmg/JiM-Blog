@@ -140,7 +140,7 @@ export function eventsMixin (Vue: Class<Component>) {
     let cbs = vm._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
-      const args = toArray(arguments, 1)
+      const args = toArray(arguments, 1) // toArray 将 arguments中第一个参数去掉
       for (let i = 0, l = cbs.length; i < l; i++) {
         try {
           cbs[i].apply(vm, args)  //这里，args 就是传入$emit 函数除第一个参数外剩下的参数

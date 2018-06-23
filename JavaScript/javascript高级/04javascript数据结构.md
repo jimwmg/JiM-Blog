@@ -1,5 +1,5 @@
 ---
-title: javascript数据结构
+nttitle: javascript数据结构
 date: 2017-01-03
 categories: javascript
 ---
@@ -239,6 +239,14 @@ function linkedList(){
 
 }
 ```
+
+链表数据结构的另外一种实现思路： 可以对比这两种实现在算法复杂度种的优劣
+
+```javascript
+
+```
+
+
 
 * 集合：某些指定的对象集在一起就成为一个集合，简称集，其中每一个对象叫元素；(ES6提供了这种数据结构)
 

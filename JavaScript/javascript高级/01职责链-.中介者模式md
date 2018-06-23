@@ -1,0 +1,116 @@
+---
+title: 职责链
+date: 2018-05-21
+categories: javascript
+---
+
+### 1 职责链模式
+
+使多个对象都有机会处理请求，从而避免请求的发送者和接受者之间的耦合关系，
+
+将这个对象连成一条链，并沿着这条链传递该请求，直到有一个对象处理他为止。
+
+该模式主要是用于解耦一个请求和多个目标对象之间的关系，在项目中通常是对 if. else 的多重循环进行优化；
+
+```javascript
+class Chain {
+    constructor(fn) {
+        this.fn = fn;
+        this.nextCall = null;
+    }
+    setNext(nextCall) {
+        this.nextCall = nextCall;
+    }
+    init(...args) {
+        console.log(args)
+        debugger;
+        const result = this.fn(...args)
+        if(result === 'nextCall') {
+            this.nextCall.init(...args)
+        }
+    }
+}
+let chainOne = function (...args) {
+    if(args[0] === 'A') {
+        console.log('A 级别人员处理')
+    } else {
+        return 'nextCall';
+    }
+}
+let chainTwo = function (...args) {
+    if(args[0] === 'B') {
+        console.log('B 级别人员处理')
+    } else {
+        return 'nextCall';
+    }
+}
+const newChainOne = new Chain(chainOne);
+const newChainTwo = new Chain(chainTwo);
+newChainOne.setNext(newChainOne);
+newChainOne.init('A',400);
+```
+
+### 2 中介者模式：该模式是多向的，即它所做的工作是模块之间的通信；对象和对象之间借助第三方中介者进行通信。
+
+**如果对象之间的复杂耦合确实导致调用和维护出现了困难，而且这些耦合度随项目的变化呈指数增长，那么我们可以考虑用中介者模式来重构代码。**可以类似考虑对应的观察者模式；
+
+```javascript
+// 生成一个中介者，保存中间对象；
+const playerMiddle = (function() { 
+  const players = []
+  const winArr = []
+  const loseArr = []
+  return {
+    add: function(name) {
+      players.push(name)
+    },
+    win: function(name) {
+      winArr.push(name)
+      if (winArr.length + loseArr.length === players.length) {
+        this.show()
+      }
+    },
+    lose: function(name) {
+      loseArr.push(name)
+      if (winArr.length + loseArr.length === players.length) {
+        this.show()
+      }
+    },
+    show: function() {
+      for (let winner of winArr) {
+        console.log(winner + '挑战成功;')
+      }
+      for (let loser of loseArr) {
+        console.log(loser + '挑战失败;')
+      }
+    },
+  }
+}())
+// 这里利用中介者，将中间对象添加给中介者，然后进行通信；
+const player = function(name) {
+  this.name = name
+  playerMiddle.add(name)
+}
+
+player.prototype.win = function() {
+  playerMiddle.win(this.name)
+}
+
+player.prototype.lose = function() {
+  playerMiddle.lose(this.name)
+}
+const a = new player('A 选手')
+const b = new player('B 选手')
+const c = new player('C 选手')
+
+a.win()
+b.win()
+c.lose()
+
+// A 选手挑战成功;
+// B 选手挑战成功;
+// C 选手挑战失败;
+```
+
+
+

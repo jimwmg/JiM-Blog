@@ -235,8 +235,10 @@ if (vm.$options.el) {
 ####2.1 挂载阶段 beforeMount.  mounted
 
 1. 父组件的 beforeCreate --> created --> beforeMount -->
-2.  子组件的生命周期 beforeCreate --> created --> beforeMount --> mounted
+2. 子组件的生命周期 beforeCreate --> created --> beforeMount --> mounted
 3. 父组件的mounted
+
+**在生命周期通过async await 并不会阻塞**
 
 `vm.$mount`中会执行到下面这个函数
 
