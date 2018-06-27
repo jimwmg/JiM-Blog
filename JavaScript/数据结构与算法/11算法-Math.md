@@ -134,3 +134,17 @@ function euclideanAlgorithm1(originalA,originalB) {
 }
 ```
 
+### 4 进制数之间的互相转化  十进制转化为二进制
+
+```javascript
+function divideBy(num) {
+    const stack = [];
+    while( num > 0 ) {
+        rem = num % 2;
+        stack.push(rem);
+        num = Math.floor(num / 2);
+    }
+    return stack.reverse().join('');
+}
+```
+
