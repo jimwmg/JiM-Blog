@@ -7,6 +7,31 @@ title: async/await
 * async 函数的状态变化，由其内部代码决定，具体情况下面详细分析
 * await 后面可以跟一个promsie对象，等待其resolve;
 * await 后面可以跟一个 js. 数据(基本数据，复杂数据) ，会立即resolve;
+* await 之后执行之后会跳出当前async函数，等待await后面的promise状态的变化，即使await后面的promise立即resolve,也是一个异步；
+
+```javascript
+async function f(){
+    console.log(2)
+    await 'sss';
+    console.log(5)
+  }  
+console.log(1);
+f();
+console.log(3);
+//1 2 3 5
+```
+
+```javascript
+async function f(){
+    console.log(2)
+    await Promise.resolve('sss');
+    console.log(5)
+}  
+console.log(1);
+f();
+console.log(3);
+//1 2 3 5 
+```
 
 ### 2 async 函数返回一个promise 对象，该对象的状态改变是如何的？
 

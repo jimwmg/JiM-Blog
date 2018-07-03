@@ -74,7 +74,7 @@ When the `ref` attribute is used on a custom component declared as a class, the 
       constructor(props){
         super(props)
       }
-//组件加载完毕之后，可以获取到ref指向的DOM元素；
+//组件加载完毕之后，可以获取到ref指向的react组件；
       componentDidMount(){
         console.log('mounted');  
       }

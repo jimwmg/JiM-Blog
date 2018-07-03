@@ -18,6 +18,20 @@ layout :
 
 delete可以删除对象的属性值以及方法，将其值为undefined，对于局部变量和方法，以及全局用var声明的变量,delete是没有用的；delete  obj.prop ;
 
+对于一元运算符 `+ - ` ,如果操作数不是一个数值，那么可以对其进行转换，
+
+一元 + 
+
+```javascript
++null : 0
++[ ]  : 0
++{ }  : NaN
++undefined: NaN
+
+```
+
+对于一元 - ，就是将 一元 +的结果前面加一个 负号`-`
+
 如果删除成功，delete x 返回true，否则返回false;
 
 ```javascript
@@ -53,6 +67,25 @@ delete可以删除对象的属性值以及方法，将其值为undefined，对�
 
 ### 2 关系运算符  >  >=  <  <=  返回一个布尔类型的值
 
+* 对于比较运算，先要明白隐式转换规则，数字 和 布尔类型 属于数字环境，会转化为数字(对于对象，数组，Date类型的对象，会调用 valueOf 或者 toString转化为基本数据类型的值)；
+
+  数组和对象调用 toString  ；Date类型对象调用 valueof
+
+* 如果没有数字 或者布尔类型，有字符串，那么就是字符串环境，会先将另外一个运算数转化为字符串；
+
+* 任何带有 NaN 比较运算返回值都是 false
+
+```javascript
+null >= 0 : true
+0 > 'a' : false 字符串转化为数字为NaN，所以为false；
+0 == [ ] : true 
+0 > {} : fasle : {}转化为数字为NaN 
+0 < new Date() :  new Date() 结果会调用valueof转化为时间戳
+'a' > [] ; //[] 调用 toString() ==> ''
+'a' > ['b'] // false
+'a' < ['b'] //true
+```
+
 **(带有NaN的比较运算，返回的结果都是false)**
 
 2.1 基本数据类型的比较(比较的时候会将对象，数组等转化为原始值)
@@ -70,8 +103,6 @@ delete可以删除对象的属性值以及方法，将其值为undefined，对�
     console.log(1 < new Date());//true
     console.log(1 > new Date());//false
 ```
-
-
 
 ​    2.1.2  **字符串类型比较**  对于字符串，第一个字符串中每个字符的代码都与会第二个字符串中对应位置的字符的代码进行数值比较。完成这种比较操作后，返回一个 Boolean 值。
 

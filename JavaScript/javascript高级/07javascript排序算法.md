@@ -77,6 +77,60 @@ console.log(insertSort(arr)
 - 最坏的情况下需要 ~N2/2 比较以及 ~N2/2 次交换，最坏的情况是数组是倒序的；
 - 最好的情况下需要 N-1 次比较和 0 次交换，最好的情况就是数组已经有序了。
 
+### 4 归并排序
+
+![sort](../../sort.jpeg)
+
+![sort](/myWork/JiM-Blog/img/sort.jpeg)
+
+```javascript
+let arr = [1,2,5,9,-1,4,7,21,23];
+// let arr = [2,1]
+// let arr = [2,5,1]
+//arr [2,1] [2,5,1]
+function mergeSortRec(arr) {
+    if(!Array.isArray(arr)){
+        throw new Error();
+    }
+    let len = arr.length;
+    if(len === 1) {
+        return arr;
+    }
+    let mid = Math.floor(len / 2 );
+    let left = arr.slice(0,mid);
+    let right = arr.slice(mid,len);
+    // let left = mergeSort(arr.slice(0,mid));
+    // let right = mergeSort(arr.slice(mid,len));
+    console.log('left',left,'right',right)
+    debugger;
+    return merge(mergeSortRec(left),mergeSortRec(right));
+}
+let ret = mergeSortRec(arr);
+console.log(ret)
+//console.log(merge([2,3,6],[1,5])) 
+function merge(left,right) {
+    let result = [];
+    let il = 0;
+    let ir = 0;
+    while(il < left.length && ir < right.length) {
+        if(left[il] < right[ir]) {
+            result.push(left[il++])
+        }else{
+            result.push(right[ir++])
+        }
+    }
+    while(il < left.length){
+        result.push(left[il++])
+    }
+    while(ir < right.length) {
+        result.push(right[ir++])
+    }
+    return result;
+}
+```
+
+
+
 ### 对应各个排序的时间复杂度和空间复杂度
 
 |                  |      |          |                              |            |                          |

@@ -269,7 +269,7 @@ new foo(function(){
 
 基本使用暂时到此,后期其他方法会有时间更新  ===========  2017/5/11    21:21
 
-then链式调用的时候,then函数的返回值,会作为第下一个then函数中第一个参数函数的参数
+then链式调用的时候,then函数的返回值,会作为第下一个then函数中第一个参数函数的参数，如果没有返回值，那么默认返回值是undefined;
 
 ```javascript
 var p = new Promise(function(resolve,reject){
@@ -283,7 +283,7 @@ var ret = p.then(function(){
   console.log('resolve')
 }).then(function(val){
   console.log('inner Resolved');
-  console.log(val) //2 false  undefined
+  console.log(val) //2 false  undefined  ;//如果没有返回值，那么默认返回值是undefined;
 })
 ```
 

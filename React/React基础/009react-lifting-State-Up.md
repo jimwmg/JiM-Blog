@@ -25,7 +25,7 @@ props应该是只读的属性，如果我们要改变输出，可以通过state�
     
    <script type='text/babel'>
 
-   const scaleNames = {
+const scaleNames = {
   c: 'Celsius',
   f: 'Fahrenheit'
 };

@@ -249,7 +249,7 @@ export function defineReactive (obj,key,val) {
   //对于每一个被观察的属性，都有一个dep对象，用来维护Observe和Watcher的关系；
   //对于监听到数据的变化的时候，那么监听到变化之后就是怎么通知订阅者？很简单，维护一个数组，用来收集订阅者，数据变动触发notify，再调用订阅者的update方法；这里的dep就是这样的一个数组；
   const dep = new Dep()
-    const property = Object.getOwnPropertyDescriptor(obj, key)
+  const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
   }
@@ -266,6 +266,7 @@ export function defineReactive (obj,key,val) {
     //这里，当组件render的时候，会调用这里get函数，添加订阅者
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
+//vm._watcher = new Watcher(vm, updateComponent, noop) 这个是核心，当vue组件第一次挂载的时候，会执行get函数，该函数负责向dep依赖中添加 Watcher 对象的函数，也就是 updateComponent，这也是为什么给组件属性重新赋值会更新 UI 的根本原因；
       if (Dep.target) {
         //dep.depend()会执行实例Watcher类的addDep()函数，而该函数，又会执行dep实例的dep.addSub,会在subs数组中放入一个Watcher实例对象；
         dep.depend()
@@ -534,7 +535,39 @@ export function popTarget () {
 
 **注意这里的Watcher实例对象的this.get方法返回值是updateComponent函数的返回值，也就是undefined,所以此时仅仅用来作为数据的渲染**
 
-* 监听数据 
+* 监听数据 （这里new Watcher）
+
+```javascript
+//watch选项
+const watcher = new Watcher(vm, expOrFn, cb, options)
+//computed选项
+function initComputed (vm: Component, computed: Object) {
+    const watchers = vm._computedWatchers = Object.create(null)
+    // computed properties are just getters during SSR
+    const isSSR = isServerRendering()
+
+    for (const key in computed) {
+        const userDef = computed[key]
+        //如果computed对象key对应的value值是函数，那么getter就去改value值,如果是一个对象，那么就去取设置的get
+        const getter = typeof userDef === 'function' ? userDef : userDef.get
+        if (process.env.NODE_ENV !== 'production' && getter == null) {
+            warn(
+                `Getter is missing for computed property "${key}".`,
+                vm
+            )
+        }
+        //如果不是服务端渲染，那么创建监听
+        if (!isSSR) {
+            // create internal watcher for the computed property.
+            watchers[key] = new Watcher(
+                vm,
+                getter || noop,
+                noop,
+                computedWatcherOptions
+            )
+        }
+
+```
 
 另一个用途就是我们的`computed`、`watch`等，即监听数据的变化来执行响应的操作。
 

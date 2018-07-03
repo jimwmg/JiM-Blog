@@ -52,7 +52,7 @@ layout :
 ```javascript
  	Foo.getName();//2
     getName();//4
-    Foo().getName();
+    Foo().getName();//1
 //1 先执行了Foo()  函数，Foo函数第一句，getName没有用var声明，改变了输出4的getName,变为输出1
 //2 第二句 返回了this,代表当前指向环境的window;相当于执行了 window.getName();
     getName();//1   直接调用getName ,上面一行代码改变后的结果
@@ -64,6 +64,46 @@ layout :
 //  等价于 (new Foo()).getName();
     new new Foo().getName();//3
 //  等价于  new (new Foo().getName)();
+```
+
+```javascript
+// var 和 function 声明提升，变量的提升，函数高于变量;
+var a 
+function a() {
+
+}
+console.log(a) //f a(){ }
+```
+
+```javascript
+// var 和 function 声明提升，变量的提升，函数高于变量
+var a = 1;
+function a() {
+
+}
+console.log(a) // 1
+// 等价于
+function a() {
+    
+}
+var a ;
+a = 1;
+```
+
+```javascript
+var b = 1
+function a () {
+    b = 10
+    function b() { // a 函数中的变量 b会提升到函数的顶部，然后会被 b = 10 重新赋值；
+        console.log('dd')
+    }
+    console.log(b)
+}
+function c(){
+    console.log(b)
+}
+a(); //10
+c(); //1
 ```
 
 ------------------------------------- = 运算符面试题

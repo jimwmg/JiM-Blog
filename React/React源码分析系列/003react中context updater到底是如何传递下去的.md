@@ -502,7 +502,7 @@ _processChildContext: function (currentContext) {
 
 此时问题又来了，transation是哪里来的？
 
-在step4中第一次出现. transaction
+在step4中第一次出现. transation
 
 ```javascript
 function batchedMountComponentIntoNode(componentInstance, container, shouldReuseMarkup, context) {

@@ -32,7 +32,7 @@ class Manager extends Basic {
 //extends关键字作用核心：1 实现原型的继承
 console.log(Manager.prototype.__proto__== Basic.prototype) // true 
 //extends关键字作用核心：2 实现静态方法继承
-console.log(Manager.__proto__.getBasicDefault == Basic.getBasicDefault) //true
+console.log(Manager.__proto__ == Basic) //true
 
 console.dir(Basic)
 console.dir(Manager)

@@ -147,7 +147,19 @@ Provider.childContextTypes = {
 
 该函数的作用是通过mapStateToProps和mapDispatchToProps函数,将将一些属性添加到Toggle组件的props上，同时
 
-**当组件第一次加载的时候，给通过Provider组件传递下来的store注册监听事件，该事件的作用就是执行setState函数，从而实现UI的更新**，这也就是connect函数的作用之一，
+**当组件第一次加载的时候，给通过Provider组件传递下来的store注册监听事件，该事件的作用就是执行setState函数，从而实现UI的更新**，这也就是connect函数的作用之一;
+
+也就是说经过connect过的组件，会在store中注册一个监听器，每次dispatch的时候，就会执行setState去更新试图；
+
+```javascript
+this.store.subscribe(() = {
+    	this.setState({
+    	storeState: this.store.getState()
+	})
+})
+```
+
+
 
 以上三种state改变，触发UI的更新的根本还是通过触发setState函数执行ReactDOM.render函数；
 
