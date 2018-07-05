@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>鲸准投资管理系统</title>
+    
+    <link rel="shortcut icon" href="favicon.ico">
+    
+    
+    <link href="style.f708822.css" rel="stylesheet">
+    
+    <link href="style.f25466c.css" rel="stylesheet">
+    
+</head>
+<body>
+
+
+
+
+<script src="loading.148c535b.js" charset="utf-8"></script>
+
+
+<div id="app"></div>
+
+
+<script src="app.ab193916.js" charset="utf-8"></script>
+
+
+
+
+</body>
+</html>

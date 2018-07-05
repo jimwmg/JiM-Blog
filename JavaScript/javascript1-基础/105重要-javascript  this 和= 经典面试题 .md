@@ -67,7 +67,7 @@ layout :
 ```
 
 ```javascript
-// var 和 function 声明提升，变量的提升，函数高于变量;
+// var 和 function 声明提升，变量的提升，函数优先于变量;
 var a 
 function a() {
 
@@ -83,10 +83,10 @@ function a() {
 }
 console.log(a) // 1
 // 等价于
+var a ;
 function a() {
     
 }
-var a ;
 a = 1;
 ```
 
@@ -105,6 +105,23 @@ function c(){
 a(); //10
 c(); //1
 ```
+
+```javascript
+var tmp = new Date();
+function f() {
+    console.log(tmp);//undefined
+    if (false) {  //由于是false不会进入，但是变量的声明还是会提升到函数体内，体内，体内的最上面(重三遍)，所以下面在执行的时候会输出 undefined,
+        var tmp = "hello world";
+        //函数体内的声明会提升到  函数作用域  的最上面
+    }
+    console.log(tmp);//undefined
+}
+f();
+console.log(tmp);//Tue Feb 28 2017 21:24:05 GMT+0800 (中国标准时间)
+console.log(typeof tmp);//object
+```
+
+
 
 ------------------------------------- = 运算符面试题
 

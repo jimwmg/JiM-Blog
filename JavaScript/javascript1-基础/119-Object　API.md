@@ -152,7 +152,7 @@ console.log(obj);
 Object.setPrototypeOf(obj,Array.prototype);
 ```
 
-4 Object.getOwnPropertyNames(obj )该函数可以将对象中**可枚举以及不可枚举**的key值都列举出来,返回一个key组成的数组
+4 Object.getOwnPropertyNames(obj )该函数可以将对象中**可枚举以及不可枚举**的key值都列举出来,返回一个key组成的数组(但是不包括 Symbol属性)
 
 The object whose enumerable *and non-enumerable* own properties are to be returned.
 

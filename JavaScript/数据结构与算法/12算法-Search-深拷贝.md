@@ -80,3 +80,21 @@ function _copy(target,...objs){
 console.log(_copy({},obj,obj1))
 ```
 
+vue源码中一个更加优雅的实现
+
+```javascript
+function clone(value){
+    if(Array.isArray(value)) {
+        return value.map(clone);
+    }else if(_isObj(value)) {
+        const ret = {};
+        for(let key in value) {
+            ret[key] = clone(value[key])
+        }
+        return ret;
+    }else{
+        return value;
+    }
+}  
+```
+

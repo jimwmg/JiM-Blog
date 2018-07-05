@@ -44,7 +44,8 @@ export default class VueRouter {
     this.resolveHooks = []
     this.afterHooks = []
     this.matcher = createMatcher(options.routes || [], this)
-    let mode = options.mode || 'hash'
+    let mode = options.mode || 'hash' //默认使用hashChange
+    //fallback，当浏览器不支持 history.pushState 控制路由是否应该回退到 hash 模式。默认值为 true。
     this.fallback = mode === 'history' && !supportsPushState && options.fallback !== false
     if (this.fallback) {
       mode = 'hash'
@@ -357,7 +358,7 @@ init (app: any /* Vue component instance */) {
 
 ==>confirmTransition :根据生成的route对象确认跳转
 
-==>updataRoute :更新history实例对象的current(当前路由)，并且执行history上通过listene注册的方法
+==>updateRoute :更新history实例对象的current(当前路由)，并且执行history上通过listene注册的方法
 
 ==>history上注册cb函数会修改应用实例`vm._route`这个响应式的属性，将其值改为当前地址对应的route对象
 

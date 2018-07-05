@@ -349,6 +349,8 @@ match的过程分为两个部分：
 
 第二：根据 normalizeLocation 之后的location ,从路由字典中取出对应的路由record;
 
+第三：找到 record 之后，生成 route对象
+
 ```javascript
  function match (
     raw: RawLocation,
@@ -360,6 +362,14 @@ match的过程分为两个部分：
         //二：如果传递了name，那么直接通过name的字典，很容易找到对应的路由record
         //三：但是如果设置了 path,那么，path会根据开头是否是 / 字符串来确定是根路由还是子路由，然后从路由字典中根据标准化后的path值去路由字典中取对应的路由record
     const location = normalizeLocation(raw, currentRoute, false, router)
+    //如果包含 name 那就直接返回 next;
+    /*如果不包含name ，那么需要对传入的进行处理，
+   {
+   		_normalized: true,
+        path,//截掉hash和query之后的path
+        query, //格式化为对象的查询字符串
+        hash //字符串hash
+    }*/
     const { name } = location
 //处理push了 name
     if (name) {
@@ -440,9 +450,9 @@ export function normalizeLocation (
     return next
   }
   //如果传入的location 有path属性
-  const parsedPath = parsePath(next.path || '')
+  const parsedPath = parsePath(next.path || '') // { hash , query , path }
   const basePath = (current && current.path) || '/'
-  //对于传入的path resolvePath函数会对其进行处理
+  //对于传入的path resolvePath函数会对其进行处理,如果不是 / 开头的就进行处理，如果是直接返回；
   const path = parsedPath.path
     ? resolvePath(parsedPath.path, basePath, append || next.append)
     : basePath
@@ -467,8 +477,39 @@ export function normalizeLocation (
 }
 ```
 
-1. ：如果传入的 path 是以 `/  `开头的路径，那么直接根据这个path值（根路由）去路由字典中取值
-2. ：如果传入的 path 不是以 `/`开头的路径，那么就根据当前路径为基准进行拼接，然后根据这个拼接好的路径，去路由字典中取值
+```javascript
+export function parsePath (path: string): {
+  path: string;
+  query: string;
+  hash: string;
+} {
+  let hash = ''
+  let query = ''
+
+  const hashIndex = path.indexOf('#')
+  if (hashIndex >= 0) {
+    hash = path.slice(hashIndex)
+    path = path.slice(0, hashIndex)
+  }
+
+  const queryIndex = path.indexOf('?')
+  if (queryIndex >= 0) {
+    query = path.slice(queryIndex + 1)
+    path = path.slice(0, queryIndex)
+  }
+
+  return {
+    path,
+    query,
+    hash
+  }
+}
+```
+
+
+
+1. 如果传入的 path 是以 `/  `开头的路径，那么直接根据这个path值（根路由）去路由字典中取值
+2. 如果传入的 path 不是以 `/`开头的路径，那么就根据当前路径为基准进行拼接，然后根据这个拼接好的路径，去路由字典中取值
 3. 以上都是在 `createRouteMap`创建路由字典的时候，针对 `/ ` 开头的path 和 不是 `/`开头的path都是有对应的处理的；
 
 ```javascript
@@ -598,6 +639,111 @@ export class History{
       this.errorCbs = []
     }
   //...
+  transitionTo (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    const route = this.router.match(location, this.current) // 可能需要current的params
+    this.confirmTransition(route, () => {
+      this.updateRoute(route)
+      onComplete && onComplete(route)
+      this.ensureURL()
+
+      // fire ready cbs once
+      if (!this.ready) {
+        this.ready = true
+        this.readyCbs.forEach(cb => { cb(route) })
+      }
+    }, err => {
+      if (onAbort) {
+        onAbort(err)
+      }
+      if (err && !this.ready) {
+        this.ready = true
+        this.readyErrorCbs.forEach(cb => { cb(err) })
+      }
+    })
+  }
+}
+```
+
+####HTML5  pushState
+
+* history/html5.js
+
+ 使用前端路由，当切换到新路由时，想要页面滚到顶部，或者是保持原先的滚动位置，就像重新加载页面那样。 `vue-router` 能做到，而且更好，它让你可以自定义路由切换时页面如何滚动。
+
+**scrollBehavior只在支持 history.pushState中的浏览器中中可以使用；**
+
+```javascript
+import { History } from './base' // 这个History就是上面的 base.js中的导出对象
+export class HTML5History extends History {
+    constructor (router: Router, base: ?string) {
+        super(router, base)
+
+        const expectScroll = router.options.scrollBehavior
+        const supportsScroll = supportsPushState && expectScroll
+
+        if (supportsScroll) {
+            setupScroll()
+        }
+
+        const initLocation = getLocation(this.base)
+        window.addEventListener('popstate', e => {
+            const current = this.current
+
+            // Avoiding first `popstate` event dispatched in some browsers but first
+            // history route not updated since async guard at the same time.
+            const location = getLocation(this.base)
+            if (this.current === START && location === initLocation) {
+                return
+            }
+
+            this.transitionTo(location, route => {
+                if (supportsScroll) {
+                    handleScroll(router, route, current, true)
+                }
+            })
+        })
+    }
+
+    go (n: number) {
+        window.history.go(n)
+    }
+
+    push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+        const { current: fromRoute } = this
+        this.transitionTo(location, route => {
+            pushState(cleanPath(this.base + route.fullPath))
+            handleScroll(this.router, route, fromRoute, false)
+            onComplete && onComplete(route)
+        }, onAbort)
+    }
+
+    replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+        const { current: fromRoute } = this
+        this.transitionTo(location, route => {
+            replaceState(cleanPath(this.base + route.fullPath))
+            handleScroll(this.router, route, fromRoute, false)
+            onComplete && onComplete(route)
+        }, onAbort)
+    }
+
+    ensureURL (push?: boolean) {
+        if (getLocation(this.base) !== this.current.fullPath) {
+            const current = cleanPath(this.base + this.current.fullPath)
+            push ? pushState(current) : replaceState(current)
+        }
+    }
+
+    getCurrentLocation (): string {
+        return getLocation(this.base)
+    }
+}
+
+export function getLocation (base: string): string {
+    let path = window.location.pathname
+    if (base && path.indexOf(base) === 0) {
+        path = path.slice(base.length)
+    }
+    return (path || '/') + window.location.search + window.location.hash
 }
 ```
 
@@ -608,5 +754,35 @@ history：{router,base,current,pending,ready,readyCbs,
   __proto__:go,back,forward,push,replace等原型方法...}
 ```
 
+当我们执行 `history.push. history.replace的时候`UI更新的根本原因如下：
 
+==>router.init    history.push     history.replace  都会触发history.transitionTo
+
+==> history.transitionTo:根据当前地址栏更新route对象
+
+==>router.match(location, this.current):根据当前地址栏生成对应的route对象(这里会从createRouteMap生成的字典中去取) 详情参见《matcher和history创建源码解析》
+
+==>confirmTransition :根据生成的route对象确认跳转
+
+==>updateRoute :更新history实例对象的current(当前路由)，并且执行history上通过listene注册的方法
+
+==>history上注册cb函数会修改应用实例`vm._route`这个响应式的属性，将其值改为当前地址对应的route对象
+
+==>响应式属性值的改变，就会触发Vue的更新机制，从而实现了DOM的更新
+
+==> Vue更新的时候，router-view组件就会根据最新的`vm._route.matched`上的匹配到的组件，对应的输出组件；
+
+==>完毕
+
+这里需要注意的一点是：`vue-router` 默认 hash 模式 —— 使用 URL 的 hash 来模拟一个完整的 URL，于是当 URL 改变时，页面不会重新加载。
+
+如果不想要很丑的 hash，我们可以用路由的 **history 模式**，这种模式充分利用 `history.pushState` API 来完成 URL 跳转而无须重新加载页面。
+
+当你使用 history 模式时，URL 就像正常的 url，例如 `http://yoursite.com/user/id`，也好看！
+
+不过这种模式要玩好，还需要后台配置支持。因为我们的应用是个单页客户端应用，如果后台没有正确的配置，当用户在浏览器直接访问 `http://oursite.com/user/id` 就会返回 404，这就不好看了。
+
+所以呢，你要在服务端增加一个覆盖所有情况的候选资源：如果 URL 匹配不到任何静态资源，则应该返回同一个 `index.html` 页面，这个页面就是你 app 依赖的页面。
+
+#### 原因： 浏览器解析地址栏的时候，`#`后面的不会发送到服务器，所以hash模式下不会有问题；但在HTML5的模式下，就会产生问题了；
 
