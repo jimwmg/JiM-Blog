@@ -4,16 +4,20 @@ title: router的基础知识
 
 ### 1 Location对象
 
-| 属性                                                         | 描述                                                 |
-| ------------------------------------------------------------ | ---------------------------------------------------- |
-| [hash](http://www.w3school.com.cn/jsref/prop_loc_hash.asp)   | 设置或返回从井号 (#) 开始的 URL（锚）。              |
-| [host](http://www.w3school.com.cn/jsref/prop_loc_host.asp)   | 设置或返回主机名和当前 URL 的端口号。                |
-| [hostname](http://www.w3school.com.cn/jsref/prop_loc_hostname.asp) | 设置或返回当前 URL 的主机名。                        |
-| [href](http://www.w3school.com.cn/jsref/prop_loc_href.asp)   | 设置或返回完整的 URL。(包括search和hash)             |
-| [pathname](http://www.w3school.com.cn/jsref/prop_loc_pathname.asp) | 设置或返回当前 URL 的路径部分。（不包括search和hash) |
-| [port](http://www.w3school.com.cn/jsref/prop_loc_port.asp)   | 设置或返回当前 URL 的端口号。                        |
-| [protocol](http://www.w3school.com.cn/jsref/prop_loc_protocol.asp) | 设置或返回当前 URL 的协议。                          |
-| [search](http://www.w3school.com.cn/jsref/prop_loc_search.asp) | 设置或返回从问号 (?) 开始的 URL（查询部分）。        |
+| 属性                                                         | 描述                                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [hash](http://www.w3school.com.cn/jsref/prop_loc_hash.asp)   | 设置或返回从井号 (#) 开始的 URL（锚）。                      |
+| [host](http://www.w3school.com.cn/jsref/prop_loc_host.asp)   | 设置或返回主机名和当前 URL 的端口号。                        |
+| [hostname](http://www.w3school.com.cn/jsref/prop_loc_hostname.asp) | 设置或返回当前 URL 的主机名。                                |
+| [href](http://www.w3school.com.cn/jsref/prop_loc_href.asp)   | 设置或返回完整的 URL。(包括search和hash)                     |
+| [pathname](http://www.w3school.com.cn/jsref/prop_loc_pathname.asp) | 设置或返回当前 URL 的路径部分。（不包括search和hash)：  绝对路径 |
+| [port](http://www.w3school.com.cn/jsref/prop_loc_port.asp)   | 设置或返回当前 URL 的端口号。                                |
+| [protocol](http://www.w3school.com.cn/jsref/prop_loc_protocol.asp) | 设置或返回当前 URL 的协议。                                  |
+| [search](http://www.w3school.com.cn/jsref/prop_loc_search.asp) | 设置或返回从问号 (?) 开始的 URL（查询部分）。                |
+| 方法                                                         |                                                              |
+| replace                                                      | `**Location**`**.replace()**方法以给定的URL来替换当前的资源。 与[`assign()`](https://developer.mozilla.org/zh-CN/docs/Web/API/Location/assign) 方法 不同的是调用`replace()方法后，当前页面不会保存到会话历史中（`session [`History`](https://developer.mozilla.org/zh-CN/docs/Web/API/History)），这样用户点击*回退*按钮将不会再跳转到该页面。location.replace(url) : url如果是绝对路径，则会替换绝对路径，如果是相对路径，则会替换最后一个 ； |
+| assign                                                       | location.assign(url) : url如果是绝对路径，则会替换绝对路径，如果是相对路径，则会替换最后一个 ； |
+| reload                                                       | 该方法只有一个参数  当值为 `true` 时，将强制浏览器从服务器加载页面资源，当值为 `false` 或者未传参时，浏览器则可能从缓存中读取页面。 |
 
 
 

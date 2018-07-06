@@ -20,6 +20,14 @@ CSS3 background-origin clip size 背景
 
 *  bakcground-origin : border-box || padding-box || content-box  该属性改变**背景图像** 的填充开始原点，对**背景色** 没有影响;默认值是padding-box,即从元素盒子的padding处开始填充；
 
+**重点重新理解下：其实是用于决定背景图像从那个区域开始显示**
+
+border-box：从border区域（含border）开始显示背景图像。
+
+padding-box：从padding区域（含padding）开始显示背景图像。（默认值）
+
+content-box：从content区域开始显示背景图像。
+
 定义元素的**背景图像** 从何处开始填充，即填充开始的原点；默认值是padding-box ；
 
 **注意背景图像必须设置为  no-repeat才会有效果，不然将会完全平铺** 
@@ -31,6 +39,9 @@ CSS3 background-origin clip size 背景
 *  auto是默认值，即背景图像的真实大小，
 *  length 可以直接设置背景图像的大小，会将背景图像进行压缩 ，
 *  percentage 以百分比设置背景图像的大小，百分比的基准是盛放背景图像的元素的宽高，而不是背景图像本身尺寸的宽高，
+
+**重点理解百分比的基准值是：**当属性值为百分比时，参照背景图像的[background-origin](http://css.doyoe.com/properties/backgrounds/background-origin)区域大小进行换算（而不是包含块大小）。如果改变 background-origin的值 content-box,那么百分比的基准值就是 content 的宽高；
+
 *  length和percentage如果只设置一一个值，那么将设置为背景图像的宽度尺寸，第二个值默认auto,根据宽度进行等比缩放；
 *  cover 会将背景图像进行**等比** 缩小或者放大，使其可以完全覆盖容器 ，此时背景图像可能会溢出；
 *  container会将背景图像进行**等比**缩小或者放大到宽度或者高度与容器的宽度或者高度一样，使其可以完全在容器内，此时容器可能会有空余空间；

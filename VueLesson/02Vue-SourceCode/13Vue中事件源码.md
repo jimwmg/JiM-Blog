@@ -67,6 +67,8 @@ export function eventsMixin (Vue: Class<Component>) {
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup
       if (hookRE.test(event)) {
+          //这里对应 vm.$on('hook:beforeDestroy',handler);
+          //在
         vm._hasHookEvent = true
       }
     }
@@ -161,5 +163,75 @@ export function toArray (list: any, start?: number): Array<any> {
   }
   return ret
 }
+```
+
+### 2 触发钩子函数源码 
+
+```javascript
+callHook(vm, 'beforeCreate')
+callHook(vm, 'beforeMount')
+callHook(vm, 'mounted')
+callHook(vm, 'beforeDestroy')
+callHook(vm, 'destroyed')
+....
+```
+
+callHook源码：
+
+```javascript
+export function callHook (vm: Component, hook: string) {
+    const handlers = vm.$options[hook]
+    if (handlers) {
+        for (let i = 0, j = handlers.length; i < j; i++) {
+            try {
+                handlers[i].call(vm)
+            } catch (e) {
+                handleError(e, vm, `${hook} hook`)
+            }
+        }
+    }
+    //如果是通过 vm.$on('hook:beforeDestory',handler) 注册的事件，就会在这里出发这个事件；
+    if (vm._hasHookEvent) {
+        vm.$emit('hook:' + hook)
+    }
+}
+```
+
+### 3 优化案例
+
+优化之前：
+
+```javascript
+data() {
+    return {
+		timer:null,        
+    }
+}
+created() {
+    this.getNotifyUnreadedCount();
+    this.timer = setInterval(() => {
+      this.getNotifyUnreadedCount();
+    }, 60 * 1000);
+  },
+  beforeDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  },
+```
+
+优化之后：
+
+```javascript
+created() {
+    this.getNotifyUnreadedCount();
+    const timer = setInterval(() => {
+        this.getNotifyUnreadedCount();
+    }, 60 * 1000);
+    this.$once('hook:beforeDestroy', () => {
+        clearInterval(timer);
+    });
+},
 ```
 

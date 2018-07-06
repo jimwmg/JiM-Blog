@@ -662,6 +662,28 @@ export class History{
     })
   }
 }
+function normalizeBase (base: ?string): string {
+  if (!base) {
+    if (inBrowser) {
+      // respect <base> tag
+      const baseEl = document.querySelector('base')
+      base = (baseEl && baseEl.getAttribute('href')) || '/'
+      // strip full URL origin 
+        //'https://dsd/'.replace(/^https?:\/\/[^\/]+/, '')  // '/'
+        //这个正则的意思是将 开头 http:?//[^\/] 替换为空字符串；
+
+      base = base.replace(/^https?:\/\/[^\/]+/, '')
+    } else {
+      base = '/'
+    }
+  }
+  // make sure there's the starting slash
+  if (base.charAt(0) !== '/') {
+    base = '/' + base
+  }
+  // remove trailing slash
+  return base.replace(/\/$/, '')
+}
 ```
 
 ####HTML5  pushState
@@ -686,6 +708,7 @@ export class HTML5History extends History {
         }
 
         const initLocation = getLocation(this.base)
+        //触发popstate的时候，根据当前的地址栏更新 route对象，进而实现 UI的更新；
         window.addEventListener('popstate', e => {
             const current = this.current
 
@@ -737,7 +760,7 @@ export class HTML5History extends History {
         return getLocation(this.base)
     }
 }
-
+// 获取当前的绝对路径；
 export function getLocation (base: string): string {
     let path = window.location.pathname
     if (base && path.indexOf(base) === 0) {
@@ -756,7 +779,7 @@ history：{router,base,current,pending,ready,readyCbs,
 
 当我们执行 `history.push. history.replace的时候`UI更新的根本原因如下：
 
-==>router.init    history.push     history.replace  都会触发history.transitionTo
+==>router.init    history.push     history.replace  都会触发history.transitionTo（base.js)
 
 ==> history.transitionTo:根据当前地址栏更新route对象
 
@@ -785,4 +808,145 @@ history：{router,base,current,pending,ready,readyCbs,
 所以呢，你要在服务端增加一个覆盖所有情况的候选资源：如果 URL 匹配不到任何静态资源，则应该返回同一个 `index.html` 页面，这个页面就是你 app 依赖的页面。
 
 #### 原因： 浏览器解析地址栏的时候，`#`后面的不会发送到服务器，所以hash模式下不会有问题；但在HTML5的模式下，就会产生问题了；
+
+### Hash
+
+```javascript
+/* @flow */
+
+import type Router from '../index'
+import { History } from './base'
+import { cleanPath } from '../util/path'
+import { getLocation } from './html5'
+import { setupScroll, handleScroll } from '../util/scroll'
+import { pushState, replaceState, supportsPushState } from '../util/push-state'
+
+export class HashHistory extends History {
+    constructor (router: Router, base: ?string, fallback: boolean) {
+        super(router, base)
+        // check history fallback deeplinking
+        if (fallback && checkFallback(this.base)) {
+            return
+        }
+        ensureSlash()
+    }
+
+    // this is delayed until the app mounts
+    // to avoid the hashchange listener being fired too early
+    setupListeners () {
+        const router = this.router
+        const expectScroll = router.options.scrollBehavior
+        const supportsScroll = supportsPushState && expectScroll
+
+        if (supportsScroll) {
+            setupScroll()
+        }
+
+        window.addEventListener(supportsPushState ? 'popstate' : 'hashchange', () => {
+            const current = this.current
+            if (!ensureSlash()) {
+                return
+            }
+            this.transitionTo(getHash(), route => {
+                if (supportsScroll) {
+                    handleScroll(this.router, route, current, true)
+                }
+                if (!supportsPushState) {
+                    replaceHash(route.fullPath)
+                }
+            })
+        })
+    }
+
+    push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+        const { current: fromRoute } = this
+        this.transitionTo(location, route => {
+            pushHash(route.fullPath)
+            handleScroll(this.router, route, fromRoute, false)
+            onComplete && onComplete(route)
+        }, onAbort)
+    }
+
+    replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+        const { current: fromRoute } = this
+        this.transitionTo(location, route => {
+            replaceHash(route.fullPath)
+            handleScroll(this.router, route, fromRoute, false)
+            onComplete && onComplete(route)
+        }, onAbort)
+    }
+
+    go (n: number) {
+        window.history.go(n)
+    }
+
+    ensureURL (push?: boolean) {
+        const current = this.current.fullPath
+        if (getHash() !== current) {
+            push ? pushHash(current) : replaceHash(current)
+        }
+    }
+
+    getCurrentLocation () {
+        return getHash()
+    }
+}
+
+function checkFallback (base) {
+    const location = getLocation(base)  // '/'
+    /*
+    
+    
+    **/
+    if (!/^\/#/.test(location)) { // 对于不是 hash 路由，则将其转化为hash 路由；
+        window.location.replace( // 通过window.replace(url) 绝对url来改变当前地址栏；
+            cleanPath(base + '/#' + location)
+        )
+        return true
+    }
+}
+
+function ensureSlash (): boolean {
+    const path = getHash()
+    if (path.charAt(0) === '/') {
+        return true
+    }
+    replaceHash('/' + path)
+    return false
+}
+
+export function getHash (): string {
+    // We can't use window.location.hash here because it's not
+    // consistent across browsers - Firefox will pre-decode it!
+    const href = window.location.href
+    const index = href.indexOf('#')
+    return index === -1 ? '' : href.slice(index + 1)
+}
+
+function getUrl (path) {
+    const href = window.location.href
+    const i = href.indexOf('#')
+    const base = i >= 0 ? href.slice(0, i) : href
+    return `${base}#${path}`
+}
+
+function pushHash (path) {
+    if (supportsPushState) {
+        pushState(getUrl(path))
+    } else {
+        window.location.hash = path
+    }
+}
+
+function replaceHash (path) {
+    if (supportsPushState) {
+        replaceState(getUrl(path))
+    } else {
+        window.location.replace(getUrl(path))
+    }
+}
+
+```
+
+
 

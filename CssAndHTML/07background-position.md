@@ -9,11 +9,11 @@ tags: css
 
 ###background-origin：content-box || padding-box || border-box 
 
-| 值           | 描述              | 测试                                       |
-| ----------- | --------------- | ---------------------------------------- |
-| padding-box | 背景图像相对于内边距框来定位。 | [测试](http://www.w3school.com.cn/tiy/c.asp?f=css_background-origin) |
-| border-box  | 背景图像相对于边框盒来定位。  | [测试](http://www.w3school.com.cn/tiy/c.asp?f=css_background-origin&p=2) |
-| content-box | 背景图像相对于内容框来定位。  | [测试](http://www.w3school.com.cn/tiy/c.asp?f=css_background-origin&p=3) |
+| 值          | 描述                                                    | 测试                                                         |
+| ----------- | ------------------------------------------------------- | ------------------------------------------------------------ |
+| padding-box | 背景图像相对于内边距框来定位。(padding左上角为坐标原点) | [测试](http://www.w3school.com.cn/tiy/c.asp?f=css_background-origin) |
+| border-box  | 背景图像相对于边框盒来定位。（border左上角为坐标原点）  | [测试](http://www.w3school.com.cn/tiy/c.asp?f=css_background-origin&p=2) |
+| content-box | 背景图像相对于内容框来定位。（content左上角为坐标原点） | [测试](http://www.w3school.com.cn/tiy/c.asp?f=css_background-origin&p=3) |
 
 以下默认backgroun-origin:padding-box；为默认值；
 
