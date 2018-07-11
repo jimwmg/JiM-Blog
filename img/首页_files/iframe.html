@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0035)https://www.italent.cn//iframe.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>proxy</title>
+  
+ </head>
+
+ <body>
+<script type="text/javascript">
+    (function () {
+        var domainFields = document.domain.split('.');
+        var len = domainFields.length;
+        var chinaDomain = [".com.cn", ".net.cn", ".org.cn", ".gov.cn", ".ac.cn",    //国内特殊域名
+                    ".bj.cn", ".sh.cn", ".hk.cn", ".tj.cn", ".cq.cn", ".he.cn",     //行政区域名
+                    ".sx.cn", ".nm.cn", ".ln.cn", ".jl.cn", ".hl.cn", ".js.cn", ".zj.cn", ".ah.cn", ".fj.cn", ".jx.cn", ".sd.cn",
+                    ".ha.cn", ".hb.cn", ".hn.cn", ".gd.cn", ".gx.cn", ".hi.cn", ".sc.cn", ".gz.cn", ".yn.cn", ".xz.cn", ".sn.cn",
+                    ".gs.cn", ".qh.cn", ".nx.cn", ".xj.cn", ".tw.cn", ".mo.cn"];
+        var domainTail = domainFields[len - 2] + "." + domainFields[len - 1];
+        if (chinaDomain.indexOf('.' + domainTail) > -1) {
+            domainTail = domainFields[len - 3] + "." + domainFields[len - 2] + "." + domainFields[len - 1];
+        }
+        document.domain = domainTail;
+    })();
+</script>
+ 
+</body></html>
