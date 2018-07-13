@@ -40,19 +40,21 @@ function selectSort(arr) {
         throw new Error();
     }
     let i,j;
-    for(i = 1 ;i < arr.length; i++ ) {
+    for(i = 1 ;i <= arr.length; i++ ) {
         let maxIndex = 0 ;
-        for(j = 0;j < arr.length - i; j++) {
+        for(j = 0;j <= arr.length - i; j++) {
             if(arr[maxIndex] < arr[j]) {
                 maxIndex = j;//记录数组中最大值的索引
             }
         }
-        // 将找到的最大值与数组的最后一位进行位置互换
-        [arr[arr.length - i],arr[maxIndex]] = [arr[maxIndex],arr[arr.length - i ]] 
+        if(maxIndex !== arr.length - i) {
+          // 将找到的最大值与数组的最后一位进行位置互换
+          [arr[arr.length - i],arr[maxIndex]] = [arr[maxIndex],arr[arr.length - i ]] 
+        }
+        
     }
     return arr;
 }
-console.log(selectSort(arr))
 ```
 
 ### 3 [插入排序（对于大规模数组，插入排序会很慢）](https://www.cnblogs.com/Hua-Min/p/StraightInsertionSort.html)

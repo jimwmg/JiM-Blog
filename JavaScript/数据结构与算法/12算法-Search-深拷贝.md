@@ -33,7 +33,7 @@ function bfs(nodes,cb,childKey,parent = null) {
         return false;
     }
     if(typeof cb != 'function') {
-        return fasle;
+        return false;
     }
     if(!Array.isArray(nodes)) {
         nodes = [nodes];

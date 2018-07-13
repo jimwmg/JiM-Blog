@@ -165,3 +165,17 @@ console.log(o.hasOwnProperty(s1)) //true
 
 ```
 
+### 7 操作对象原型总结
+
+```javascript
+Object.setPrototypeOf(obj,proto) ==> obj.__proto__ = proto
+Object.setPrototypeOf = Object.setPrototypeOf || function(obj, proto) {
+  obj.__proto__ = proto;
+  return obj; 
+}
+Object.create(proto,descriptor) ;//proto 是 Object.create() 返回的对象的 __proto__ 属性的指向；
+Object.create({name:'jim'},{age:{value:12}}) 
+Object.getPrototypeOf(obj) // 返回obj的__proto__ 对象
+Object.getPrototypeOf(Object.create({name:'jim'},{age:{value:12}})) // {name:'jim'}
+```
+

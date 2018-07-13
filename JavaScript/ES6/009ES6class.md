@@ -190,7 +190,9 @@ console.log(Rect.getArea() ); //prototype method 不能直接通过类名调用�
 
 —**将子类`__proto__` 指向 父类 ` Dog.__proto__ = Animal`**
 
-2.4 先来看下extends关键字的作用 class类实现继承的根本原因就是通过extends关键字，将子类的prototype.__ proto __ 属性指向父类构造函数prototype
+2.4 先来看下extends关键字的作用 class类实现继承的根本原因就是通过extends关键字，将子类的prototype.__ proto __ 属性指向父类构造函数prototype; 
+
+constructor和其他方法均在 类的 prototype 对象上；
 
 ```javascript
 class Animal {
@@ -262,7 +264,7 @@ var p=new F;
 （4）判断F的返回值类型：如果是值类型，就丢弃它，还是返回instance。如果是引用类型，就返回这个引用类型的对象，替换掉instance。
 ```
 
-也就是说，所有的**对象o**都会有`__proto`属性，该属性指向**对象o**的构造函数的prototype属性
+也就是说，所有的**对象o**都会有`__proto__`属性，该属性指向**对象o**的构造函数的prototype属性
 
 以上所有建议读者在浏览器中打印台看下实际效果，理解更深刻；
 

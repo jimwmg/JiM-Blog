@@ -146,5 +146,18 @@ function divideBy(num) {
     }
     return stack.reverse().join('');
 }
+
+function divideBy(num,by) {
+	const stack = [];
+    // 对应16进制的适用
+    const digitsMap = '0123456789ABCDEF';
+    const rem = null;
+    while( num > 0) {
+        rem = Math.floor( num % by ) ;
+        stack.push(digitsMap[rem]);
+        num = Math.floor(num / by);
+    }
+    return stack.reverse().join('');
+}
 ```
 
