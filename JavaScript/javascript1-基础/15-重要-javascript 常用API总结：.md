@@ -22,11 +22,11 @@ Node.textContent  //返回当前节点和它的所有后代节点的文本内容
 Node.baseURI    //返回当前网页的绝对路径
 
 Node.ownerDocument  //返回当前节点所在的顶层文档对象，即document
-Node.nextSibling  //返回紧跟在当前节点后面的第一个兄弟节点
-Node.previousSibling  //返回当前节点前面的、距离最近的一个兄弟节点
+Node.nextSibling  //返回紧跟在当前节点后面的第一个兄弟元素节点
+Node.previousSibling  //返回当前节点前面的、距离最近的一个兄弟元素节点
 Node.parentNode   //返回当前节点的父节点
 Node.parentElement  //返回当前节点的父Element节点
-Node.childNodes   //返回当前节点的所有子节点
+Node.childNodes   //返回当前节点的所有子节点(包括文本节点，元素节点)
 Node.firstChild  //返回当前节点的第一个子节点
 Node.lastChild   //返回当前节点的最后一个子节点
 
@@ -184,7 +184,7 @@ Element.style  //返回元素节点的行内样式
 **（3）节点相关属性**
 
 ```javascript
-Element.children   //包括当前元素节点的所有子元素
+Element.children   //包括当前元素节点的所有子元素,注意和 childNodes区分，一个获取的额是子元素节点，一个获取的是全部的子节点，包括文本节点，注释节点，元素节点等；
 Element.childElementCount   //返回当前元素节点包含的子HTML元素节点的个数
 Element.firstElementChild  //返回当前节点的第一个Element子节点  
 Element.lastElementChild   //返回当前节点的最后一个Element子节点  

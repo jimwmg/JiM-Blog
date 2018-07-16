@@ -57,3 +57,16 @@ for(let v of o) {
 // 可以，只是不会遍历属性不是数字的，并且长度之外的
 ```
 
+### 4 for-of 迭代可迭代的对象的时候，如果可迭代对象动态变化，for-of也会遍历到动态变化的值
+
+```javascript
+for(let v of numArr) {
+    console.log(v);
+    if(v === 2) {
+        // numArr.push(9);
+        // numArr.shift();
+        numArr.splice(1,2);
+    }
+}
+```
+

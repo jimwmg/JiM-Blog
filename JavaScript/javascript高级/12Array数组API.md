@@ -22,13 +22,71 @@ title: 数组API
 ### 4 数组的遍历方法
 
 * map: 返回一个通过传入map中的函数处理数组每一项之后的新数组；
+
+使用 map 方法处理数组时，**数组元素的范围是在 callback 方法第一次调用之前就已经确定了**。在 map 方法执行的过程中：原数组中新增加的元素将不会被 callback 访问到；若已经存在的元素被改变或删除了，则它们的传递到 callback 的值是 map 方法遍历到它们的那一时刻的值；而被删除的元素将不会被访问到。`map `不修改调用它的原数组本身（当然可以在 `callback` 执行时改变原数组）。
+
+```javascript
+let numArr = [1,2,3,4];
+const ret = numArr.map((num,i,arr) => {
+    console.log(num)
+    if(num === 2) {
+        // arr.shift();
+        numArr.push('5')
+    }
+    return num * 2;
+})
+console.log(ret)
+console.log(numArr);
+```
+
+
+
 * reduce:
+
 * reduceRight:
+
 * filter:
+
 * every:
+
 * some:
+
 * find:
+
 * includes:
+
 * indexOf:
-* forEach:
+
+* forEach: 该函数遍历的范围在第一次调用 callback的时候就会确定；
+
+  -- `forEach` **遍历的范围在第一次调用 `callback` 前就会确定**。调用`forEach` 后添加到数组中的项不会被 `callback` 访问到。如果已经存在的值被改变，则传递给 `callback` 的值是 `forEach` 遍历到他们那一刻的值。已删除的项不会被遍历到。如果已访问的元素在迭代时被删除了(例如使用 [`shift()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/shift)) ，之后的元素将被跳过 - 参见下面的示例。
+
+  -- `forEach()` 为每个数组元素执行callback函数；不像[`map()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/map) 或者[`reduce()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce) ，它总是返回 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)值，并且不可链式调用。典型用例是在一个链的最后执行副作用。
+
+  -- **注意：** 没有办法中止或者跳出 forEach 循环，除了抛出一个异常。如果你需要这样，使用forEach()方法是错误的，你可以用一个简单的循环作为替代。如果您正在测试一个数组里的元素是否符合某条件，且需要返回一个布尔值，那么可使用 [`Array.every`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/every) 或 [`Array.some`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/some)。如果可用，新方法 [`find()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/find) 或者[`findIndex()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex) 也可被用于真值测试的提早终止。
+
+```javascript
+let numArr = [1,2,3,4];
+numArr.forEach((num,i,arr) => {
+    if(num === 2) {
+        // arr.shift();
+        numArr.push('5')
+    }
+    console.log(num)
+})
+```
+
+对于`forEach map`等数组API是在调用的时候就确定了数组的遍历范围不同，`for-of`可以在访问到循环的过程中push进数组的新值；
+
+```javascript
+let numArr = [1,2,3,4];
+for(let v of numArr) {
+    console.log(v);
+    if(v === 2) {
+        numArr.push(9);
+    }
+}
+```
+
+
 

@@ -10,7 +10,7 @@ static：对象遵循常规流。此时4个定位偏移属性不会被应用。
 
 relative：对象遵循常规流，并且参照自身在常规流中的位置通过[top](http://css.doyoe.com/properties/positioning/top.htm)，[right](http://css.doyoe.com/properties/positioning/right.htm)，[bottom](http://css.doyoe.com/properties/positioning/bottom.htm)，[left](http://css.doyoe.com/properties/positioning/left.htm)这4个定位偏移属性进行偏移时不会影响常规流中的任何元素。
 
-absolute：对象脱离常规流，此时偏移属性参照的是离自身最近的定位祖先元素，如果没有定位的祖先元素，则一直回溯到`body`元素。盒子的偏移位置不影响常规流中的任何元素，其`margin`不与其他任何`margin`折叠。
+absolute：对象脱离常规流，此时偏移属性参照的是离自身最近的定位祖先元素，如果没有定位的祖先元素，初始块。盒子的偏移位置不影响常规流中的任何元素，其`margin`不与其他任何`margin`折叠（因为触发了BFC ）。
 
 fixed：与`absolute`一致，但偏移定位是以窗口为参考。当出现滚动条时，对象不会随着滚动。
 
@@ -168,7 +168,7 @@ sticky：对象在常态时遵循常规流。它就像是`relative`和`fixed`的
     background-color:grey;
     left:10%;/**10px: left和right的百分比取值为content-box的宽度*/
     top:10%;/**20px:top和bottom的百分比取值为content-box的高度*/
-    /**对于relative的元素，其定位left top bottom right的取值基准是其父元素的content-box为基准*/
+    /**对于relative的元素，其定位left top bottom right的取值基准是其父元素的content-box为基准；位移的坐标系是其自身；*/
   }
   </style>
   <div id="container">
@@ -292,10 +292,29 @@ ICB（初始包含块）是专有名词，它特指根元素`<html />`的包含�
   <div id='container'></div>
 ```
 
-### 2.4 尺寸包含块和定位包含块涉及到 border-box的时候
+### 2.4 如何使一个未知宽高的元素水平垂直居中于屏幕；
 
-```html
-
+```css
+.center{
+    width:200px;
+    height:200px;
+    background-color:greenyellow;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+.center{
+    width:200px;
+    height:200px;
+    background-color:greenyellow;
+    position:absolute;
+	margin:auto;
+    left:0;
+    top:0;
+    right:0;
+    bottom:0;
+}
 ```
 
 
