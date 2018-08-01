@@ -25,7 +25,7 @@ function broadcast(componentName, eventName, params) {
 }
 export default {
   methods: {
-      // 子组件中调用，是可以出发父组件中指定组件名字的对应的事件
+      // 子组件中调用，是可以触发父组件中指定组件名字的对应的事件
     dispatch(componentName, eventName, params) {
       var parent = this.$parent || this.$root;
       var name = parent.$options.componentName;

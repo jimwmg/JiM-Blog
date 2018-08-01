@@ -51,6 +51,13 @@ cookie流程
 
 name、value 是 cookie 的名和值。domian 、Path 、 Expires/max-age 、Size 、Http 、 Secure等均属cookie的属性。
 
+一个 cookie 开始于一个名称/值对：
+
+- `<cookie-name>` 可以是除了控制字符 (CTLs)、空格 (spaces) 或制表符 (tab)之外的任何 US-ASCII 字符。同时不能包含以下分隔字符： ( ) < > @ , ; : \ " /  [ ] ? = { }.
+- `<cookie-value>` 是可选的，如果存在的话，那么需要包含在双引号里面。支持除了控制字符（CTLs）、空格（whitespace）、双引号（double quotes）、逗号（comma）、分号（semicolon）以及反斜线（backslash）之外的任意 US-ASCII 字符。**关于编码**：许多应用会对 cookie 值按照URL编码（URL encoding）规则进行编码，但是按照 RFC 规范，这不是必须的。不过满足规范中对于 <cookie-value> 所允许使用的字符的要求是有用的。
+- **__Secure- 前缀**：以 __Secure- 为前缀的 cookie（其中连接符是前缀的一部分），必须与 secure 属性一同设置，同时必须应用于安全页面（即使用 HTTPS 访问的页面）。
+- **__Host- 前缀：** 以 __Host- 为前缀的 cookie，必须与 secure 属性一同设置，必须应用于安全页面（即使用 HTTPS 访问的页面），必须不能设置 domain 属性 （也就不会发送给子域），同时 path 属性的值必须为“/”。
+
 **domain 和 path**
 
 这两个选项共同决定了cookie能被哪些页面共享。
@@ -59,9 +66,9 @@ name、value 是 cookie 的名和值。domian 、Path 、 Expires/max-age 、Siz
 
 如网址为www.jb51.net/test/test.aspx，那么domain默认为www.jb51.net。而跨域访问，如域A为t1.test.com，域B为t2.test.com，那么在域A生产一个令域A和域B都能访问的cookie就要将该cookie的domain设置为.test.com；如果要在域A生产一个令域A不能访问而域B能访问的cookie就要将该cookie的domain设置为t2.test.com
 
-path用来控制cookie发送的指定域的「路径」，默认为"/"，表示指定域下的所有路径都能访问。**它是在域名的基础下，指定可以访问的路径**。例如cookie设置为"`domain=.google.com.hk; path=/webhp`"，那么只有"`.google.com.hk/webhp`"及"`/webhp`"下的任一子目录如"`/webhp/aaa`"或"`/webhp/bbb`"会发送cookie信息，而"`.google.com.hk`"就不会发送，即使它们来自同一个域。
+**path**用来控制cookie发送的指定域的「路径」，默认为"/"，表示指定域下的所有路径都能访问。**它是在域名的基础下，指定可以访问的路径**。例如cookie设置为"`domain=.google.com.hk; path=/webhp`"，那么只有"`.google.com.hk/webhp`"及"`/webhp`"下的任一子目录如"`/webhp/aaa`"或"`/webhp/bbb`"会发送cookie信息，而"`.google.com.hk`"就不会发送，即使它们来自同一个域。
 
-### expries/max-age失效时间
+### expries/max-age失效时间(两者都有的时候 max-age优先级更高)
 
 expries 和 max-age 是用来决定cookie的生命周期的，也就是cookie何时会被删除。
 
@@ -93,7 +100,7 @@ Cookie都是通过document对象获取的，我们如果能让cookie在浏览器
 
 ###4、如何利用以上属性去设置cookie？
 
-**服务器端设置**
+**服务器端设置**      [setCookie](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Set-Cookie)
 
 服务器通过发送一个名为 Set-Cookie 的HTTP头来创建一个cookie，作为 Response Headers 的一部分。如下图所示，每个Set-Cookie 表示一个 cookie（**如果有多个cookie,需写多个Set-Cookie**），每个属性也是以名/值对的形式（除了secure），属性间以分号加空格隔开。格式如下：
 
@@ -106,6 +113,26 @@ set-cookie: vcsaas_test16_token=5ad86179cff47e3486c5ed00; Max-Age=315360000; Exp
 **Set-Cookie: name=value[; expires=GMTDate][; domain=domain][; path=path][; secure]**
 
 只有cookie的名字和值是必需的。
+
+* 会话期cookie : 会话期cookie将会在客户端关闭的时候被移除；会话期cookie 不设置 Expires 或 Max-Age指令
+
+```javascript
+Set-Cookie: sessionid=38afes7a8; HttpOnly; Path=/
+```
+
+* 持久化cookie : 持久化cookie不会再客户端关闭的时候失效，而是在特定日期( Expires ) 或者经过一段特定的时候之后（Max-Age）之后才会失效；
+
+```javascript
+Set-Cookie: id=a3fWa; Expires=Wed, 21 Oct 2015 07:28:00 GMT; Secure; HttpOnly
+```
+
+* 非法域
+
+```javascript
+Set-Cookie: qwerty=219ffwef9w0f; Domain=somecompany.co.uk; Path=/; Expires=Wed, 30 Aug 2019 00:00:00 GMT
+```
+
+
 
 　　**客户端设置**(在服务器没有设置httpOnly的情况下)
 

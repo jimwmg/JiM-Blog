@@ -50,6 +50,68 @@ function bfs(nodes,cb,childKey,parent = null) {
 }
 ```
 
+以上两种算法可以实现将一个树状的数据结构，拿到每一个节点，可以将其转化为一个链表或者一维数组，那么如何实现它的逆运算，将一个链表转化为一个树状的数据结构呢？
+
+```javascript
+var obj = [{
+    id: 1,
+    parent: null
+  },
+  {
+    id: 3,
+    parent: 2
+  },
+  {
+    id: 2,
+    parent: 1
+  },
+]
+function clone(value){
+    if(Array.isArray(value)){
+        return value.map(clone)
+    }else if(typeof value === 'object' && value !== null){
+        let ret = {};
+        for(let key in value){
+            ret[key] = value[key]
+        }
+        return ret;
+    }else{
+        return value;
+    }
+}
+function reverseDfs(nodes,parent = null){
+    nodes = clone(nodes);
+    if(!nodes){
+        return 
+    }
+    if(!Array.isArray(nodes)){
+        nodes = [nodes];
+    }
+    let result = null;//存放返回结果的指针
+    let pointer = null;//存放当前数组元素的指针
+    while(nodes.length){
+        const found = nodes.find((node) => node.parent === parent);
+        if(!found){
+            return result;
+        }
+        let delIndex = nodes.indexOf(found);
+        nodes.splice(delIndex,1);
+        if(parent === null) {
+            result = found;
+            pointer = found;
+            parent = found.id;
+        }else{
+            pointer.child = found;
+            pointer = found;
+            parent = found.id;
+        }
+    }
+    return result;
+}
+```
+
+
+
 ### 3 深拷贝实现 `JSON.parse(JSON.stringify())`
 
 ```javascript

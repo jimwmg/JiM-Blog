@@ -1,5 +1,5 @@
 ---
-title:  Vue中事件源码
+ttitle:  Vue中事件源码
 date: 2018-01-24
 categories: vue
 ---
