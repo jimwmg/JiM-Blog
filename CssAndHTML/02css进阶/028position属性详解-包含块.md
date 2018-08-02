@@ -23,7 +23,7 @@ sticky：对象在常态时遵循常规流。它就像是`relative`和`fixed`的
 * 初始包含块：**直观来看，根元素`<html />`的包含块ICB，就是“首屏”。
 * 理解`box-sizing`,content-box ,padding border不包括在 width和height的定义之中；border-box中 padding和border会在 width 和 height 的定义之中；（所以就会出现padding-box和content-box被挤压的情况）
 
-####2.1 尺寸包含块：(子元素通过百分比基准获取自身盒模型content padding margin的基准)
+####2.1 尺寸包含块：(子元素通过百分比基准获取自身盒模型content padding margin的基准)，即设置width height padding margin的百分比基准；
 
 * 对于非定位元素（包括一般的块级元素，浮动元素），其**尺寸包含块**就是其块级父元素的 **content-box 的宽高**;
 
@@ -45,7 +45,6 @@ sticky：对象在常态时遵循常规流。它就像是`relative`和`fixed`的
     padding:10%;/**10px*/
     margin:10%;/**10px*/
     background-color:grey;
-
   }
   </style>
   <div id="container">
@@ -82,7 +81,7 @@ sticky：对象在常态时遵循常规流。它就像是`relative`和`fixed`的
 </div>
 ```
 
-* 对于定位元素：其**尺寸包含块 **就是其块级父元素的 **padding-box 的宽高**;
+* 对于定位元素：其**尺寸包含块 **就是其非static定位父元素 或者 初始包含块 的 **padding-box 的宽高**;
 
 `box-sizing的默认值是 content-box;`
 

@@ -17,7 +17,7 @@ W3C: In CSS, the adjoining margins of two or more boxes (which might or might no
 
 * 两个或者元素盒元素：可以是父子元素之间的margin接触地带，也可以是兄弟元素之间的margin接触地带；
 
-* 垂直方向：只有在垂直方向的额margin才会发生外边距合并，水平方向的外边距不会存在叠加情况；
+* 垂直方向：只有在垂直方向的margin才会发生外边距合并，水平方向的外边距不会存在叠加情况；
 
 * 普通流（in flow): 只要不是float ,absolute ,root element 就是普通流；**也就是说只有都是普通流种的元素才能进行margin的合并**
 

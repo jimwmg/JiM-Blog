@@ -113,6 +113,8 @@ export function eventsMixin (Vue: Class<Component>) {
       // specific handler
       let cb
       let i = cbs.length
+       // 因为删除数组元素是会更改索引的
+  // 所有从后往前删可以保证索引不变
       while (i--) {
         cb = cbs[i]
         if (cb === fn || cb.fn === fn) {
