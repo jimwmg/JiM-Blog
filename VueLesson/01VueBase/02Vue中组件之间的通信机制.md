@@ -59,6 +59,9 @@ Vue.component('example', {
 
 * HTML 中的特性名是大小写不敏感的，所以浏览器会把所有大写字符解释为小写字符。
 * 重申一次，如果你使用字符串模板，那么这个限制就不存在了。
+产生这样的原因,对于html的模板是通过 outerHTML解析的，但是template的模板是可以通过vue内部解析的；这也就解释了上面两句话
+[vue源码中的解析-outerHTML会序列化这样的值-打开控制台看下输出](https://jsfiddle.net/JiMWmg/fatsd240/4/)
+[platforms/web/entry-runtime-with-compiler.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
 
 
 
