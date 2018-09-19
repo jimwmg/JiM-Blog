@@ -68,6 +68,8 @@ this.history = new HTML5History(this, options.base)
 
 ### 2 创建matcher对象的流程
 
+该对象包括两个函数一个是 match : 用于从所有路由中找到对应的routeRecord; createRouteMap用于根据路由配置生成路由记录表；
+
 具体源码github可以找到
 
 ```javascript
@@ -334,10 +336,18 @@ router.push({ path: 'home' })
 router.push({ name: 'user', params: { userId: 123 }})
 
 // 带查询参数，变成 /register?plan=private
-router.push({ path: 'register', query: { plan: 'private' }})
+-->1 router.push({ path: 'register', query: { plan: 'private' }})
 
-const route = this.router.match(location, this.current)
-//这里会执行：return this.matcher.match(raw, current, redirectedFrom)
+-->2 this.history.push(location, onComplete, onAbort)
+
+-->3 this.transitionTo(location, route => {
+      pushHash(route.fullPath)
+      handleScroll(this.router, route, fromRoute, false)
+      onComplete && onComplete(route)
+    }, onAbort)
+-->4 this.router.match(location, this.current)
+
+-->5 this.matcher.match(raw, current, redirectedFrom)
 //详情《matcher和history创建源码解析》
 ```
 
@@ -624,6 +634,10 @@ function formatMatch (record: ?RouteRecord): Array<RouteRecord> {
 
 history/base.js
 
+注意这里面的 **transitionTo**函数是实现路由改变，页面更新的根本原因，因为在这里会执行updateRoute函数，来更新`_route`,由于`_route`是响应式的（经过defineReactive函数处理的，所以当它改变的时候，会触发vue的更新机制；
+
+**重点可以看下面的代码，以下源码中，不管是hash history 还是 abstract ,最终在改变路由的时候，都会调用这个transitionTo函数，这个函数才是触发vue视图更新的入口**
+
 ```javascript
 export class History{ 
   constructor (router: Router, base: ?string) {
@@ -686,7 +700,7 @@ function normalizeBase (base: ?string): string {
 }
 ```
 
-####HTML5  pushState
+#### HTML5  pushState
 
 * history/html5.js
 
@@ -769,6 +783,73 @@ export function getLocation (base: string): string {
     return (path || '/') + window.location.search + window.location.hash
 }
 ```
+
+pushState.js
+
+```javascript
+/* @flow */
+
+import { inBrowser } from './dom'
+import { saveScrollPosition } from './scroll'
+
+export const supportsPushState = inBrowser && (function () {
+    const ua = window.navigator.userAgent
+
+    if (
+        (ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
+        ua.indexOf('Mobile Safari') !== -1 &&
+        ua.indexOf('Chrome') === -1 &&
+        ua.indexOf('Windows Phone') === -1
+    ) {
+        return false
+    }
+
+    return window.history && 'pushState' in window.history
+})()
+
+// use User Timing api (if present) for more accurate key precision
+const Time = inBrowser && window.performance && window.performance.now
+? window.performance
+: Date
+
+let _key: string = genKey()
+
+function genKey (): string {
+    return Time.now().toFixed(3)
+}
+
+export function getStateKey () {
+    return _key
+}
+
+export function setStateKey (key: string) {
+    _key = key
+}
+
+export function pushState (url?: string, replace?: boolean) {
+    saveScrollPosition()
+    // try...catch the pushState call to get around Safari
+    // DOM Exception 18 where it limits to 100 pushState calls
+    const history = window.history
+    try {
+        if (replace) {
+            history.replaceState({ key: _key }, '', url)
+        } else {
+            _key = genKey()
+            history.pushState({ key: _key }, '', url)
+        }
+    } catch (e) {
+        window.location[replace ? 'replace' : 'assign'](url)
+    }
+}
+
+export function replaceState (url?: string) {
+    pushState(url, true)
+}
+
+```
+
+
 
 history对象
 
@@ -944,6 +1025,66 @@ function replaceHash (path) {
     } else {
         window.location.replace(getUrl(path))
     }
+}
+
+```
+
+### Abstract
+
+这种路由模式主要是为了兼容非web端的使用；区别于hash和history
+
+```javascript
+/* @flow */
+
+import type Router from '../index'
+import { History } from './base'
+
+export class AbstractHistory extends History {
+  index: number;
+  stack: Array<Route>;
+
+  constructor (router: Router, base: ?string) {
+    super(router, base)
+    this.stack = []
+    this.index = -1
+  }
+
+  push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    this.transitionTo(location, route => {
+        //对于abstract模式的路由需要在挂载之后手动push一个要显示的页面；
+      this.stack = this.stack.slice(0, this.index + 1).concat(route)
+      this.index++
+      onComplete && onComplete(route)
+    }, onAbort)
+  }
+
+  replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    this.transitionTo(location, route => {
+      this.stack = this.stack.slice(0, this.index).concat(route)
+      onComplete && onComplete(route)
+    }, onAbort)
+  }
+
+  go (n: number) {
+    const targetIndex = this.index + n
+    if (targetIndex < 0 || targetIndex >= this.stack.length) {
+      return
+    }
+    const route = this.stack[targetIndex]
+    this.confirmTransition(route, () => {
+      this.index = targetIndex
+      this.updateRoute(route)
+    })
+  }
+
+  getCurrentLocation () {
+    const current = this.stack[this.stack.length - 1]
+    return current ? current.fullPath : '/'
+  }
+
+  ensureURL () {
+    // noop
+  }
 }
 
 ```

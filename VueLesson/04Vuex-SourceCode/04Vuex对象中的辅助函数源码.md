@@ -193,7 +193,7 @@ export const mapState = normalizeNamespace((namespace, states) => {
   })
   return res
 })
-
+//最后实现的效果还是  store.commit(type,payload)
 export const mapMutations = normalizeNamespace((namespace, mutations) => {
   const res = {}
   normalizeMap(mutations).forEach(({ key, val }) => {

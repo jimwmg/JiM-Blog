@@ -5,11 +5,13 @@ categories: nodejs
 comments : true 
 updated : 
 ---
-###1 Process对象简介
+### 1 Process对象简介
 
 `process`对象是 Node 的一个全局对象，提供当前 Node 进程的信息。它可以在脚本的任意位置使用，不必通过`require`命令加载。该对象部署了`EventEmitter`接口。
 
 ### 2 Process全局对象基本使用
+
+**Process.argv[2] 常用参数；**
 
 #### 属性
 
@@ -45,7 +47,7 @@ node process-args.js one two=three four
 #### 方法 
 
 - `process.chdir()`：切换工作目录到指定目录。
-- `process.cwd()`：返回运行当前脚本的工作目录的路径。
+- `process.cwd()`：返回运行当前脚本的工作目录的路径（绝对路径）。
 - `process.exit()`：退出当前进程。
 - `process.getgid()`：返回当前进程的组ID（数值）。
 - `process.getuid()`：返回当前进程的用户ID（数值）。
@@ -53,7 +55,9 @@ node process-args.js one two=three four
 - `process.on()`：监听事件。
 - `process.setgid()`：指定当前进程的组，可以使用数字ID，也可以使用字符串ID。
 - `process.setuid()`：指定当前进程的用户，可以使用数字ID，也可以使用字符串ID。
--  process.binding(name) :这个方法用于返回指定名称的内置模块。Process对象同样部署了EventEmitter的接口，所以可以调用 Process.on 进行事件绑定等其他事件操作；
+- process.binding(name) :这个方法用于返回指定名称的内置模块。Process对象同样部署了EventEmitter的接口，所以可以调用 Process.on 进行事件绑定等其他事件操作；
+
+需要注意区分 `process.cwd()`和 `__dirname`的区别，前者是 运行node服务所在的绝对路径，而后者则是具体文件（js脚本）所在的目录路径；前者在同一个node服务中，不同的文件中的值是一样的，后者在不同的文件中值是不一样的；
 
 #### 事件
 
@@ -63,6 +67,8 @@ node process-args.js one two=three four
 - `exit`事件：进程退出前触发
 
 ### 3 process.argv
+
+**一般使用minimist  npm包**
 
 ```
 node dev.js --host local.test.com --proxy test18"

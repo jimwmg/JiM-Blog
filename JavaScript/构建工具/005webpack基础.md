@@ -277,5 +277,87 @@ recordsOutputPath: path.resolve(__dirname, "build/records.json"),
 
 [node加载模块的过程](http://nodejs.cn/api/modules.html)
 
-node的模块分为：文件模块，目录模块，系统模块（核心模块），
+node的模块分为：文件模块，目录模块，系统模块（核心模块）
+
+### 4 webpack配置文件不同的支持导出形式，比如导出一个对象，导出一个函数，导出一个数组对象等；
+
+#### 导出一个对象
+
+webpack会执行这个配置
+
+```javascript
+module.exports ={
+  output: {
+    filename: './dist-amd.js',
+    libraryTarget: 'amd'
+  },
+  entry: './app.js',
+  mode: 'production',
+}
+
+```
+
+#### 导出一个数组对象
+
+webpack会执行者两个配置
+
+```javascript
+module.exports = [{
+  output: {
+    filename: './dist-amd.js',
+    libraryTarget: 'amd'
+  },
+  entry: './app.js',
+  mode: 'production',
+}, {
+  output: {
+    filename: './dist-commonjs.js',
+    libraryTarget: 'commonjs'
+  },
+  entry: './app.js',
+  mode: 'production',
+}]
+
+```
+
+#### 导出一个函数
+
+对于需要对不同的构建环境进行的不同为webpack的配置，此时可以根据环境对象来进行判断，通过导出一个函数来执行不同的配置；
+
+```javascript
+module.exports = function(env, argv) {
+  return {
+    mode: env.production ? 'production' : 'development',
+    devtool: env.production ? 'source-maps' : 'eval',
+     plugins: [
+       new webpack.optimize.UglifyJsPlugin({
+        compress: argv['optimize-minimize'] // 只有传入 -p 或 --optimize-minimize
+       })
+     ]
+  };
+};
+
+```
+
+#### 导出一个promise
+
+webpack 将运行由配置文件导出的函数，并且等待 Promise 返回。便于需要异步地加载所需的配置变量。
+
+```javascript
+module.exports = () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve({
+        entry: './app.js',
+        /* ... */
+      })
+    }, 5000)
+  })
+}
+
+```
+
+
+
+
 

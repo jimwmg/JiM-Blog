@@ -33,6 +33,14 @@ new Vue({
 vue-router.src/index.js
 
 ```javascript
+vue-router 提供了三种运行模式：
+
+hash: 使用 URL hash 值来作路由。默认模式。
+history: 依赖 HTML5 History API 和服务器配置。查看 HTML5 History 模式。
+abstract: 支持所有 JavaScript 运行环境，如 Node.js 服务器端。
+```
+
+```javascript
 export default class VueRouter {
   static install: () => void;
   static version: string;
@@ -47,10 +55,10 @@ export default class VueRouter {
     let mode = options.mode || 'hash' //默认使用hashChange
     //fallback，当浏览器不支持 history.pushState 控制路由是否应该回退到 hash 模式。默认值为 true。
     this.fallback = mode === 'history' && !supportsPushState && options.fallback !== false
-    if (this.fallback) {
+    if (this.fallback) {//即使mode模式传入的是history，vue-router源码内部也会对浏览器是否支持history API进行校验，如果不支持，则会回滚到hash模式；
       mode = 'hash'
     }
-    if (!inBrowser) {
+    if (!inBrowser) { //对于不是浏览器的移动端原生环境默认会使用abstract模式；
       mode = 'abstract'
     }
     this.mode = mode
@@ -141,6 +149,8 @@ export function initMixin (Vue: GlobalAPI) {
 install.js
 
 ```javascript
+import View from './components/view'
+import Link from './components/link'
 export function install (Vue) {
   //防止重复安装
   if (install.installed && _Vue === Vue) return
@@ -199,7 +209,7 @@ export function install (Vue) {
 }
 ```
 
-###3.2 创建router实例对象
+### 3.2 创建router实例对象
 
 ```javascript
 const router = new VueRouter({
@@ -249,10 +259,10 @@ router:{
 	app = null
     apps = []
     options = options //传入 new VueRouter(options)中的options对象
-    beforeHooks = []
-    resolveHooks = []
-    afterHooks = []
-    matcher = matcher
+    beforeHooks = [] //存放注册的 beofreEach守卫
+    resolveHooks = [] //存放注册的resolve守卫
+    afterHooks = [] //存放注册的after守卫
+    matcher = matcher //存放
     history = history
     mmode = mode
     __proto__:init,match,replace,push,go,back,forward 等原型链上的方法
@@ -301,6 +311,7 @@ Vue.mixin({
 ```javascript
 this._router = this.$options.router  //vm._router = router
 this._router.init(this) 
+这里的init函数执行之后，就会找到 _route = this._router.history.current;然后router-view在吐出对应组件的时候，会根据这个route的值去渲染；具体还需要看route-view源码的实现；
 ```
 
 vue-router/src/index.js
@@ -317,7 +328,6 @@ init (app: any /* Vue component instance */) {
     this.app = app
 
     const history = this.history
-
     if (history instanceof HTML5History) {
       //这里history.transotionTo进行路由的跳转==>updateRoute==>执行this.cb ==> app._route改变
       //Vue.util.defineReactive(this, '_route', this._router.history.current)
@@ -325,8 +335,9 @@ init (app: any /* Vue component instance */) {
     } else if (history instanceof HashHistory) {
       const setupHashListener = () => {
         history.setupListeners()
-      }
-      history.transitionTo(
+    }
+   // 1 注意这里，这里是实现路由匹配，以及从routeMap中找到要渲染的路由组件的根源；
+    history.transitionTo(
         history.getCurrentLocation(),
         setupHashListener,
         setupHashListener
@@ -345,6 +356,80 @@ init (app: any /* Vue component instance */) {
   }
 
 ```
+
+transitionTo函数源码实现
+
+```javascript
+transitionTo (location: RawLocation, onComplete?: Function, onAbort?: Function) {
+    const route = this.router.match(location, this.current)
+    this.confirmTransition(route, () => {
+      this.updateRoute(route)
+      onComplete && onComplete(route)
+      this.ensureURL()
+
+      // fire ready cbs once
+      if (!this.ready) {
+        this.ready = true //这里出发 onReady注册的函数
+        this.readyCbs.forEach(cb => { cb(route) })
+      }
+    }, err => {
+      if (onAbort) {
+        onAbort(err)
+      }
+      if (err && !this.ready) {
+        this.ready = true
+        this.readyErrorCbs.forEach(cb => { cb(err) })
+      }
+    })
+  }
+```
+
+step1: 找到对应的路由；
+
+```javascript
+history.getCurrentLocation();
+//hash模式下
+getCurrentLocation () {
+    return getHash()
+}
+export function getHash (): string {
+    // We can't use window.location.hash here because it's not
+    // consistent across browsers - Firefox will pre-decode it!
+    const href = window.location.href
+    const index = href.indexOf('#')
+    return index === -1 ? '' : href.slice(index + 1)
+}
+//history 模式下
+getCurrentLocation (): string {
+    return getLocation(this.base)
+}
+export function getLocation (base: string): string {
+    let path = window.location.pathname
+    if (base && path.indexOf(base) === 0) {
+        path = path.slice(base.length)
+    }
+    return (path || '/') + window.location.search + window.location.hash
+}
+//abstract 模式下
+getCurrentLocation () {
+    const current = this.stack[this.stack.length - 1] //该模式下默认的this.stack = [];
+    return current ? current.fullPath : '/'
+}
+```
+
+step2： 根据地址找到对应的路由(具体实现可以看 router.match的实现原理，核心就是从生成的 路由map中找到对应的路由record)
+
+```javascript
+const route = this.router.match(location, this.current)
+```
+
+Step3: 更新响应式属性 `_route`的值，更新该值的时候vue会更新页面；
+
+```javascript
+this.updateRoute(route)
+```
+
+下面的工作就是 `router-view`组件的实现，核心原理是根据 路由record对象，根据该record 对象的链表层次去渲染对应的组件；
 
 总结下上面的更新流程：
 
@@ -370,7 +455,7 @@ init (app: any /* Vue component instance */) {
 
 **以上基本流程基本完毕，下面稍微详细分析下各个函数大致的实现**
 
-###4 细节总结
+### 4 细节总结
 
 #### `router.push(location, onComplete?, onAbort?)`
 
@@ -487,6 +572,7 @@ history文件夹：
     this.current = route
     this.cb && this.cb(route)
     this.router.afterHooks.forEach(hook => {
+        //这里可以看到 会执行路由守卫
       hook && hook(route, prev)
     })
   }

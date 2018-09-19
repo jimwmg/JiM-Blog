@@ -116,7 +116,7 @@ export class Store {
 }
 ```
 
-####2. 1   installModule(this, state, [], this._modules.root)
+#### 2. 1   installModule(this, state, [], this._modules.root)
 
 installModule 方法是把我们通过 options 传入的各种属性模块注册和安装；
 
@@ -310,7 +310,7 @@ function registerGetter (store, type, rawGetter, local) {
 
 ![store上模块的注册](../img/vuexModules.png)
 
-####2.2      resetStoreVM(this, state)
+#### 2.2      resetStoreVM(this, state)
 
 主要作用：
 
@@ -372,7 +372,7 @@ function resetStoreVM (store, state) {
 
 ```
 
-###3 思考：为什么store中的state改变会触发UI视图的更新？这个和组件中的data更新触发视图更新一样吗？
+### 3 思考：为什么store中的state改变会触发UI视图的更新？这个和组件中的data更新触发视图更新一样吗？
 
 * 核心关注点1：store.state. 和  组件中的 options.data
 

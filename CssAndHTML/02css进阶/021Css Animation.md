@@ -2,7 +2,7 @@
 title:Css Animation
 ---
 
-###1 transition实现 
+### 1 transition实现 
 
 ```css
 .rightSlide{

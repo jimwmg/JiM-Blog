@@ -15,7 +15,10 @@ categories: vue
 </div>
 ```
 
+这个案例可以看出，如果是多出口，那么对应于同一个路由会对应多个组件；
+
 ```javascript
+//这里注意component 和  components的区别；vue-router库内部再生成路由 record 的时候，会优先取route.components ,如果不存在则会取  { default: route.component };
 const router = new VueRouter({
   mode: 'history',
   routes:[
@@ -43,7 +46,7 @@ Vue.component('RouterView', View)
 Vue.component('RouterLink', Link)
 ```
 
-###2 具体实现
+### 2 具体实现
 
 RouterView
 
@@ -54,7 +57,7 @@ export default {
   props: {
     name: {
       type: String,
-      default: 'default'
+      default: 'default' //如果router-view组件不传递name这个prop,那么默认name的值是defalut
     }
   },
     //注意这里的parent就是 router-view组件实例对象的 父组件实例对象
@@ -64,7 +67,7 @@ export default {
     // directly use parent context's createElement() function
     // so that components rendered by router-view can resolve named slots
     const h = parent.$createElement
-    const name = props.name
+    const name = props.name //注意这里的name属性，这里就是 router-view 组件接受的name参数
     //获取到主组件的vm.$route==>vm._route地址一样
     const route = parent.$route
     const cache = parent._routerViewCache || (parent._routerViewCache = {})
@@ -77,7 +80,7 @@ export default {
     //在《matcher和history创建源码》中createRoute 生成route对象的时候，matched数组会根据我们的配置，找到对应的路由；这里的 depth 和 formatMatch 生成 matched是对应的
     //如果parent组件实例对象 _routerRoot 不是指向 parent组件实例自身，那么就代表parent组件是一个子组件
     while (parent && parent._routerRoot !== parent) {
-      if (parent.$vnode && parent.$vnode.data.routerView) {
+      if (parent.$vnode && parent.$vnode.data.routerView) {//如果存在父组件，并且父组件中存在routerView属性值
         depth++
       }
       if (parent._inactive) {
@@ -98,7 +101,7 @@ export default {
       cache[name] = null
       return h()
     }
-    //得到要渲染的组件
+    //得到要渲染的组件，这里的name就是default或者是通过 router-view传递过来的name值；
     const component = cache[name] = matched.components[name]
 
     // attach instance registration hook

@@ -5,14 +5,39 @@ categories: CommonJS
 
 ---
 
+[参考](https://github.com/ericdum/mujiang.info/issues/6/)
+
 CommonJS为package.json文件定义了如下一些必须的字段：
 
-- name。包名，需要在NPM上是唯一的。不能带有空格。
-- description。包简介。通常会显示在一些列表中。
-- version。版本号。一个语义化的版本号（<http://semver.org/> ），通常为x.y.z。该版本号十分重要，常常用于一些版本控制的场合。
-- keywords。关键字数组。用于NPM中的分类搜索。
-- maintainers。包维护者的数组。数组元素是一个包含name、email、web三个属性的JSON对象。
-- contributors。包贡献者的数组。第一个就是包的作者本人。在开源社区，如果提交的patch被merge进master分支的话，就应当加上这个贡献patch的人。格式包含name和email。如：
+#### name。包名，需要在NPM上是唯一的。不能带有空格。
+
+#### description。包简介。通常会显示在一些列表中。
+
+#### version。版本号。一个语义化的版本号（<http://semver.org/> ），通常为x.y.z。该版本号十分重要，常常用于一些版本控制的场合。依次为主版本号，次版本号，补丁号；
+
+- `*`: 任意版本
+- `1.1.1`: 指定版本
+- `~1`: >= 1.0.0 && < 2.0.0(相当于1.x)
+- `~1.1`: >= 1.1.0 && < 1.2.0(相当于1.1.x)
+- `~1.1.0`: >= 1.1.0 && < 1.2.0(相当于1.1.x)
+- `^1.2.3`: >= 1.2.3 < 2.0.0
+- `^0.0.3`: >= 0.0.3 < 0.0.4
+- `^0.0`: >= 0.0.0 < 0.1.0
+- `^0.x`: >= 0.0.0 < 1.0.0
+
+`^`和`~`：
+
+- `~` 前缀表示，安装大于指定的这个版本，并且匹配到 x.y.z 中 z 最新的版本
+- `^` 前缀在 `^0.y.z` 时的表现和 `~0.y.z` 是一样的，然而 `^1.y.z` 的时候，就会匹配到 y 和 z 都是最新的版本
+
+ 
+
+#### keywords。关键字数组。用于NPM中的分类搜索。
+
+#### maintainers。包维护者的数组。数组元素是一个包含name、email、web三个属性的JSON对象。
+
+#### contributors。包贡献者的数组。第一个就是包的作者本人。在开源社区，如果提交的patch被merge进master分支的话，就应当加上这个贡献patch的人。格式包含name和email。如：
+
 - ```
   "contributors": [{
       "name": "Jackson Tian",
@@ -22,18 +47,19 @@ CommonJS为package.json文件定义了如下一些必须的字段：
       "email": "mail2@gmail.com"
   }],
   ```
+#### bugs。一个可以提交bug的URL地址。可以是邮件地址（mailto:mailxx@domain），也可以是网页地址（http://url）。
 
-- bugs。一个可以提交bug的URL地址。可以是邮件地址（mailto:mailxx@domain），也可以是网页地址（http://url）。
-- licenses。包所使用的许可证。例如：
+#### licenses。包所使用的许可证。例如：
+
 - ```
   "licenses": [{
       "type": "GPLv2",
       "url": "http://www.example.com/licenses/gpl.html",
   }]
   ```
+#### repositories。托管源代码的地址数组。
 
-- repositories。托管源代码的地址数组。
-- dependencies。当前包需要的依赖。这个属性十分重要，NPM会通过这个属性，帮你自动加载依赖的包。
+#### dependencies。当前包需要的依赖。这个属性十分重要，NPM会通过这个属性，帮你自动加载依赖的包。
 
 以下是Express框架的package.json文件，值得参考。
 
@@ -56,6 +82,51 @@ CommonJS为package.json文件定义了如下一些必须的字段：
     "test": "test.js",
 }
 ```
+
+#### 其他特性
+
+#### hook
+
+Npm 脚本有两个钩子 pre 和 post;
+
+```javascript
+"prego": "echo 'before go'",
+"go": "node index.js",
+"postgo": "echo 'after go'",
+
+```
+
+当执行 npm run go的之后，其实会执行  npm run prego => npm run go =>   npm run postgo;
+
+#### execution sequence
+
+```
+& 并行执行， 如 npm run lint & npm run tsc
+&& 串行执行， 如 npm run lint && npm run test
+```
+
+#### wildcards
+
+npm script 中可以使用 shell 通配符。
+
+- `*` 代表任意文件， 如 `"test": "mocha test/*.js"`
+- `**` 代表任意目录， 如 `"test": "mocha test/**/*.js "`
+
+#### bash
+
+npm script执行bash命令
+
+```
+"bash": "echo $(pwd)",
+```
+
+npm run bash;
+
+### exiting
+
+如果 npm script 的 exit code 不是 0， 会认为执行失败， 终止进程。
+
+ 
 
 webpack中经常看到如下配置,webpack  -h 可以查看所有支持的命令
 

@@ -15,7 +15,7 @@ var server = http.createServer((req,res)=>{
 //打开浏览器访问：http://localhost:8080/user?name=jim&url=www.runoob.com
 ```
 
-###2 具体看下如何使用
+### 2 具体看下如何使用
 
 首先看下一个url字符串包含的内容
 
@@ -33,7 +33,7 @@ protocol     auth     hostname   port pathname     search     hash
                                                    query
 ```
 
-####url.parse(stringUrl)
+#### url.parse(stringUrl)
 
 ```
 
@@ -98,7 +98,7 @@ url.resolve('http://example.com/one/two','../three') //'http://example.com/three
 
 ### 3 querystring模块用于专门解析查询字符串
 
-####querystring.escape(str)   query string.unescape(str)  用于对字符串进行编码和解码
+#### querystring.escape(str)   query string.unescape(str)  用于对字符串进行编码和解码
 
 ```javascript
 var queryString = require('querystring');
@@ -119,7 +119,7 @@ querystring.parse('foo=bar&abc=xyz&abc=123')
 }
 ```
 
-####querystring.stringify(str, sep,eq,options) 将javascript对象转化为查询字符串
+#### querystring.stringify(str, sep,eq,options) 将javascript对象转化为查询字符串
 
 ```javascript
 querystring.stringify({ foo: 'bar', baz: ['qux', 'quux'], corge: '' });

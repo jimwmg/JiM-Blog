@@ -41,7 +41,7 @@ layout :
 
 下面是一个例子
 
-```
+```javascript
 var webpack = require('webpack');
 var commonsPlugin = new webpack.optimize.CommonsChunkPlugin('common.js');
 module.exports = {
@@ -97,7 +97,7 @@ module.exports = {
 
 3. 书写index.html文件
 
-   ```
+   ```html
    <html>
    <head>
    <meta charset="utf-8">
@@ -110,7 +110,7 @@ module.exports = {
 
 4. 执行命令，生成bundle.js文件
 
-   ```
+   ```javascript
    $ webpack ./entry.js bundle.js
    ```
 
@@ -118,7 +118,7 @@ module.exports = {
 
 6. 增加一个content.js文件
 
-   ```
+   ```javascript
    module.exports = "现在的内容是来自于content.js文件！";
    ```
 

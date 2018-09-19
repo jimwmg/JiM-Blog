@@ -6,3 +6,9 @@
 
 ### 基于 Vue-2.5.9源码
 
+2018-09-07更新,后来又看见一个不错的总结；
+
+[vuejs技术揭秘](https://ustbhuangyi.github.io/vue-analysis/prepare/directory.html#platform) [github](https://github.com/ustbhuangyi/vue-analysis)
+
+
+

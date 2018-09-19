@@ -46,13 +46,15 @@ try{
 }
 ```
 
-###2 try-catch错误捕获
+### 2 try-catch错误捕获
 
 2.1 如果程序抛出一个错误，没有进行catch，那么后续的代码将不会执行;
 
 2.2 如果抛出了错误进行了catch,那么后续的代码还是会继续执行;
 
 2.3 如果不想后续代码执行，需要return;
+
+2.4 try-catch只会捕获同步错误，异步错误是不会被捕获的；
 
 ```javascript
 function testTry() {
@@ -96,5 +98,18 @@ function catchTry() {
     console.log('如果抛出的错误没有被catch，但是catch中return终止了函数的执行，那么下面的程序会终止执行')
 }
 catchTry()
+```
+
+```javascript
+function testTry(){
+    try{
+        // throw new Error('err');
+        setTimeout(() => {
+            throw new Error('err');
+        })
+    } catch(e){
+        console.log(e.message)
+    }
+}
 ```
 
