@@ -54,6 +54,16 @@ Vue.component('example', {
 ### 1 父子组件之间的通信
 
 **父子组件的之间的额通信在工作中使用的也是特别频繁，接下来简单分析下**
+[demo1-html模板的props不支持驼峰](https://jsfiddle.net/JiMWmg/eywraw8t/376489/)
+[demo2-template模板的props支持驼峰](https://jsfiddle.net/JiMWmg/eywraw8t/376474/)
+
+* HTML 中的特性名是大小写不敏感的，所以浏览器会把所有大写字符解释为小写字符。
+* 重申一次，如果你使用字符串模板，那么这个限制就不存在了。
+产生这样的原因,对于html的模板是通过 outerHTML解析的，但是template的模板是可以通过vue内部解析的；这也就解释了上面两句话
+[vue源码中的解析-outerHTML会序列化这样的值-打开控制台看下输出](https://jsfiddle.net/JiMWmg/fatsd240/4/)
+[platforms/web/entry-runtime-with-compiler.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
+
+
 
 简单注意一点在HTML结构中，属性名要使用 - 连字符的形式，在javascript中需要将驼峰命名的形式转化为驼峰命名的形式
 
