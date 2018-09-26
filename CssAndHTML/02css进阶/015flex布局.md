@@ -6,6 +6,8 @@ categories: css
 
 [阮一峰教程](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
 
+## 注意，设为 Flex 布局以后，子元素的`float`、`clear`和`vertical-align`属性将失效。 
+
 ### 1 容器的属性
 
 - flex-direction：row | row-reverse | column | column-reverse，**该属性通过定义flex容器的主轴方向来决定felx子项在flex容器中的位置。这将决定flex需要如何进行排列;同时决定了子元素在扩展自身大小的时候，往那个方向扩展**;

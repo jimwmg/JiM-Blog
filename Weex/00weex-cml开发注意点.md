@@ -36,6 +36,9 @@ title: weex 开发注意点汇总
 * box-shadow仅仅支持iOS
 * Weex 盒模型的 `box-sizing` 默认为 `border-box`，即盒子的宽高包含内容、内边距和边框的宽度，不包含外边距的宽度。
 * border-radius：不支持简写，应该写成 border-top-left-radius: length;
+* Weex 支持四种伪类：`active`, `focus`, `disabled`, `enabled`，不支持其他的比如 first-child等伪类的实现；
+* Flexbox 是默认且唯一的布局模型，所以你不需要手动为元素添加 `display: flex;` 属性。
+* Flex-direction默认值是 column;
 ### 3.2 css单位
 
 

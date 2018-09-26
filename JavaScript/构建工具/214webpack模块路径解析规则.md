@@ -10,9 +10,9 @@ layout :
 
 # 模块解析
 
-##1 首先来看下webpack支持的模块类型
+## 1 首先来看下webpack支持的模块类型
 
-###模块(Modules)
+### 模块(Modules)
 
 [EDIT DOCUMENT**](https://github.com/webpack/webpack.js.org/edit/master/content/concepts/modules.md)
 

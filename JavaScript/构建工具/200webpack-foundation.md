@@ -10,9 +10,25 @@ layout :
 
 ## webpack.config.js解析
 
+### 0 context
+
+基础目录，绝对路径，默认值是 cwd():当前执行 node 的目录；
+
+用于从webpack.config.js中解析其他项配置的基础目录，比如解析 entry 和 lorder 就是以context 路径为基准进行解析的；
+
 ### 1 entry
 
 entry 对象是用于 webpack 查找启动并构建 bundle。其上下文是入口文件所处的目录的绝对路径的字符串。
+
+如果传入一个**字符串或字符串数组**，chunk 会被命名为 `main`。如果传入一个对象，**则每个键(key)会是 chunk 的名称**，该值描述了 chunk 的入口起点。
+
+* 字符串 `entry: '某模块'` 表示一个单一模块作为起点(当然，单一入口也可以用后边两种写)，把这个模块需要的东西打包成一堆
+* 数组 `entry: ['模块1', '模块2']`
+
+ 模块1与模块2互相之间并没有依赖，但是我们还想把他们打包在一起，此时就用数组值的方式，webpack从左到右把各个模块及他们的依赖打包在一起（[第一堆，第二堆]），然后从左到右首尾相连的拼接成一个文件。最终也是打包成一堆。
+
+* 对象 `entry:{path1,'',path2:''}`
+* 动态入口： `() => '/demo'`
 
 ```
 context: path.resolve(__dirname, "app")
@@ -51,6 +67,12 @@ module.exports = config;
 ```
 
 注意output.path提供打包后的文件存放的**绝对路径地址** ; output.filename提供了打包后文件的名字;
+
+- `[name]`最简单，就是在entry里边的属性名
+- `[hash]` is replaced by the hash of the compilation，代表的是整个构建之后的hash值，
+- `[chunkhash]`is replaced by the hash of the chunk，简单来讲代表的是每一个模块（chunk）根据其内容就算出来的hash值，如果模块的内容不变，那么hash值就不会改变，
+
+ [参考](http://www.cnblogs.com/ihardcoder/p/5623411.html)
 
 ### 3 module
 
