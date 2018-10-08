@@ -14,8 +14,6 @@ layout :
 
 ### 模块(Modules)
 
-[EDIT DOCUMENT**](https://github.com/webpack/webpack.js.org/edit/master/content/concepts/modules.md)
-
 在[模块化编程](https://en.wikipedia.org/wiki/Modular_programming)中，开发者将程序分解成离散功能块(discrete chunks of functionality)，并称之为*模块*。
 
 每个模块具有比完整程序更小的接触面，使得校验、调试、测试轻而易举。 精心编写的*模块*提供了可靠的抽象和封装界限，使得应用程序中每个模块都具有条理清楚的设计和明确的目的。
@@ -73,7 +71,7 @@ import "./file2";
 
 **也就是说webpack解析该文件的时候,会以资源文件所在目录为基准进行解析;**
 
-### 模块路径
+### 模块路径（不是以  / 或者  .  、. .等开头的路径）
 
 ```javascript
 import "module";
@@ -163,6 +161,8 @@ module.exports = {
       // ================================
       STORE: path.join(src, 'redux/store'),
       ROUTE: path.join(src, 'routes'),//对应src/routers文件夹  
+      'vue$': 'vue/dist/vue.esm.js',//这里指定了import vue from 'vue' 的时候引用那个文件
+      '@': resolve('src'),
     }
   }, 
 };

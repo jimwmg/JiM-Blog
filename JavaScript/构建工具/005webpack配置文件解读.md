@@ -185,7 +185,7 @@ module.exports = {
     /* 高级解析选项（点击展示） */
   },
  //==4.2 这组选项与上面的 resolve 对象的属性集合相同，但仅用于解析 webpack 的 loader 包。默认
-  resolveLoader: { /* 等同于 resolve */ }
+  resolveLoader: { /* 等同于 resolve */ } //可以用于自己手写loader的时候在本地使用；
 /*** 默认值
 {
   modules: [ 'node_modules' ],

@@ -12,7 +12,7 @@ title:webpack-devServer
 
 ### 2 最简单配置
 
-####2.1 都取默认值
+#### 2.1 都取默认值
 
 webpack.config.js
 
@@ -57,7 +57,7 @@ module.exports = {
 
 在 `http://127.0.0.1:8010/anyPath/`下面就可以访问到我们的经过webpack打包后的资源
 
-####2.3 `output.publicPath `没有值，`devServer.publicPath`赋值
+#### 2.3 `output.publicPath `没有值，`devServer.publicPath`赋值
 
 ```javascript
 const path = require('path')
@@ -79,7 +79,7 @@ module.exports = {
 
 在 `http://127.0.0.1:8010/anyPath/`下面就可以访问到我们的经过webpack打包后的资源
 
-####2.4 `output.publicPath `有值，`devServer.publicPath`也有值 
+####  2.4 `output.publicPath `有值，`devServer.publicPath`也有值 
 
 ```javascript
 const path = require('path')

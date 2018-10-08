@@ -72,6 +72,8 @@ module.exports = config;
 - `[hash]` is replaced by the hash of the compilation，代表的是整个构建之后的hash值，
 - `[chunkhash]`is replaced by the hash of the chunk，简单来讲代表的是每一个模块（chunk）根据其内容就算出来的hash值，如果模块的内容不变，那么hash值就不会改变，
 
+webpack-dev-server 也会默认从 `publicPath` 为基准，使用它来决定在哪个目录下启用服务，来访问 webpack 输出的文件。
+
  [参考](http://www.cnblogs.com/ihardcoder/p/5623411.html)
 
 ### 3 module
@@ -108,6 +110,10 @@ module.exports = {
 通过 `webpack.config.js`
 
 [`module.rules`](https://doc.webpack-china.org/configuration/module/#module-rules) 允许你在 webpack 配置中指定几个 loader。 这是展示 loader 的一种简明的方式，并且有助于使代码变得简洁。而且对每个相应的 loader 有一个完整的概述。
+
+**Loaders can be chained by passing multiple loaders, which will be applied from right to left (last to first configured).**
+
+**对于 文件的解析  ，根据lorder的配置顺序进行，从最后一个开始往前一个一个的经过loader;**
 
 ```
   module: {

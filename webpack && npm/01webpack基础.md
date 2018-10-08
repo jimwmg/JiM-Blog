@@ -3,7 +3,7 @@ title:webpack基础
 
 ---
 
-###1 [webpack CLI](https://doc.webpack-china.org/api/cli) （Command Line Interface） 
+### 1 [webpack CLI](https://doc.webpack-china.org/api/cli) （Command Line Interface） 
 
 #### 常用配置
 
@@ -21,7 +21,7 @@ webpack --env.platform=web  # 设置 env.platform == "web"
 webpack --env.NODE_ENV=local --env.production --progress
 如果设置 env 变量，却没有赋值，--env.production 默认将 --env.production 设置为 true
 ```
-####[其他配置](https://doc.webpack-china.org/api/cli#%E8%BE%93%E5%87%BA%E9%85%8D%E7%BD%AE)
+#### [其他配置](https://doc.webpack-china.org/api/cli#%E8%BE%93%E5%87%BA%E9%85%8D%E7%BD%AE)
 
 [配置文件多种配置类型-对象，函数](https://doc.webpack-china.org/configuration/configuration-types/)
 
@@ -184,7 +184,7 @@ new webpack.optimize.CommonsChunkPlugin({
 
 ```
 
-#####4.2.1 提取多入口公共部分,会额外生成一个 chunk(每个入口都会生成一个chunk)
+##### 4.2.1 提取多入口公共部分,会额外生成一个 chunk(每个入口都会生成一个chunk)
 
 ```javascript
 entry: {
@@ -202,7 +202,7 @@ new webpack.optimize.CommonsChunkPlugin({
 
 以上会将`app.js`和`index.js`的公用部分提取出来；
 
-#####4.2.2 设置公用库
+#####  4.2.2 设置公用库
 
 ```javascript
 entry: {

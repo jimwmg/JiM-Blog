@@ -47,7 +47,7 @@ var firstName = exports.firstName = 'K';
 * 转化后的代码对象属性值含有default关键字，IE8不支持
 * 转化后的代码使用了Object.defineProperty方法，IE8根本没有实现,并且不让别人访问或修改
 
-###2 解决方案
+### 2 解决方案
 
 * [es3ify](https://www.npmjs.com/package/es3ify):Browserify transform to convert quote reserved words in property keys for compatibility with ES3 JavaScript engines like IE8. In addition, trailing commas in array and object literals are removed.
 
@@ -124,7 +124,7 @@ exports.default = MyModule;
 exports.__esModule = true;
 ```
 
-###3 总结下以上两个解决方案解决的问题，发现还是没有解决IE8不支持的Object.defineProperty
+### 3 总结下以上两个解决方案解决的问题，发现还是没有解决IE8不支持的Object.defineProperty
 
 解决方案：
 

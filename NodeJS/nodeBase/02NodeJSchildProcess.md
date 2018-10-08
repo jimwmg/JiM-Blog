@@ -62,6 +62,8 @@ console.log(exec('npm --version'))
 console.log(execSync('npm --version'))
 //[object Object]
 //3.10.10
+child_process.exec(`open ${__dirname}`);
+//mac 下打开执行文件的目录；
 ```
 
 ### execFile

@@ -110,7 +110,7 @@ fs.open('myfile', 'r', (err, fd) => {
 });
 ```
 
-####fs.readFile(file,options,callback)
+#### fs.readFile(file,options,callback)
 
 * file是要读取的文件的路径
 * options
@@ -149,7 +149,7 @@ fs.readFile('etc/passwd',(err,data)=>{
 //readFile用于异步读取文件内容，
 ```
 
-####fs.writeFile(file,data,[option],callback)
+#### fs.writeFile(file,data,[option],callback)
 
 * file可以是文件名或者文件描述
 * data是异步地写入的数据内容，可以是一个string或者buffer
@@ -187,3 +187,7 @@ fs.writeFileSync('./text.txt',1);//写入文件的内容是 1
 4 对于异步 的任务，很多时候，每个任务的执行先后顺序是无法控制的，那么如何去解决这个问题？
 
 **此时，如果需要异步任务按照我们的意愿顺序进行，那么则需要将形成异步嵌套，形成一个回调链**
+
+#### fs.watch(filename,[options],listener)
+
+监听某个文件的变化，然后执行对应的动作；
