@@ -57,7 +57,7 @@ node process-args.js one two=three four
 - `process.setuid()`：指定当前进程的用户，可以使用数字ID，也可以使用字符串ID。
 - process.binding(name) :这个方法用于返回指定名称的内置模块。Process对象同样部署了EventEmitter的接口，所以可以调用 Process.on 进行事件绑定等其他事件操作；
 
-需要注意区分 `process.cwd()`和 `__dirname`的区别，前者是 运行node服务所在的绝对路径，而后者则是具体文件（js脚本）所在的目录路径；前者在同一个node服务中，不同的文件中的值是一样的，后者在不同的文件中值是不一样的；
+**需要注意区分 `process.cwd()`和 `__dirname`的区别，前者是 运行node服务所在的绝对路径，而后者则是具体文件（js脚本）所在的目录路径；前者在同一个node服务中，不同的文件中的值是一样的，后者在不同的文件中值是不一样的**；
 
 #### 事件
 

@@ -147,7 +147,7 @@ export function eventsMixin (Vue: Class<Component>) {
       const args = toArray(arguments, 1) // toArray 将 arguments中第一个参数去掉
       for (let i = 0, l = cbs.length; i < l; i++) {
         try {
-          cbs[i].apply(vm, args)  //这里，args 就是传入$emit 函数除第一个参数外剩下的参数
+          cbs[i].apply(vm, args)  //这里，args 就是传入$emit 函数除第一个参数外剩下的参数,因为第一个参数是用来在_events中找到对应的处理函数的；第一个参数是函数名；
         } catch (e) {
           handleError(e, vm, `event handler for "${event}"`)
         }

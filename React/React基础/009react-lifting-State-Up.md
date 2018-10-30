@@ -12,7 +12,7 @@ layout :
 
 props应该是只读的属性，如果我们要改变输出，可以通过state属性改变；
 
-```html
+```jsx
 <!DOCTYPE html>
 <html>
   <head>
@@ -133,7 +133,7 @@ ReactDOM.render(
 
 ### 2 props中的children
 
-```html
+```jsx
 <body>
     <div id="root"></div>
     
