@@ -79,6 +79,17 @@ function clone(value){
         return value;
     }
 }
+function deepCopy(value){
+    let retValue = Array.isArray(value) ? [] : {}；
+    for(let key in value){
+        if(value[key] && typeof value[key] === 'object'){
+            retValue[key] = deepCopy(value[key])
+        }else{
+            retValue[key] = value[key]
+        }
+    }
+    return retValue;
+}
 function reverseDfs(nodes,parent = null){
     nodes = clone(nodes);
     if(!nodes){
