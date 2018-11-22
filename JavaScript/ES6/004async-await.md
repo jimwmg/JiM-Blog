@@ -5,7 +5,7 @@ categories: javascript
 tags: sync
 ---
 
-### 1 async函数的返回值是一个promise对象
+### 1 async函数的返回值是一个promise对象(无论该函数内部返回值类型是什么)
 
 ```javascript
 // 1 async函数没有返回值，那么该函数执行之后将会是一个resolved的 值为undefined的promise对象

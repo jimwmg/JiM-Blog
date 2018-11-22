@@ -117,7 +117,7 @@ console.log(Boolean(o1=0));//false
 
 ### 6 获取对象属性的总结
 
-symbol属性不会被forr-in ,  for-of   , Object.keys(),  Object.getOwnPropertyNames() , JSON.stringify() 获取到
+symbol属性不会被for-in ,  for-of   , Object.keys(),  Object.getOwnPropertyNames() , JSON.stringify() 获取到
 
 * for-in : 可以遍历到原型和自身的 可枚举以及不可枚举属性，不包括symbol属性
 * Object.keys() :可以遍历到对象自身所有 可枚举和不可枚举属性，不包括symbol属性，区别于for-in是不能遍历原型上的属性

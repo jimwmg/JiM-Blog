@@ -2,7 +2,11 @@
 title:package.json解析
 ---
 
-### 1 依赖的版本解析
+### 1 依赖的版本解析    [版本号解析](https://semver.npmjs.com/)
+
+- Patch releases: `1.0` or `1.0.x` or `~1.0.4`
+- Minor releases: `1` or `1.x` or `^1.0.4`
+- Major releases: `*` or `x`
 
 **版本号格式： 主版本号.次版本号.修订号**  
 
@@ -29,8 +33,8 @@ title:package.json解析
 - `>=version` etc
 - `<version`
 - `<=version`
-- `~version` "Approximately equivalent to version" See [semver](https://docs.npmjs.com/misc/semver)
-- `^version` "Compatible with version" See [semver](https://docs.npmjs.com/misc/semver)
+- `~version` "Approximately equivalent to version" See [semver](https://docs.npmjs.com/misc/semver)(近似等于这个版本)
+- `^version` "Compatible with version" See [semver](https://docs.npmjs.com/misc/semver)（兼容的）
 - `1.2.x` 1.2.0, 1.2.1, etc., but not 1.3.0
 - `http://...` See 'URLs as Dependencies' below
 - `*` Matches any version

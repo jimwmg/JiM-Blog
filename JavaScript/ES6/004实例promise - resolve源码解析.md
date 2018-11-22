@@ -42,7 +42,7 @@ someData
 
 ### 2 Promise内部是如何运行的？
 
-####2.1 执行这行代码的时候：let p = new Promise(f);
+#### 2.1 执行这行代码的时候：let p = new Promise(f);
 
 ```javascript
 function noop() {}
@@ -105,7 +105,7 @@ p =>{
 }
 ```
 
-####2.2执行这行代码的时候： promise.then(function(data){ console.log(data);}); 
+#### 2.2执行这行代码的时候： promise.then(function(data){ console.log(data);}); 
 
 ```javascript
 console.log('start')
@@ -215,7 +215,7 @@ res:{
 }
 ```
 
-####2.3 异步操作完成以后：resolve('someData');这里的resolve就是负责将处理结果放入then中的异步回调函数的，等待下次事件循环再去执行；
+#### 2.3 异步操作完成以后：resolve('someData');这里的resolve就是负责将处理结果放入then中的异步回调函数的，等待下次事件循环再去执行；
 
 ```javascript
 //真正调用这个函数的是tryCallTwo中的第二个函数入参；self就是p这个promise实例对象；
@@ -269,7 +269,7 @@ p =>{
 }
 ```
 
-####2.4  finale(self);//最后处理这个promise对象 
+#### 2.4  finale(self);//最后处理这个promise对象 
 
 这里可以看到，当处理最后一个promsie的时候，最后一个promsie对象由于没有then注册函数，所以该promise对象_deferredState值为0，处理它的时候，不会有任何操作
 
@@ -356,9 +356,9 @@ function tryCallOne(fn, a) {
 
 ### 3 对于then的链式调用，Promise内部又是如何运行的呢？
 
-####下一个then中注册的函数会接收到上一个then的返回值作为该then中注册的函数的参数；
+#### 下一个then中注册的函数会接收到上一个then的返回值作为该then中注册的函数的参数；
 
-####3.1 then注册的函数返回基本数据类型,那么返回的promise对象直接还是原来的那个被resolve的对象，会接着执行下一个then的调用
+####  3.1 then注册的函数返回基本数据类型,那么返回的promise对象直接还是原来的那个被resolve的对象，会接着执行下一个then的调用
 
 ```javascript
 function runAsync(){

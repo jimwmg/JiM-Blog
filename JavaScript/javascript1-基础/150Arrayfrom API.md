@@ -76,5 +76,14 @@ var newArr = Array.from(arrayLike,item => item*2);
 console.log(newArr);//[22,24,26]
 ```
 
+3 对于HTMLLIST这样的类数组，不能通过原型访问数组的一些API
+
+```javascript
+var divs = document.getElementsByTagName('div');
+  Array.prototype.map.call(divs,function(div){
+    console.log(div)
+  })
+```
+
 
 

@@ -6,7 +6,9 @@ categories: vue
 
 ### 1 Vue构造函数一节分析了Vue对象上的属性和方法如何一步步挂载上去的，接下来分析这些方法的具体实现
 
-#### 1.1 Vue.extend(option)
+#### 1.1 Vue.extend(option
+
+使用基础 Vue 构造器，创建一个“子类”。参数是一个包含组件选项的对象
 
 ```javascript
 export function initExtend (Vue: GlobalAPI) {
@@ -141,7 +143,9 @@ Sub.prototype.$ssrContext
 Sub.prototype.$isServer
 ```
 
-#### 1.2 Vue.component(option)
+#### 1.2 Vue.component(option
+
+注册或获取全局组件。注册还会自动使用给定的`id`设置组件的名称
 
 ```javascript
 export function initAssetRegisters (Vue: GlobalAPI) {
@@ -166,6 +170,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
             )
           }
         }
+      //这里就是注册组件
         if (type === 'component' && isPlainObject(definition)) {
           //===========================
           //主要是下面这两行代码，可以看到Vue.component(id,option),最终还是调用的Vue.extend(option)
@@ -201,6 +206,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         <myComp></myComp>
     </div>
     <script>
+        //声明一个子组件
         var myCopm = Vue.extend({
             data() {
                 return {

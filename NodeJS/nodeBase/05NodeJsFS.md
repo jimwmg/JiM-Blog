@@ -191,3 +191,18 @@ fs.writeFileSync('./text.txt',1);//写入文件的内容是 1
 #### fs.watch(filename,[options],listener)
 
 监听某个文件的变化，然后执行对应的动作；
+
+### fs.readdirSync(path,[options]) (同步)  fs.readdir(path,[options],[callback]) (异步)
+
+返回该路径下所有的 文件夹或者文件名组成的数组；
+
+```
+[ 
+  'cml-learn-one',
+  'cml-learn-two',
+  'index.cml',
+  'index.js',
+  'index.vue' 
+ ]
+```
+

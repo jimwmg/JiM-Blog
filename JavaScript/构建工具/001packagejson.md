@@ -1,4 +1,5 @@
 ---
+
 title: packagejson文件字段解析
 date: 2017-08-23
 categories: CommonJS
@@ -6,6 +7,8 @@ categories: CommonJS
 ---
 
 [参考](https://github.com/ericdum/mujiang.info/issues/6/)
+
+## 1 package.json
 
 CommonJS为package.json文件定义了如下一些必须的字段：
 
@@ -82,6 +85,10 @@ CommonJS为package.json文件定义了如下一些必须的字段：
     "test": "test.js",
 }
 ```
+
+#### main
+
+该字段作为一个npm包的入口地址去找寻对应的入口；
 
 #### 其他特性
 
@@ -177,3 +184,40 @@ npm install <package.json folder>
 ```
 
 只需将路径指向package.json存在的目录即可。然后在代码中require('package')即可使用
+
+#### script字段: 注意Linux命令行的  &  ； &&的区别
+
+- &  ：几个命令同时执行
+- ； ：不管前面的命令是否执行成功，后面的命令都会继续执行
+- &&  ：只有前面的命令执行成功，后面的命令才会继续执行 
+
+**exit 标识退出当前 shell, 0 标识成功 非0标识失败**
+
+```javascript
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server",
+    "build": "webpack --config webpack.build.js"
+  },
+```
+
+1.command1 & command2 & command3     
+
+  三个命令同时执行 
+
+2.command1; command2; command3         
+
+  不管前面命令执行成功没有，后面的命令继续执行 
+
+3.command1 && command2                         
+
+只有前面命令执行成功，后面命令才继续执行
+
+## 2 .npmignore
+
+Use a `.npmignore` file to keep stuff out of your package. If there's no `.npmignore`file, but there *is* a `.gitignore` file, then npm will ignore the stuff matched by the `.gitignore` file. If you *want* to include something that is excluded by your `.gitignore` file, you can create an empty `.npmignore` file to override it. Like `git`, `npm` looks for `.npmignore` and `.gitignore` files in all subdirectories of your package, not only the root directory.
+
+## 3 Configuring NPM
+
+
+

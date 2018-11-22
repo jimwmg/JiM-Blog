@@ -15,7 +15,32 @@ updated :
 
 基本使用
 
-* 作为服务端
+```
+- server.js
+- client.js
+- index.html
+```
+
+`index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div style="background-color:red">this is index</div>
+</body>
+</html>
+```
+
+
+
+* 作为服务端 server.js
 
 ```javascript
 var http = require('http');
@@ -54,31 +79,44 @@ http.createServer( function (request, response) {
 }).listen(8080);
  
 // 控制台会输出以下信息
-console.log('Server running at http://127.0.0.1:8080/');
+ppd
 
 
 ```
 
 [response响应对象上的方法](http://nodejs.cn/api/http.html#http_response_writehead_statuscode_statusmessage_headers)
 
-* 作为客户端
+* 作为客户端 client.js
 
 ```javascript
+var querystring = require('querystring')
+var http = require('http')
+
 var options = {
-        hostname: 'www.example.com',
-        port: 80,
-        path: '/upload',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    };
-//http.request创建了一个客户端；
-var request = http.request(options, function (response) {});
+  host:'localhost',
+  port: 8080,
+  path: '/index.html',
+  method: 'GET',
+  headers: {
+    'Content-Type': 'text/html',
+  }
+};
 
-request.write('Hello World');
-request.end();
+var req = http.request(options, function(res) {
+  console.log('STATUS: ' + res.statusCode);
+  console.log('HEADERS: ' + JSON.stringify(res.headers));
+  res.setEncoding('utf8');
+  res.on('data', function (chunk) {
+    console.log('BODY: ' + chunk);//这里将会输出 index.html的内容
+  });
+});
 
+req.on('error', function(e) {
+  console.log('problem with request: ' + e.message);
+});
+
+// write data to request body
+req.end();
 ```
 
 ### 2 HTTP模块源码粗解

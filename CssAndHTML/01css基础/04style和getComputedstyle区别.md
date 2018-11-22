@@ -92,7 +92,7 @@ console.log('=====getComputedStyle')
 
 
 ====getComputedStyle
-282(不同浏览器结果有席位不同)
+282(不同浏览器结果有不同)
 21px
 100px
 rgb(255,0,0)

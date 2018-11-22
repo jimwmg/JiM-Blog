@@ -42,7 +42,24 @@ node process-args.js one two=three four
 4: four
 ```
 
+index.js
 
+```javascript
+consoel.log(process.argv)
+```
+
+执行 `node index.js` -a b fas --ho
+
+```javascript
+[ '/Users/didi/.nvm/versions/node/v8.9.4/bin/node',//所执行的node命令所在文件路径
+  '/Users/didi/learn/learnSPace/11cml-learn/index.js',//被执行的脚本的文件名路径
+  '-a',//以下都是执行命令的时候传递的参数；
+  'b',
+  'fas',
+  '--ho' ]
+```
+
+可以看到，对于直接`process.argv` 会将所有的参数作为后续的数组
 
 #### 方法 
 
@@ -70,8 +87,10 @@ node process-args.js one two=three four
 
 **一般使用minimist  npm包**
 
+使用  minimist 处理 `process.argv`过后的参数中
+
 ```
-node dev.js --host local.test.com --proxy test18"
+node index.js dev --host local.test.com --proxy test18"
 ```
 
 ```javascript
@@ -97,14 +116,33 @@ console.log(args);
 ]
 // args
 { 
-  _:[ '/usr/local/bin/node',
-  '/Users/jim-w/work/vcsaas-web/node_modules/.bin/gulp',
+  _:[ '/Users/didi/.nvm/versions/node/v8.9.4/bin/node',
+  '/Users/didi/path/to/index.js',
   'dev' ],
   host: 'local.36kr.com',
   proxy: 'test18',
   port: '8888' 
 }
 ```
+
+具体的可以看下
+
+```javascript
+$ node example/parse.js dev -x 3 -y 4 -n5 -abc --beep=boop foo bar baz
+{ 
+  _: [ 'dev','foo', 'bar', 'baz' ],
+  x: 3,
+  y: 4,
+  n: 5,
+  a: true,
+  b: true,
+  c: true,
+  beep: 'boop'
+}
+
+```
+
+
 
 #### process.exit() 
 

@@ -19,9 +19,21 @@ function bind(fn,thisArg,...args) {
 ```
 
 ```javascript
+function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+```
+
+```javascript
 Function.prototype.myBind = function(thisArg,...args) {
     if(typeof this !== 'function') {
-        throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+        throw new TypeError('ll');
     }
     let fToBind = this;
     let fBound = function(...innerArgs){
