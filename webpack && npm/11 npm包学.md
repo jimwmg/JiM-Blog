@@ -46,3 +46,7 @@ portfinder.getPort(function (err, port) {
 [union](https://www.npmjs.com/package/union)
 
 [ip](https://www.npmjs.com/package/ip)
+
+[prompt](https://www.npmjs.com/package/prompt)
+
+[ora](https://www.npmjs.com/package/ora)

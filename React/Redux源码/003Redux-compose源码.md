@@ -211,36 +211,35 @@ console.log(ret);//6
 <body>
   <script src='./redux.min.js'></script>
   <script>
-    function func1(num){
-      console.log('func1获取参数',num);
-      return num + 1 ;
-    }
+    function compose(...funcs) {
+  if (funcs.length === 0) {
+    return arg => arg
+  }
 
-    function func2(num){
-      console.log('func2获取参数',num);
-      return num + 1 ;
-    }
+  if (funcs.length === 1) {
+    return funcs[0]
+  }
 
-    function func3(num1,num2){
-      console.log('func3获取参数',num);
-      return num1+num2 ;
-    }
+  return funcs.reduce((a, b) => (...args) => a(b(...args)))
+}
+let fn1 = function(ctx){
+  ctx.name = "jhon";
+  return ctx;
+}
+let fn2 = function(ctx){
+  ctx.age = 15;
+  return ctx;
+}
+let funcs = [fn1,fn2];
+let conposedFn = compose(...funcs);
+let result = conposedFn({})
+console.log('resCompose',result);
 
-    var ret = Redux.compose(func1,func2,func3);
-    console.dir(ret);//可以看出结果是一个函数  function anonymous(t)
-    //实际上就是
-    ret = [func1,func2,func3].reduce(function (a, b) {
-      return function () {
-        //这里的arguments是ret函数执行传递进来的参数组成的类数组；执行到最后，就是func中最后一个函数，也就是ret接受的参数要和func中最后一个函数需要的参数保持一致；
-        return a(b.apply(undefined, arguments));
-      };
-    });
-    //也就是reduce执行的结果，reduce执行的结果是对func数组中所有元素执行之后最终的返回函数；
-    var ret1 = Redux.compose(func1,func2,func3)(3,1) ;
-    console.log(ret1);//8
-
-    var ret2 = func1(func2(func3(3,1))); //这个就是compose函数最终返回的最简单的函数形态
-    console.log(ret2);//8
+//简单理解就是
+let resReduce = funcs.reduce((res,func) => {
+  return func(res);
+},{});
+console.log('resReduce',resReduce)
   </script>
 ```
 

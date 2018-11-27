@@ -22,6 +22,45 @@ updated :
 - `process.platform`：返回一个字符串，表示当前的操作系统，比如`Linux`。
 - `process.title`：返回一个字符串，默认值为`node`，可以自定义该值。
 - `process.version`：返回一个字符串，表示当前使用的 Node 版本，比如`v7.10.0`。
+- `process.versions : 属性返回一个对象，此对象列出了Node.js和其依赖的版本信息。 `process.versions.modules`表明了当前ABI版本，此版本会随着一个C++API变化而增加。 Node.js会拒绝加载模块，如果这些模块使用一个不同ABI版本的模块进行编译。
+
+```javascript
+//process.versions
+{ http_parser: '2.7.0',
+  node: '8.9.0',
+  v8: '6.3.292.48-node.6',
+  uv: '1.18.0',
+  zlib: '1.2.11',
+  ares: '1.13.0',
+  modules: '60',
+  nghttp2: '1.29.0',
+  napi: '2',
+  openssl: '1.0.2n',
+  icu: '60.1',
+  unicode: '10.0',
+  cldr: '32.0',
+  tz: '2016b' }
+
+```
+
+```javascript
+//process.env
+{
+  TERM: 'xterm-256color',
+  SHELL: '/usr/local/bin/bash',
+  USER: 'maciej',
+  PATH: '~/.bin/:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin',
+  PWD: '/Users/maciej',
+  EDITOR: 'vim',
+  SHLVL: '1',
+  HOME: '/Users/maciej',
+  LOGNAME: 'maciej',
+  _: '/usr/local/bin/node'
+}
+
+```
+
+
 
 
 ```javascript
@@ -63,7 +102,7 @@ consoel.log(process.argv)
 
 #### 方法 
 
-- `process.chdir()`：切换工作目录到指定目录。
+- `process.chdir(directory)`：切换工作目录到指定目录。对于directory路径是跟绝对路径或者相对路径有关系的；
 - `process.cwd()`：返回运行当前脚本的工作目录的路径（绝对路径）。
 - `process.exit()`：退出当前进程。
 - `process.getgid()`：返回当前进程的组ID（数值）。
@@ -147,4 +186,5 @@ $ node example/parse.js dev -x 3 -y 4 -n5 -abc --beep=boop foo bar baz
 #### process.exit() 
 
 如果参数大于0，表示执行失败；如果等于0表示执行成功。 
+
 

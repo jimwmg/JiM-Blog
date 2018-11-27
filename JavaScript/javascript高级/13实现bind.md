@@ -37,7 +37,7 @@ Function.prototype.myBind = function(thisArg,...args) {
     }
     let fToBind = this;
     let fBound = function(...innerArgs){
-		return fToBind.apply(thisArg,arg.concat(...innerArgs))
+		return fToBind.apply(thisArg,args.concat(...innerArgs))
     }
     return fBound;
 }

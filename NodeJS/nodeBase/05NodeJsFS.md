@@ -156,6 +156,8 @@ fs.readFile('etc/passwd',(err,data)=>{
 * option 编码格式，如果data是一个buffer,则默认encoding是utf-8
 * callback 回调函数,该回调函数里面只有一个参数就是err错误处理对象，如果写入成功err返回null
 
+如果说` file` 表示的路径已经存在，那么就会直接改写这个文件的内容，如果说 不存在，那么就说新建一个文件；
+
 看下面这个简单的例子
 
 ```javascript
