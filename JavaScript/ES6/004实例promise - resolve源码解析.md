@@ -123,7 +123,7 @@ end
 555  this is value
 ```
 
-**注意看下then回调中传入不是函数的情况，在源码中是如何处理的，在new Handlere中**
+**注意看下then回调中传入不是函数的情况，在源码中是如何处理的，在new Handler中**
 
 **在  handleResolved 如果传入的 onFulfilled onRejected 为null ,那么就会直接resolve这个promise,等待下次事件循环 **
 
@@ -132,6 +132,7 @@ Promise.prototype.then = function(onFulfilled, onRejected) {
   if (this.constructor !== Promise) {//这些比较的都是引用地址；
     return safeThen(this, onFulfilled, onRejected);
   }
+  //function noop() {}
   var res = new Promise(noop);
   handle(this, new Handler(onFulfilled, onRejected, res));
   //注意这里 then的链式调用，每次then函数执行完毕之后，返回值都是一个新的Promise实例对象，

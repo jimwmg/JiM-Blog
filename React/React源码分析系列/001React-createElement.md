@@ -47,11 +47,11 @@ ReactElement.createElement = function(type, config, children) {
 
 可以看出React.createElement函数返回的是一个对象,大概是这个形式
 
-```
+```javascript
 {
   type,
   key,
-  props: {
+  props: { //这里是所有的组件上的属性都在这里，当然除了key和ref；
     children
   }
 }

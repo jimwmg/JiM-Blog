@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!-- saved from url=(0071)https://interactive-examples.mdn.mozilla.net/pages/js/string-match.html -->
+<html lang="en" class="js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>JavaScript Demo: String.match()</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./codemirror-5-31-0.css" rel="stylesheet">
+    <link href="./editor-js.css" rel="stylesheet">
+    
+    <script>"use strict";function setupConfig(){var e="https://developer.mozilla.org";if(window.URL){var t=new URL(window.location.href);if(t.searchParams){var i=t.searchParams.get("origin");i&&(e=i)}}window.ieConfig={origin:e}}function postToKuma(e){window.parent.postMessage(e,window.ieConfig.origin)}setupConfig(),postToKuma({markName:"interactive-editor-loading"}),document.addEventListener("readystatechange",function(e){switch(e.target.readyState){case"interactive":postToKuma({markName:"interactive-editor-interactive",measureName:"ie-time-to-interactive",startMark:"interactive-editor-loading",endMark:"interactive-editor-interactive"});break;case"complete":postToKuma({markName:"interactive-editor-complete",measureName:"ie-time-to-complete",startMark:"interactive-editor-loading",endMark:"interactive-editor-complete"})}});</script>
+  </head>
+  <body>
+      <section id="static" class="hidden">
+          <pre><code id="static-js">var paragraph = 'The quick brown fox jumped over the lazy dog. It barked.';
+var regex = /[A-Z]/g;
+var found = paragraph.match(regex);
+
+console.log(found);
+// expected output: Array ["T", "I"]</code>
+</pre>
+
+      </section>
+
+      <section id="live" class="live">
+          <header><h4>JavaScript Demo: String.match()</h4></header>
+          <div id="editor" class="editor"><div class="CodeMirror cm-s-default CodeMirror-focused"><div class="CodeMirror-vscrollbar" cm-not-content="true" style="width: 18px; pointer-events: none;"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" cm-not-content="true" style="height: 18px; pointer-events: none;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: 0px; border-right-width: 30px; min-height: 134px; min-width: 637.031px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><span><span>​</span>x</span></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style="visibility: hidden;"></div><div class="CodeMirror-code" role="presentation" autocorrect="off" autocapitalize="off" spellcheck="false" contenteditable="true" tabindex="0" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" contenteditable="false" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">paragraph</span> <span class="cm-operator">=</span> <span class="cm-string">'The quick brown fox jumped over the lazy dog. It barked.'</span>;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" contenteditable="false" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">regex</span> <span class="cm-operator">=</span> <span class="cm-string-2">/[A-Z]/g</span>;</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" contenteditable="false" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">found</span> <span class="cm-operator">=</span> <span class="cm-variable">paragraph</span>.<span class="cm-property">match</span>(<span class="cm-variable">regex</span>);</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" contenteditable="false" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" contenteditable="false" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-variable">console</span>.<span class="cm-property">log</span>(<span class="cm-variable">found</span>);</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" contenteditable="false" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-comment">// expected output: Array ["T", "I"]</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 30px; width: 1px; border-bottom: 0px solid transparent; top: 134px;"></div><div class="CodeMirror-gutters" style="height: 164px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></div>
+
+          <div class="output-container">
+              <div class="buttons-container">
+                  <button id="execute" class="button run" type="button">Run ›</button>
+                  <button id="reset" type="button" class="button">Reset</button>
+              </div>
+              <div id="console" class="output"><code></code></div>
+          </div>
+      </section>
+
+    
+
+    <script src="./codemirror-5-31-0.js"></script>
+    <script src="./editor-js.js"></script>
+  
+
+</body></html>
