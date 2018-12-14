@@ -50,3 +50,5 @@ portfinder.getPort(function (err, port) {
 [prompt](https://www.npmjs.com/package/prompt)
 
 [ora](https://www.npmjs.com/package/ora)
+
+[node-notifier](https://www.npmjs.com/package/node-notifier) : 错误提示
