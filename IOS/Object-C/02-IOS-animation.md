@@ -18,6 +18,10 @@ xcode面板详解：
 
 左侧面板最后一个：[IOS构建日志](http://beyondvincent.com/2013/11/21/2013-11-23-123-build-process/)
 
+[IOS-animation-demo合集](https://segmentfault.com/a/1190000016181681)
+
+[基础动画](https://github.com/manofit/BabyPigAnimation.git)
+
 
 
 xcode文档总结
