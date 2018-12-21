@@ -98,7 +98,7 @@ consoel.log(process.argv)
   '--ho' ]
 ```
 
-可以看到，对于直接`process.argv` 会将所有的参数作为后续的数组
+可以看到，对于直接`process.argv` 会将所有的参数作为后续的数组,以空格作为分割；
 
 #### 方法 
 

@@ -140,6 +140,7 @@ export function initUse (Vue: GlobalAPI) {
 ```javascript
 export function initMixin (Vue: GlobalAPI) {
   Vue.mixin = function (mixin: Object) {
+      // 这里 Vue.mixin(options)函数执行的时候，this代表的是 Vue 构造函数这个对象；
     this.options = mergeOptions(this.options, mixin)
     return this
   }

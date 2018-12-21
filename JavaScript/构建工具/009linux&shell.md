@@ -248,7 +248,124 @@ cat /etc/shells
 -x 将范围局限在现行的文件系统中，若指定目录下的某些子目录，其存放于另一个文件系统上，则将该子目录予以排除在寻找范围外。
 ```
 
+### 6 shell脚本编程
 
+shell脚本编程简单来说就是一个 `.sh`文件，这个文件中可以执行一些平时在终端中执行的命令，比如ls  比如 npm install 比如mkdir ,比如 echo 等等；
+
+`test.sh`
+
+```shell
+#!/bin/sh
+
+NAME="Zara Ali"
+echo $NAM
+mkdir tewt
+cat filename
+vi test.sh
+ls ~
+```
+
+执行shell脚本
+
+```
+source test.sh
+. ./test.sh
+sh test.sh
+```
+
+linux编程中基本命令
+
+0.用户操作
+
+```
+login : 登录
+passwd:修改用户登录密码
+whoami:查看你是谁
+users: 查看登录本机的用户
+
+```
+
+1. 文件操作
+
+```
+ls : 列出文件列表
+vi : 创建文件或者编辑已存在文件
+cat:显示文件内容
+mv : 重命名文件
+rm : 删除、移动文件
+cp : 复制文件
+mkdir: 创建目录
+rmdir:移动某个目录
+
+cd: 改变目录，终端到某个目录，cd ~ ~代表home directory
+```
+
+2. 环境 | 管道
+
+```
+$PATH  $PWD  $HOME  .... : 全局变量
+ls | grep 'didi' : 列出该目录下所有带有 'didi' 的文件或者文件夹
+```
+
+| Sr.No. | Option & Description                                         |
+| ------ | ------------------------------------------------------------ |
+| 1      | **-v**Prints all lines that do not match pattern.            |
+| 2      | **-n**Prints the matched line and its line number.           |
+| 3      | **-l**Prints only the names of files with matching lines (letter "l") |
+| 4      | **-c**Prints only the count of matching lines.               |
+| 5      | **-i**Matches either upper or lowercase.                     |
+
+3.进程
+
+Each unix process has two ID numbers assigned to it: The Process ID (pid) and the Parent process ID (ppid). Each user process in the system has a parent process.
+
+Most of the commands that you run have the shell as their parent. Check the **ps -f** example where this command listed both the process ID and the parent process ID.
+
+```
+ps
+ps -f : 显示终端进程
+kill : 杀掉某个进程
+```
+
+| Sr.No. | Column & Description                                         |
+| ------ | ------------------------------------------------------------ |
+| 1      | **UID**User ID that this process belongs to (the person running it) |
+| 2      | **PID**Process ID                                            |
+| 3      | **PPID**Parent process ID (the ID of the process that started it) |
+| 4      | **C**CPU utilization of process                              |
+| 5      | **STIME**Process start time                                  |
+| 6      | **TTY**Terminal type associated with the process             |
+| 7      | **TIME**CPU time taken by the process                        |
+| 8      | **CMD**The command that started this process                 |
+
+There are other options which can be used along with **ps** command −
+
+| Sr.No. | Option & Description                                      |
+| ------ | --------------------------------------------------------- |
+| 1      | **-a**Shows information about all users                   |
+| 2      | **-x**Shows information about processes without terminals |
+| 3      | **-u**Shows additional information like -f option         |
+| 4      | **-e**Displays extended information                       |
+
+4. 交互 | vim编辑器
+
+```
+ping: The ping command sends an echo request to a host available on the network. Using this command, you can check if your remote host is responding well or not.
+finger:The finger command displays information about users on a given host. The host can be either local or remote.
+
+```
+
+
+
+
+
+
+
+
+
+[shell脚本](https://github.com/qinjx/30min_guides/blob/master/shell.md)
+
+[unix](http://www.tutorialspoint.com/unix/unix-shell.htm)
 
 
 

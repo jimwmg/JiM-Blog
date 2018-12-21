@@ -167,3 +167,24 @@ Promise.all = function (arr) {
 
 ```
 
+### 4 总结
+
+async函数中，只要遇到await就会等待该函数promsie状态的变化；
+
+```javascript
+let as1 = async function(arg){
+    console.log('as1',arg);
+    //return new Promise((resolve,reject) => {}) //阻塞
+}
+let as2 = async function(){
+    console.log('as2');
+}
+let run = async function(){
+    for(let i = 0 ; i < 4 ; i++){
+        await as1(i);
+    }
+    await as2();
+}
+run()
+```
+
