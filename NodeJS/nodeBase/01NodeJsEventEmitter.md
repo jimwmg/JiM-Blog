@@ -26,7 +26,7 @@ eventEmitter.on('eventName',eventNameHandle);
 eventEmitter.emit('eventName');
 ```
 
-###2 我们可以输出 events 模块  console.log(events); 查看其所包含内容
+### 2 我们可以输出 events 模块  console.log(events); 查看其所包含内容
 
 events模块只提供了一个对象: events.EventEmitter .该对象的核心就是事件的触发和事件的监听的整体封装；
 
