@@ -40,7 +40,7 @@ webpack index=./src/index.js index2=./src/index2.js --output-path='./dist' --out
 
 ### 3 webpack配置文件
 
-#### 3.1 webpack配置为对象,就已官网的例子来看
+#### 3.1 webpack配置为对象,就官网的例子来看
 
 我们的代码会经过loaders==>plugins
 
@@ -48,6 +48,7 @@ webpack index=./src/index.js index2=./src/index2.js --output-path='./dist' --out
 const path = require('path');
 
 module.exports = {
+  context:path.resolve(__dirname), //默认使用当前目录，插件中，以及entry等处的相对路径都是相对于这个context为基准；
   //==> 1 入口
   entry: "./app/entry", // string | object | array  对象代表多页面程序
   // 这里应用程序开始执行
@@ -59,11 +60,11 @@ module.exports = {
     // 所有输出文件的目标路径
     // 必须是绝对路径（使用 Node.js 的 path 模块）
 
-    filename: "bundle.js", // string
+    filename: "bundle.js", // string [name]:文件名，[hash:8]，8代表取值8位hash值，默认是20位；
     // 「入口分块(entry chunk)」的文件名模板（出口分块？） 还可以通过[name] /[chunk]/[id]来进行命名
 
-    publicPath: "/assets/", // string
-    // 输出解析文件的目录，url 相对于 HTML 页面
+    publicPath: "/assets/", // string，publicPath: 'https://cdn.example.com/assets/'
+    // 输出解析文件的目录，url 相对于 HTML 页面，线上页面：<script src='https://cdn.example.com/assets/a_12345678.js'></script>
 
     library: "MyLibrary", // string,
     // 导出库(exported library)的名称

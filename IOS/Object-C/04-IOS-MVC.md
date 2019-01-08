@@ -47,8 +47,3 @@ UIViewController的生命周期
 5）dealloc
 
       释放其他资源或内存
----------------------
-作者：MrSimp1e 
-来源：CSDN 
-原文：https://blog.csdn.net/bboyfeiyu/article/details/41623321 
-版权声明：本文为博主原创文章，转载请附上博文链接！

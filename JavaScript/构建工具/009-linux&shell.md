@@ -355,7 +355,68 @@ finger:The finger command displays information about users on a given host. The 
 
 ```
 
+5. what is shell
 
+The shell reads your input after you press Enter. It determines the command you want executed by looking at the first word of your input. A word is an unbroken set of characters. Spaces and tabs separate words.
+
+* Shell types
+
+```
+/bin/bash
+/bin/csh
+/bin/ksh
+/bin/sh
+/bin/tcsh
+/bin/zsh
+```
+
+* Shell scripts
+
+Assume we create a test.sh script. Note all the scripts would have .sh extension. Before you add anything else to your script, you need to alert the system that a shell script is being started. This is done using the shebang construct. For example:
+
+```
+#!/bin/sh
+```
+
+* Shell comments : 以 #  开头
+
+```
+# this is comments
+```
+
+5.1 变量
+
+- **Local Variables** − A local variable is a variable that is present within the current instance of the shell. It is not available to programs that are started by the shell. They are set at the command prompt.
+- **Environment Variables** − An environment variable is available to any child process of the shell. Some programs need environment variables in order to function correctly. Usually, a shell script defines only those environment variables that are needed by the programs that it runs.
+- **Shell Variables** − A shell variable is a special variable that is set by the shell and is required by the shell in order to function correctly. Some of these variables are environment variables whereas others are local variables.
+
+```sh
+PERSON 
+PERSON="jim"
+readonly PERSON
+PERSON="jhom" //只读变量不允许再次赋值
+```
+
+5.2 数组
+
+```sh
+# 定义数组
+array_name[index]=value
+# 获取数组值
+${array_name[index]}
+```
+
+```sh
+#!/bin/sh
+
+NAME[0]="Zara"
+NAME[1]="Qadir"
+NAME[2]="Mahnaz"
+NAME[3]="Ayan"
+NAME[4]="Daisy"
+echo "First Index: ${NAME[0]}"
+echo "Second Index: ${NAME[1]}"
+```
 
 
 

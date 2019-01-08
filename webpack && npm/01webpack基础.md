@@ -150,7 +150,7 @@ new webpack.optimize.CommonsChunkPlugin({
   // When using `options.async` to create common chunks from other async chunks you must specify an entry-point
   // chunk name here instead of omitting the `option.name`.
 
-  filename: string,
+  filename: string,//如果filename 是带有路径的，那么也会以context,默认__dirname拼接成路径
   // common chunk 的文件名模板。可以包含与 `output.filename` 相同的占位符。
   // 如果被忽略，原本的文件名不会被修改(通常是 `output.filename` 或者 `output.chunkFilename`)。
   // This option is not permitted if you're using `options.async` as well, see below for more details.

@@ -70,3 +70,6 @@ tile:babel 基础
 [如何编写babel插件](https://www.h5jun.com/post/babel-for-es6-and-beyond.html)
 
 [AST-explorer](https://astexplorer.net/)
+
+babel-polyfill Babel 有一个 polyfill ，它包括 a custom regenerator runtime 和 core-js. babel-polyfill会完整的模拟ES2015+的环境，目标是用于应用中而不是库或工具中。使用babel-node时，它会自动的加载。 这意味你能使用内置的函数如Promise或WeakMap，静态方法如Array.from 或 Object.assign，实例方法如Array.prototype.includes，以及generator函数。为了实现这些方法，它被添加到全局，也被添加到原生的原型上。
+
