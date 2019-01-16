@@ -167,3 +167,27 @@ watching.close(() => {
 });
 ```
 
+构建服务器
+
+```javascript
+const webpack = require('webpack');
+var WebpackDevServer = require('webpack-dev-server');
+const config = require('./config.js')
+
+
+const options = {
+  open:true,
+  contentBase: './dist',
+  hot: true,
+  host: 'localhost'
+};
+
+WebpackDevServer.addDevServerEntrypoints(config, options);
+const compiler = webpack(config);
+const server = new WebpackDevServer(compiler, options);
+
+server.listen(5000, 'localhost', () => {
+  console.log('dev server listening on port 5000');
+});
+```
+

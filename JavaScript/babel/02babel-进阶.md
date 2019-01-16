@@ -4,6 +4,10 @@
 
 [babel官网](https://babeljs.io/)
 
+[babel手册](https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md)
+
+
+
 比如
 
 ```javascript
@@ -36,10 +40,18 @@ npm install --save-dev @babel/core @babel/cli
 
 新建一个文件夹 `src`
 
+`src`文件夹下面可以写入不同的你想测试的plugins转化，对照着文档写案例即可；
+
 ```
 -babel-learn
  -src
  	-example-cli.js
+ 	-jsx.js
+ 	-ES2018.js
+ 	-module.js
+ 	-computed-properties
+ 	-destructuring
+ 	-....
  -package.json
 ```
 
@@ -57,6 +69,8 @@ let fun = () => console.log('hello babel.js');
 ```
 
 还是原来的代码，没有任何变化。说好的编译呢？
+
+Now, out of the box Babel doesn't do anything. It basically acts like `const babel = code => code;` by parsing the code and then generating the same code back out again. You will need to add plugins for Babel to do anything.
 
 这个调整则是在 [babel 6](https://babeljs.io/blog/2015/10/29/6.0.0) 里发生的。Babel 6 做了大量模块化的工作，将原来集成一体的各种编译功能分离出去，独立成插件。这意味着，默认情况下，当下版本的 babel 不会编译代码。
 
@@ -124,7 +138,15 @@ babel会自动读取 `.babelrc`里面的配置并应用到编译中；
 
 ##### plugins/presets排序
 
-也许你会问，或者你没注意到，我帮你问了，plugins和presets编译，也许会有相同的功能，或者有联系的功能，按照怎么的顺序进行编译？答案是会按照一定的顺序。
+plugins和presets编译，也许会有相同的功能，或者有联系的功能，按照怎么的顺序进行编译？答案是会按照一定的顺序。
+
+This means if two transforms both visit the "Program" node, the transforms will run in either plugin or preset order.
+
+- Plugins run before Presets.
+- Plugin ordering is first to last.
+- Preset ordering is reversed (last to first).
+
+翻译：
 
 - 具体而言，plugins优先于presets进行编译。
 - plugins按照数组的index增序(从数组第一个到最后一个)进行编译。
@@ -188,6 +210,8 @@ npx babel src/example-cli.js -d lib
 #### 2.3 polyfill的配置
 
 对于 `.babelrc`如下配置
+
+**注意这个配置不会引入regeneratorRuntime的垫片实现**
 
 ```javascript
 {
@@ -506,3 +530,143 @@ import '@babel/polyfill'
 如前面所说的，babel-polyfill 其实包含 `regenerator runtime`、`core-js`，如果你的代码只需要其中一部分 polyfill，那么你可以考虑直接引入 `core-js` 下的特定 polyfill，不必使用 babel-polyfill 这样的庞然大物。
 
 这正是 babel-polyfill 与 babel-runtime 的一大区别，前者改造目标浏览器，让你的浏览器拥有本来不支持的特性；后者改造你的代码，让你的代码能在所有目标浏览器上运行，但不改造浏览器。
+
+### 3 .babelrc的其他配置
+
+#### 3.1 plugins/preset可以配置options
+
+Both plugins and presets can have options specified by wrapping the name and an options object in an array inside your config.
+
+```javascript
+{
+  "presets": [
+    ["env", {
+      "loose": true,
+      "modules": false
+    }]
+  ]
+  "plugins": [
+    "pluginA",
+    ["pluginA"],
+    ["pluginA", {}],
+  ]
+}
+```
+
+#### 3.2 preset根据环境进行配置preset
+
+Babel 插件解决许多不同的问题。 其中大多数是开发工具，可以帮助你调试代码或是与工具集成。 也有大量的插件用于在生产环境中优化你的代码。
+
+因此，想要基于环境来配置 Babel 是很常见的。你可以轻松的使用 `.babelrc` 文件来达成目的。
+
+```javascript
+  {
+    "presets": ["es2015"],
+    "plugins": [],
++   "env": {
++     "development": {
++       "plugins": [...]
++     },
++     "production": {
++       "plugins": [...]
++     }
+    }
+  }
+```
+
+Babel 将根据当前环境来开启 `env` 下的配置。
+
+当前环境可以使用 `process.env.BABEL_ENV` 来获得。 如果 `BABEL_ENV` 不可用，将会替换成 `NODE_ENV`，并且如果后者也没有设置，那么缺省值是`"development"`。.
+
+### 3 @babel/node
+
+babel-node is a CLI that works exactly the same as the Node.js CLI, with the added benefit of compiling with Babel presets and plugins before running it.
+
+```
+nvm install 6
+npm install --save-dev @babel/core @babel/node
+```
+
+`index.js` 
+
+```javascript
+console.log(process.version)
+console.log('sss')
+async function f2(){
+  console.log('async')
+}
+f2()
+```
+
+我们知道，node 6的版本不支持async
+
+```
+node index.js
+```
+
+报错信息如下
+
+```
+SyntaxError: Unexpected token function
+```
+
+但是如果执行以下命令
+
+```
+babel-node index.js
+```
+
+则可以正常执行；
+
+### 4 @babel/register
+
+这个也会根据 `.babelrc`的配置进行编译代码，用来支持某些node低版本不支持的特性；
+
+One of the ways you can use Babel is through the require hook. The require hook will bind itself to node's `require` and automatically compile files on the fly. This is equivalent to CoffeeScript's [coffee-script/register](http://coffeescript.org/v2/annotated-source/register.html).[ ](https://babeljs.io/docs/en/babel-register#install)
+
+You can pass in all other [options](https://babeljs.io/docs/en/options) as well, including `plugins` and `presets`. Note that [config files](https://babeljs.io/docs/en/config-files) will also be loaded and the programmatic config will be merged over top of the file config options.
+
+`index.js`
+
+```javascript
+console.log(process.version)
+console.log('sss')
+require("./src/async.js")
+```
+
+`async.js`
+
+```javascript
+async function f(){
+  console.log('f')
+  await f2()
+}
+async function f2(){
+  console.log('f2')
+}
+f()
+f2()
+```
+
+```
+nvm use 6
+node index.js //报错
+```
+
+增加 `@babel/register`
+
+```javascript
+console.log(process.version)
+console.log('sss')
+require("@babel/register");
+require("./src/async.js")
+```
+
+```javascript
+nvm use 6 
+node index.js //可以正常执行
+```
+
+### 5 如何写一个babel插件
+
+[babel-github](https://github.com/babel/babel/tree/2b6ff53459d97218b0cf16f8a51c14a165db1fd2/packages)

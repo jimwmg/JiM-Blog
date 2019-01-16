@@ -29,6 +29,49 @@ webpack --env.NODE_ENV=local --env.production --progress
 
 ### 2管理资源
 
+* `mode`:提供mode配置选项，告知webpack使用相应模式的内置优化
+
+用法
+
+只在配置中提供 `mode` 选项：
+
+```javascript
+module.exports = {
+  mode: 'production'
+};
+```
+
+或者从 [CLI](https://www.webpackjs.com/api/cli/) 参数中传递：
+
+```bash
+webpack --mode=production
+```
+
+支持以下字符串值：
+
+选项
+
+描述
+
+```
+development
+```
+
+会将 `process.env.NODE_ENV` 的值设为 `development`。启用 `NamedChunksPlugin` 和 `NamedModulesPlugin`。
+
+```
+production
+```
+
+会将 `process.env.NODE_ENV` 的值设为 `production`。启用 `FlagDependencyUsagePlugin`, `FlagIncludedChunksPlugin`, `ModuleConcatenationPlugin`, `NoEmitOnErrorsPlugin`, `OccurrenceOrderPlugin`, `SideEffectsFlagPlugin` 和 `UglifyJsPlugin`.
+
+>
+
+- `entry` 一个可执行模块或库的入口文件。
+- `chunk` 多个文件组成的一个代码块，例如把一个可执行模块和它所有依赖的模块组合和一个 `chunk` 这体现了webpack的打包机制。
+- `loader` 文件转换器，例如把es6转换为es5，scss转换为css。
+- `plugin` 插件，用于扩展webpack的功能，在webpack构建生命周期的节点上加入扩展hook为webpack加入功能。
+
 ```javascript
 + |– /components
 + |  |– /my-component

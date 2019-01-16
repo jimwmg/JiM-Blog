@@ -126,7 +126,13 @@ a: 50+(300/4*3)=275px
 
 #### flex-basis （flex-basis的优先级高于width)
 
-这个属性值的作用也就是width的替代品。 如果子容器设置了flex-basis或者width，那么在分配空间之前，他们会先跟父容器预约这么多的空间，然后剩下的才是归入到剩余空间，然后父容器再把剩余空间分配给设置了flex-grow的容器。 如果同时设置flex-basis和width，那么width属性会被覆盖，也就是说flex-basis的优先级比width高。有一点需要注意，如果flex-basis和width其中有一个是auto，那么另外一个非auto的属性优先级会更高。
+这个属性值的作用也就是width的替代品。 如果子容器设置了flex-basis或者width，那么在分配空间之前，他们会先跟父容器预约这么多的空间，然后剩下的才是归入到剩余空间，然后父容器再把剩余空间分配给设置了flex-grow的容器。 如果同时设置flex-basis和width，那么width属性会被覆盖，也就是说flex-basis的优先级比width高。
+
+**有一点需要注意，如果flex-basis和width其中有一个是auto，那么另外一个非auto的属性优先级会更高。**
+
+现在我们知道了width属性只是一个当flex-basis没有被设置时的回退选项。**min-width和max-width则是flex-basis的下限和上限。**那么flex-basis到底是什么呢？
+
+也许你注意到了上面我们所有的示例在将flex items放入flex容器之前都直观地列出了flex items的大小。之所以这么做是因为这就是flex-basis的含义：**flex items 在被放进一个flex容器之前的大小。**也就是items理想或假设的大小。但是flex-basis**不能保证其大小！**一旦将items放入flex容器中，flex-basis的值就无法保证了
 
 #### flex简写[flex-grow,flex-shrink,flex-basis]
 

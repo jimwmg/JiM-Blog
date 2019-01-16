@@ -223,3 +223,21 @@ undefined
 - `__dirname`：指向当前运行的脚本所在的目录。即执行对应脚本的时候，该脚本中 `__dirname`所在的js**文件的目录路径**
 - `__filename 比 __dirname 多了一层文件自身的路径`；
 
+### 4 NodeJs 调试
+
+在需要调试的地方打上 debugger;
+
+如果是手写一个cli:
+
+```终端执行
+#! /usr/bin/env node  --inspect
+```
+
+如果直接打开终端执行一段nodejs脚本:
+
+```
+node --inspect xxx.js
+```
+
+
+
