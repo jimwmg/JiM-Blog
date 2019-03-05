@@ -33,13 +33,13 @@ import Vue from './runtime/index'
 export default Vue
 ```
 
-####1[plaforms/web/runtime/index.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)中有如下一行代码
+#### 1[plaforms/web/runtime/index.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)中有如下一行代码
 
 ```javascript
 import Vue from 'core/index'
 ```
 
-####2[core/index.js]()
+#### 2[core/index.js]()
 
 ```javascript
 import Vue from './instance/index'
@@ -60,7 +60,7 @@ Vue.version = '__VERSION__'
 export default Vue
 ```
 
-####3[instance/index.js源码地址](https://github.com/jimwmg/vue/blob/dev/src/core/instance/index.js)
+#### 3[instance/index.js源码地址](https://github.com/jimwmg/vue/blob/dev/src/core/instance/index.js)
 
 ```javascript
 import { initMixin } from './init'

@@ -250,7 +250,7 @@ cat /etc/shells
 
 ### 6 shell脚本编程
 
-shell脚本编程简单来说就是一个 `.sh`文件，这个文件中可以执行一些平时在终端中执行的命令，比如ls  比如 npm install 比如mkdir ,比如 echo 等等；
+shell脚本编程简单来说就是一个 `.sh`文件，这个文件中可以执行一些平时在终端中执行的命令，比如 ls  比如 npm install 比如mkdir ,比如 echo 等等；
 
 `test.sh`
 

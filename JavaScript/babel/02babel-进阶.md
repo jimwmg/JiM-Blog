@@ -670,3 +670,49 @@ node index.js //可以正常执行
 ### 5 如何写一个babel插件
 
 [babel-github](https://github.com/babel/babel/tree/2b6ff53459d97218b0cf16f8a51c14a165db1fd2/packages)
+
+最简单的一个例子
+
+`plugins/index.js`
+
+```javascript
+module.exports =  function (...args) {
+  debugger;
+  console.log(args)
+  return {
+    visitor: {
+      Identifier(path) {
+        debugger;
+        console.log('sss')
+        const name = path.node.name;
+        // reverse the name: JavaScript -> tpircSavaJ
+        path.node.name = name.split("").reverse().join("");
+      }
+    }
+  };
+}
+```
+
+`.babelrc` 中配置插件的路径
+
+```javascript
+{
+  "presets": [
+    
+  ],
+  "plugins":[
+    ["./plugins/index.js",{
+      "v1":"v1",
+      "v2":2
+    }],
+  ]
+}
+
+```
+
+找到`babel-cli`的源码增加一行代码,方便进行调试；对于babel7  在 `node_modules/@babel/cli/bin/babel.js`中
+
+```
+#!/usr/bin/env node --inspect-brk
+```
+

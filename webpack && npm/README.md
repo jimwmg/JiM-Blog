@@ -5,3 +5,19 @@
 [webpack构建案例详解](https://juejin.im/post/5c25b76ef265da614b120ed0?utm_medium=hao.caibaojian.com&utm_source=hao.caibaojian.com&from=groupmessage&isappinstalled=0)
 
 [webpack-loader](https://imweb.io/topic/59324940b9b65af940bf58ae)
+
+[webpack体积优化](https://www.jeffjade.com/2017/08/06/124-webpack-packge-optimization-for-volume)
+
+[webpack-速度优化](https://www.jeffjade.com/2017/08/12/125-webpack-package-optimization-for-speed/)
+
+[webpack-dllplugin](https://segmentfault.com/a/1190000011138081)
+
+[webpack-uglify-js](https://www.npmjs.com/package/uglifyjs-webpack-plugin)
+
+[webpack体积优化](https://juejin.im/post/5b1e303b6fb9a01e605fd0b3)
+
+[webpacl-dllplugin](https://www.jianshu.com/p/a5b3c2284bb6)
+
+[webpack-增量构建](https://blog.csdn.net/kun5706947/article/details/78949038)
+
+[webpack-速度优化](https://www.ibm.com/developerworks/cn/web/wa-lo-expedite-webpack/index.html)

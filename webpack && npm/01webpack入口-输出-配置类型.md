@@ -27,9 +27,9 @@ webpack --env.NODE_ENV=local --env.production --progress
 
 
 
-### 2管理资源
+### 2 管理资源
 
-* `mode`:提供mode配置选项，告知webpack使用相应模式的内置优化
+#### `mode`:提供mode配置选项，告知webpack使用相应模式的内置优化
 
 用法
 
@@ -51,8 +51,6 @@ webpack --mode=production
 
 选项
 
-描述
-
 ```
 development
 ```
@@ -65,23 +63,7 @@ production
 
 会将 `process.env.NODE_ENV` 的值设为 `production`。启用 `FlagDependencyUsagePlugin`, `FlagIncludedChunksPlugin`, `ModuleConcatenationPlugin`, `NoEmitOnErrorsPlugin`, `OccurrenceOrderPlugin`, `SideEffectsFlagPlugin` 和 `UglifyJsPlugin`.
 
->
-
-- `entry` 一个可执行模块或库的入口文件。
-- `chunk` 多个文件组成的一个代码块，例如把一个可执行模块和它所有依赖的模块组合和一个 `chunk` 这体现了webpack的打包机制。
-- `loader` 文件转换器，例如把es6转换为es5，scss转换为css。
-- `plugin` 插件，用于扩展webpack的功能，在webpack构建生命周期的节点上加入扩展hook为webpack加入功能。
-
-```javascript
-+ |– /components
-+ |  |– /my-component
-+ |  |  |– index.jsx
-+ |  |  |– index.css
-+ |  |  |– icon.svg
-+ |  |  |– img.png
-```
-
-这种配置方式会使你的代码更具备可移植性，因为现有的统一放置的方式会造成所有资源紧密耦合在一起。假如你想在另一个项目中使用 `/my-component`，只需将其复制或移动到 `/components` 目录下。
+#### output
 
 ### 3 webpack 缓存管理[链接](https://doc.webpack-china.org/guides/output-management/#manifest)
 
@@ -137,7 +119,7 @@ npm run dev
 
 #### 4.1 入口起点（没有设置CommonsChunkPlugin插件的时候）
 
-**注意：**
+**注意：**（函数的返回值也是一样）
 
 * **如果传入一个字符串或字符串数组，chunk 会被命名为 `main`。**
 
@@ -376,6 +358,25 @@ module.exports = (options = {}) => ({
   devtool: options.dev ? '#eval-source-map' : '#source-map'
 })
 
+```
+
+### 5 watch  & watchOptions
+
+#### 通过命令行的方式
+
+```
+webpack --watch
+```
+
+#### 通过配置的方式
+
+```javascript
+watch:true,
+watchOptions: {
+    aggregateTimeout: 3000, //当第一个文件更改，会在重新构建前增加延迟。这个选项允许 webpack 将这段时间内进行的任何其他更改都聚合到一次重新构建里。以毫秒为单位：
+    poll: 3000, //通过传递 true 开启 polling，或者指定毫秒为单位进行轮询。
+    ignored:"./src/**/*.js" //对于某些系统，监听大量文件系统会导致大量的 CPU 或内存占用。这个选项可以排除一些巨大的文件夹，例如 node_modules：
+},
 ```
 
 
