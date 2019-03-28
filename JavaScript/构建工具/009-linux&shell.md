@@ -13,6 +13,44 @@ title: linux
 以上输出分别表示：输入命令； 当前Mac已安装jdk目录； Mac默认使用的jdk版本；
 ```
 
+### 0 PATH
+
+```
+PATH=/usr/local/opt/php@7.1/sbin:/usr/local/opt/php@7.1/bin:/Users/didi/.nvm/versions/node/v11.2.0/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+```
+
+关于PATH的作用：
+PATH说简单点就是一个字符串变量，当输入命令的时候LINUX会去查找PATH里面记录的路径。比如在根目录/下可以输入命令ls,在/usr目录下也可以输入ls,但其实ls这个命令根本不在这个两个目录下，事实上当你输入命令的时候LINUX会去/bin,/usr/bin,/sbin等目录下面去找你此时输入的命令，而PATH的值恰恰就是/bin:/sbin:/usr/bin:……。
+
+其中的冒号使目录与目录之间隔开。
+
+打开终端
+
+```javascript
+cd /usr/bin  //进入这个目录
+ls //可以看到该目录下所有的命令文件了
+```
+
+关于新增自定义路径：
+
+假如你新安装了一个命令，这里就以`flutter`为例[flutter](https://flutter.dev/docs/get-started/install/macos)
+
+打开一个终端
+
+```
+export PATH="$PATH:[PATH_TO_FLUTTER]/flutter/bin"
+```
+
+此时执行`flutter -v`,发现可以在终端执行 `flutter`命令行；
+
+如果在新打开一个终端执行`flutter`发现又不生效了，此时需要配置下
+
+**.bash_profile** ：定义了用户的个人化路径与环境变量的文件名称。每个用户都可使用该文件输入专用于自己使用的shell信息,当用户登录时,**该文件仅仅执行一次**。
+
+**.bashrc** ：该文件包含专用于你的shell的bash信息,**当登录时以及每次打开新的shell时,**该该文件被读取。例如你可以将用户自定义的alias或者自定义变量写到这个文件中。
+
+将以上`export PATH="$PATH:[PATH_TO_FLUTTER]/flutter/bin"`写入该文件中即可。
+
 ### 1 目录相关操作(列表 ，移动，删除，复制等)
 
 * ls  列出当前目录
@@ -145,11 +183,17 @@ cat /etc/shells
 "terminal.integrated.shell.linux": "/bin/zsh",
 ```
 
-
-
 **.bash_profile** ：定义了用户的个人化路径与环境变量的文件名称。每个用户都可使用该文件输入专用于自己使用的shell信息,当用户登录时,**该文件仅仅执行一次**。
 
+`.bash_profile`文件只会对指定的`shell`类型起作用，`.bash_profile`只会被`bash shell`调用
+
+如果你用了其他的`shell`，比如 `zsh`，那么对应的是 `.zsh_profile`
+
 **.bashrc** ：该文件包含专用于你的shell的bash信息,**当登录时以及每次打开新的shell时,**该该文件被读取。例如你可以将用户自定义的alias或者自定义变量写到这个文件中。
+
+`.bashrc`文件只会对指定的`shell`类型起作用，`bashrc`只会被`bash shell`调用。
+
+如果你用了其他的`shell`，比如`zsh `那么对应的是`.zshrc`
 
 **.bash_history** ：记录命令历史用的。
 
