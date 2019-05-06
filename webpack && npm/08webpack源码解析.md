@@ -4,6 +4,8 @@
 
 ### 1 启动webpack编译 - webpack[github源码](https://github.com/webpack/webpack)
 
+[webpack打包机制](<https://github.com/happylindz/blog/issues/6>)
+
 #### 1.1 通过 [webpack-cli](https://github.com/webpack/webpack-cli)
 
 这里贴出来主要的核心代码

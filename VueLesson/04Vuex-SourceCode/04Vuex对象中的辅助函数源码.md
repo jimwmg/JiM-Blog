@@ -77,8 +77,34 @@ export default {
       'doneTodosCount',
       'anotherGetter',
       // ...
-    ])
-  }
+    ]),
+    ...mapState({
+    // 箭头函数可使代码更简练
+    count: state => state.count,
+
+    // 传字符串参数 'count' 等同于 `state => state.count`
+    countAlias: 'count',
+
+    // 为了能够使用 `this` 获取局部状态，必须使用常规函数
+    countPlusLocalState (state) {
+      return state.count + this.localCount
+    }
+  },
+  methods: {
+    ...mapMutations([
+      'increment', // 将 `this.increment()` 映射为 `this.$store.commit('increment')`
+
+      // `mapMutations` 也支持载荷：
+      'incrementBy' // 将 `this.incrementBy(amount)` 映射为 `this.$store.commit('incrementBy', amount)`
+         
+    ]),
+    ...mapMutations({
+      add: 'increment' // 将 `this.add()` 映射为 `this.$store.commit('increment')`
+      del:(commit,type,payload){
+				//可以在这里执行 commit 其他type的mutation
+        commit(type,payload)
+      }
+    })
 }
 
 ```
@@ -158,8 +184,14 @@ export default {
 //处理后
 export default {
   // ...res = {key:mappedGetter,....}
+  /* _wrapedGetters ==> getters  ==> 
+  fn(local.state, // local state
+      local.getters, // local getters
+      store.state, // root state
+      store.getters // root getters)
+  */
   computed: {
-	doneTodosCount:mappedGetter, //==>store.getters.doneTodosCount
+		doneTodosCount:mappedGetter, //==>store.getters.doneTodosCount  
     anotherGetter:mappedGetter  //==>store.getters.anotherGetter
   }
 }
@@ -194,10 +226,19 @@ export const mapState = normalizeNamespace((namespace, states) => {
   return res
 })
 //最后实现的效果还是  store.commit(type,payload)
+/*
+  function registerMutation (store, type, handler, local) {
+    const entry = store._mutations[type] || (store._mutations[type] = [])
+    entry.push(function wrappedMutationHandler (payload) {
+    //这个handler就是我们写的mutation函数
+      handler.call(store, local.state, payload)
+    })
+  }
+*/
 export const mapMutations = normalizeNamespace((namespace, mutations) => {
   const res = {}
   normalizeMap(mutations).forEach(({ key, val }) => {
-    res[key] = function mappedMutation (...args) {
+    res[key] = function mappedMutation (...args) { //这个函数就会被注入到 vue实例对象的 methods中
       let commit = this.$store.commit
       if (namespace) {
         //得到每一个模块
@@ -210,6 +251,14 @@ export const mapMutations = normalizeNamespace((namespace, mutations) => {
       }
       return typeof val === 'function'
         ? val.apply(this, [commit].concat(args))
+      /* let commit = this.$store.commit
+      commit (_type, _payload, _options){
+      	//...
+      	const mutation = { type, payload }
+    		const entry = this._mutations[type]
+    		//...
+      }
+      */
         : commit.apply(this.$store, [val].concat(args))
     }
   })

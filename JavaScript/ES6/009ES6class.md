@@ -64,6 +64,8 @@ console.log(rectAngle.__proto__ === Rectangle.prototype); //true
 
 ES6中:
 
+`class `声明的构造函数只能通过 `new `关键字去 `invoke`
+
 ```javascript
  class Rect {
    //定义构造函数，类似于上面的RectAngle函数
@@ -184,11 +186,13 @@ console.log(Rect.getArea() ); //prototype method 不能直接通过类名调用�
 
 **二，extends关键字的作用就是 ：**主要是以下两个作用：
 
---**将子类(函数）的prototype对象上的`__proto__`指向父类（函数）的prototype属性,**
+- **将子类(函数）的prototype对象上的`__proto__`指向父类（函数）的prototype属性,**
 
 **`Dog.prototype.__proto__ = Animal.prototype`**
 
-—**将子类`__proto__` 指向 父类 ` Dog.__proto__ = Animal`**
+- **将子类`__proto__` 指向 父类 **
+
+**` Dog.__proto__ = Animal`**
 
 2.4 先来看下extends关键字的作用 class类实现继承的根本原因就是通过extends关键字，将子类的prototype.__ proto __ 属性指向父类构造函数prototype; 
 
@@ -342,7 +346,7 @@ lion.speak();
 * 注意,通过super调用父类的方法的时候,super会绑定子类的this
 
 
-  其实super关键字指向的是使用该关键字对象的prototype属性，正好结合extends作用是子函数(对象)的prototype.`__proto__` 指向父函数的prototype；所以就可以访问到父函数中的prototype对象上的属性和方法
+  **其实super关键字指向的是使用该关键字对象的prototype属性**，正好结合extends作用是子函数(对象)的prototype.`__proto__` 指向父函数的prototype；所以就可以访问到父函数中的prototype对象上的属性和方法
 
 ```javascript
 //MDN上关于super关键字作用的解释；
@@ -369,23 +373,23 @@ obj2.method2(); // logs "method 1"
 
 ```javascript
 class People {
-        constructor(name) { //构造函数
-            this.name = name;
-        }
-        get name() {
-            return this._name.toUpperCase();
-        }
-        set name(value) {
-            this._name = value;
-        }
-        sayName() {
-            console.log(this.name);
-        }
-    }
-    var p = new People("tom");
-    console.log(p);
-    console.log(p.name);    //TOM
-    console.log(p._name);    //tom
-    p.sayName(); //TOM
+  constructor(name) { //构造函数
+    this.name = name;
+  }
+  get name() {
+    return this._name.toUpperCase();
+  }
+  set name(value) {
+    this._name = value;
+  }
+  sayName() {
+    console.log(this.name);
+  }
+}
+var p = new People("tom");
+console.log(p);
+console.log(p.name);    //TOM
+console.log(p._name);    //tom
+p.sayName(); //TOM
 ```
 

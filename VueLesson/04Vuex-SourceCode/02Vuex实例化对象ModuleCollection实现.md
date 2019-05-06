@@ -37,7 +37,7 @@ const userStore = new Vuex.Store({
 console.log(userStore);//可以输出看下结果
 ```
 
-###2 源码实现
+###  2 源码实现
 
 Store.js 中store构造函数
 

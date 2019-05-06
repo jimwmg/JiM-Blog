@@ -42,7 +42,7 @@ console.log(vm);
 
 ### 2 看下Vuex的源码实现
 
-vuex/src/index.js
+`vuex/src/index.js`
 
 ```javascript
 export default {
@@ -61,7 +61,7 @@ export default {
 
 ### 3 使用流程
 
-####3.1 Vue.use(Vuex)
+#### 3.1 Vue.use(Vuex)
 
 ```javascript
 export function initUse (Vue: GlobalAPI) {
@@ -325,7 +325,7 @@ store:{
 
 类似于插件，我们可以让构建工具来处理这种情况：
 
-```
+```javascript
 const store = new Vuex.Store({
   // ...
   strict: process.env.NODE_ENV !== 'production'
@@ -341,7 +341,7 @@ new Vue({
 }).$mount('#app');
 ```
 
-这里，当我们new Vue(options)的时候，会首先执行callHook(vm, 'beforeCreate')生命周期函数数组
+这里，当我们`new Vue(options)`的时候，会首先执行`callHook(vm, 'beforeCreate')`生命周期函数数组
 
 由于beforeCreate该函数是Vue构造函数Vue.options.beforeCreate  Vue.options.destroyed上，所以在实例化Vue组件的时候，就会在vm.$options.beforeCreate.   有这两个生命周期函数
 

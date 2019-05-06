@@ -31,8 +31,8 @@ const store = new Vuex.Store({
   },
   mutations: {
     increment (state, payload) {
-          state.count += payload.amount
-        }
+      state.count += payload.amount
+    }
   }
 })
 store.commit('increment'）
@@ -44,7 +44,16 @@ store.commit({
   type: 'increment',
   amount: 10
 })
-
+ return typeof val === 'function'
+        ? val.apply(this, [commit].concat(args))
+       let commit = this.$store.commit
+      commit (_type, _payload, _options){
+      	//...
+      	const mutation = { type, payload }
+    		const entry = this._mutations[type]
+    		//...
+      }
+        : commit.apply(this.$store, [val].concat(args))
 */
 ```
 
@@ -62,6 +71,15 @@ commit (_type, _payload, _options) {
     } = unifyObjectStyle(_type, _payload, _options)
 
     const mutation = { type, payload }
+    /*
+    function registerMutation (store, type, handler, local) {
+      const entry = store._mutations[type] || (store._mutations[type] = [])
+      entry.push(function wrappedMutationHandler (payload) {
+        //注册在store对象中options中的mutations中的函数接受的参数如下：local.state   payload
+        handler.call(store, local.state, payload)
+      })
+    }
+    */
     const entry = this._mutations[type]
     if (!entry) {
       if (process.env.NODE_ENV !== 'production') {
@@ -80,7 +98,7 @@ commit (_type, _payload, _options) {
   **/
     this._withCommit(() => {
       entry.forEach(function commitIterator (handler) {
-        //这个handler如下：wrappedMutationHandler
+        //这个handler如下：wrappedMutationHandler,对应下面
         handler(payload)
       })
     })
@@ -181,7 +199,7 @@ actions: {
 
 为什么会出现action ? **因为mutation仅仅支持同步操作，而action支持异步操作**
 
-看下dispatch(action)源码中如何实现action支持异步的；
+看下`dispatch(action)`源码中如何实现action支持异步的；
 
 ```javascript
 dispatch (_type, _payload) {

@@ -6,7 +6,7 @@ categories: vue
 
 接上《Vuex实例化store对象ModuleCollection的实现》
 
-###1 使用
+### 1 使用
 
 ```javascript
 // new Vuex.Store(options)
@@ -40,7 +40,7 @@ const userStore = new Vuex.Store({
 console.log(userStore);//可以输出看下结果
 ```
 
-###2 源码实现
+###   2 源码实现
 
 **这篇文章主要解释 installModule   resetStoreVM：**
 

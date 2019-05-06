@@ -281,7 +281,11 @@ const publicPath = ''
 module.exports = (options = {}) => ({
   // entry:'./src/main.js',
   entry: {
-    vendor: ['lodash','vue'],
+    // Since react is installed as a node module, node_modules/react,
+    // we can point to it directly, just like require('react');
+    // 当 React 作为一个 node 模块安装的时候，
+    // 我们可以直接指向它，就比如 require('react')
+    vendor: ['lodash','vue','react'], //这里其实就是直接从 `node_modules`中去找这个文件
     
     index: './src/main.js',
     
