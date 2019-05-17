@@ -39,3 +39,4 @@ console.log(arr)
 VM252:1 ["a", index: 1, input: "nameaammmgagagegeagage"]
 ```
 
+* 静态 **String.fromCharCode()** 方法返回由指定的UTF-16代码单元序列创建的字符串。
