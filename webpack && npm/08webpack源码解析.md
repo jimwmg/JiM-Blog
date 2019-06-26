@@ -6,6 +6,12 @@
 
 [webpack打包机制](<https://github.com/happylindz/blog/issues/6>)
 
+[compiler-hooks](https://www.webpackjs.com/api/compiler-hooks/)
+
+[玩转webpack]([https://lxzjj.github.io/2017/11/02/%E7%8E%A9%E8%BD%ACwebpack%EF%BC%88%E4%B8%80%EF%BC%89/](https://lxzjj.github.io/2017/11/02/玩转webpack（一）/))
+
+[loader-pitch-extract-css源码解析](https://www.jianshu.com/p/f8178e18d38c)
+
 #### 1.1 通过 [webpack-cli](https://github.com/webpack/webpack-cli)
 
 这里贴出来主要的核心代码
@@ -357,6 +363,8 @@ class Compiler extends Tapable {
     }
 }
 ```
+
+
 
 `webpack`执行的时候：
 
@@ -791,3 +799,139 @@ try {
 [webpack-源码-知乎](https://zhuanlan.zhihu.com/p/29551683)
 
 [如何写一个webpack插件-附源码解析](https://juejin.im/post/5beb8875e51d455e5c4dd83f)
+
+### 4 compiler生命周期源码执行处汇总
+
+在`compiler.js`中也可以清晰的看到每个钩子执行的时候所传入的参数为何。
+
+`webpack  version 3.12`
+
+| compiler.hooks                                               | 执行时机                                          | 执行位置                                                     | 备注 |
+| ------------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------ | ---- |
+| `entryOptions`                                               | 在 `entry` 配置项处理过之后，执行插件             | WebpackOptionsApply.js:compiler.applyPluginsBailResult("entry-option", options.context, options.entry); |      |
+| `afterPlugins`                                               | 设置完初始插件之后，执行插件。                    | WebpackOptionsApply.js:compiler.applyPlugins("after-plugins", compiler); |      |
+| afterResolvers                                               | resolver 安装完成之后，执行插件。                 | WebpackOptionsApply.js:compiler.applyPlugins("after-resolvers", compiler); |      |
+| `environment`                                                | environment 准备好之后，执行插件。                | webpack.js:compiler.applyPlugins("environment");             |      |
+| `afterEnvironment`                                           | environment 安装完成之后，执行插件。              | webpack.js:compiler.applyPlugins("after-environment");       |      |
+| beforeRun                                                    | `compiler.run()` 执行之前，添加一个钩子           | compiler.js:this.applyPluginsAsync("before-run",….)          |      |
+| run                                                          | 开始读取 records 之前，钩入(hook into) compiler。 | compiler.js:this.applyPluginsAsync("run",                    |      |
+| watch-run                                                    |                                                   | compiler.js:this.compiler.applyPluginsAsync("watch-run"…)    |      |
+| `normalModuleFactory、contextModuleFactory、beforeCompile、compile、thisCompilation、compilation 、make、` | compiler.js   compiler函数                        | 在这个周期中`compilation`还没有编译assets                    |      |
+| should-emit、needAdditionalPass、emit、afterEmit、done       | compile回到函数中执行 onCompiled                  |                                                              |      |
+|                                                              |                                                   |                                                              |      |
+|                                                              |                                                   |                                                              |      |
+
+子编译器
+
+某些插件会创建子编译器流程，然后直接执行 runAsChild ，然后执行 compiler方法，接着会执行 Compiler对象上的钩子函数的钩子流程，但是需要注意的是子编译器没有`["make", "compile", "emit", "after-emit", "invalid", "done", "this-compilation"]`这些钩子过程；
+
+```javascript
+createChildCompiler(compilation, compilerName, compilerIndex, outputOptions, plugins) {
+		const childCompiler = new Compiler();
+		if(Array.isArray(plugins)) {
+			plugins.forEach(plugin => childCompiler.apply(plugin));
+		}
+		for(const name in this._plugins) { 
+			//这个_plugins是tapable构造函数上继承的值，因为compiler钩子函数包括这些；
+			if(["make", "compile", "emit", "after-emit", "invalid", "done", "this-compilation"].indexOf(name) < 0)
+				childCompiler._plugins[name] = this._plugins[name].slice();//将子编译器上这些钩子函数对应的函数数组删除；
+		}
+		childCompiler.name = compilerName;
+		childCompiler.outputPath = this.outputPath;
+		childCompiler.inputFileSystem = this.inputFileSystem;
+		childCompiler.outputFileSystem = null;
+		childCompiler.resolvers = this.resolvers;
+		childCompiler.fileTimestamps = this.fileTimestamps;
+		childCompiler.contextTimestamps = this.contextTimestamps;
+
+		const relativeCompilerName = makePathsRelative(this.context, compilerName);
+		if(!this.records[relativeCompilerName]) this.records[relativeCompilerName] = [];
+		if(this.records[relativeCompilerName][compilerIndex])
+			childCompiler.records = this.records[relativeCompilerName][compilerIndex];
+		else
+			this.records[relativeCompilerName].push(childCompiler.records = {});
+
+		childCompiler.options = Object.create(this.options);
+		childCompiler.options.output = Object.create(childCompiler.options.output);
+		for(const name in outputOptions) {
+			childCompiler.options.output[name] = outputOptions[name];
+		}
+		childCompiler.parentCompilation = compilation;
+
+		compilation.applyPlugins("child-compiler", childCompiler, compilerName, compilerIndex);
+
+		return childCompiler;
+	}
+```
+
+应该会知道上面任务点在整个构建流程中的位置。从这里我们也可以看出来，**子编译器跟父编译器的一个差别在于，子编译器并没有完整的构建流程。** 比如子编译器没有文件生成阶段(`emit`任务点)，它的文件生成必须挂靠在父编译器下面来实现。
+
+另外需要注意的是，子编译器的运行入口并非 `run` 方法 ，而是有单独的 `runAsChild` 方法来运行，从代码上面也能够直接看出来，它马上调用了 `compile` 方法，跳过了 `run`, `make`等任务点;
+
+每一个子编译器页对应一个新的compilation对象；
+
+
+
+compilation.hooks`
+
+`compiler.js`中执行compile函数，该函数执行`const compilation = this.newCompilation(params);`==> compilation.js文件; compilation的生命周期在compiler.js的make钩子中开始执行；**所以在make之前的钩子中给compilation添加的compilation.hooks会执行，但是在make之后的钩子中给compilation.hooks中添加的钩子函数是不会执行的；**
+
+在make钩子函数中，会确认webpack的入口，可能是单入口，也可能是多入口，也可能是动态入口，但是只能是一个，当解析完入口之后，会拿到入口的文件地址，然后递归的遍历生成依赖树；
+
+在compiler中的make钩子函数执行的时候，compilation中的钩子开始响应的执行；make钩子函数中绑定的以下方法会被执行
+
+- 在创建 module 之前，Compiler 会触发 make，并调用 `Compilation.addEntry` 方法，通过 options 对象的 entry 字段找到我们的入口js文件。之后，在 addEntry 中调用私有方法 `_addModuleChain` ，这个方法主要做了两件事情。一是根据模块的类型获取对应的模块工厂并创建模块，二是构建模块。
+- webpack 提供的一个很大的便利就是能将所有资源都整合成模块，不仅仅是 js 文件。所以需要一些 loader ，比如 `url-loader` ， `jsx-loader` ， `css-loader` 等等来让我们可以直接在源文件中引用各类资源。webpack 调用 `doBuild()` ，对每一个 require() 用对应的 loader 进行加工，最后生成一个 js module。
+- 
+- 对于当前模块，或许存在着多个依赖模块。当前模块会开辟一个依赖模块的数组，在遍历 AST 时，将 require() 中的模块通过 `addDependency()` 添加到数组中。当前模块构建完成后，webpack 调用 `processModuleDependencies` 开始递归处理依赖的 module，接着就会重复之前的构建步骤。
+
+```javascript
+compiler.make钩子执行的时候，会执行 addEntry，然后开始对这个入口的依赖收集，compilation对象的构建；
+compilation.addEntry 
+compilation.prefetch
+```
+
+接着compilation的 buildModule 钩子等开始进入执行阶段；
+
+| compilation.hooks                        | 执行时机                                                     | 执行位置 |
+| ---------------------------------------- | ------------------------------------------------------------ | -------- |
+| buildModule/failedModule/successedModule | compilation.addEntry ==> this._addModuleChain ==> this.buildModule |          |
+| finishModules                            | make函数回调中:compilation.finish();                         |          |
+|                                          |                                                              |          |
+
+### 4 compiler和compilation对象
+
+#### compiler
+
+#### compilation
+
+`additionalChunkAssets`: 
+
+`assets:{path:source}` 其中source是 `webpack-sources`中对应的不同种类，比如 `RawSource/CachedSource`等
+
+`entryOptions:一些webpack入口配置的信息`
+
+`chunks:[chunk1,chunk2],chunk:{id,}`
+
+`children:[compilation1,compilation2,....]`
+
+`
+
+compilation -API
+
+- getPath
+
+```javascript
+compilation.getPath(format, {
+  chunk
+})
+```
+
+
+
+```javascript
+
+```
+
+
+

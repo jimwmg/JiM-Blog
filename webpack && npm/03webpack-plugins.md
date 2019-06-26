@@ -18,6 +18,12 @@ title:webpack - plugins
 
 [tapable+webpack-plugin](https://juejin.im/post/5beb8875e51d455e5c4dd83f)
 
+[webpack-文档-编写一个webpack-plugin](https://webpack.docschina.org/contribute/writing-a-plugin/)
+
+[webpack-plugin2.0文档](https://www.html.cn/doc/webpack2/development/how-to-write-a-plugin/)
+
+[webpack-plugin](https://zoumiaojiang.com/article/what-is-real-webpack-plugin/)
+
 
 Loader处理单独的文件级别并且通常作用于包生成之前或生成的过程中。
 
@@ -71,7 +77,9 @@ module.exports =  = {
 
 ### 3 webpack启用plugins
 
-在webpack函数中有如下代码，webpack会自动调用所有plugin的apply方法，每个apply方法接受 compiler对象
+在webpack函数中有如下代码，webpack会自动调用所有plugin的apply方法，每个apply方法接受 compiler对象;
+
+当调用某个`plugin`的时候，`new Plugin()`会先执行这个插件的构造函数；而该插件的apply函数，会在webpack的`run`函数执行的时候，解析完options之后执行每个插件的apply函数；
 
 ```javascript
 if (options.plugins && Array.isArray(options.plugins)) {

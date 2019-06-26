@@ -659,3 +659,10 @@ class AsyncSeriesHook {
 ## 总结
 
 在 `tapable` 源码中，注册事件的方法 `tab`、`tapSync`、`tapPromise` 和触发事件的方法 `call`、`callAsync`、`promise` 都是通过 `compile` 方法快速编译出来的，我们本文中这些方法的实现只是遵照了 `tapable` 库这些 “钩子” 的事件处理机制进行了模拟，以方便我们了解 `tapable`，为学习 Webpack 原理做了一个铺垫，在 Webpack 中，这些 “钩子” 的真正作用就是将通过配置文件读取的插件与插件、加载器与加载器之间进行连接，“并行” 或 “串行” 执行，相信在我们对 `tapable` 中这些 “钩子” 的事件机制有所了解之后，再重新学习 Webpack 的源码应该会有所头绪。
+
+
+
+
+
+[tapable-0.29源码](https://www.cnblogs.com/xiaokebb/p/8418905.html)
+

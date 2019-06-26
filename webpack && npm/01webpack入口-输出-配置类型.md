@@ -160,6 +160,17 @@ new webpack.optimize.CommonsChunkPlugin({
 }),
 ```
 
+* 如果传入一个函数
+
+```javascript
+module.exports = {
+  //...
+  entry: () => new Promise((resolve) => resolve(['./demo', './demo2']))
+};
+```
+
+For example: you can use dynamic entries to get the actual entries from an external source (remote server, file system content or database):
+
 #### 4.2 入口起点设置[CommonsChunkPlugin](https://doc.webpack-china.org/plugins/commons-chunk-plugin/#explicit-vendor-chunk)插件
 
 接受配置如下：

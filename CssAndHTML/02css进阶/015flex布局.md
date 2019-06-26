@@ -143,9 +143,45 @@ flex:auto /**[1 1 auto]  这里就会根据width的值计算剩余空间*/
 flex:none /**[0 0 auto]* 这里不会收缩页不会扩张/
 ```
 
+需要注意的是分配剩余空间的时候，是先去掉**子元素盒模型所占据空间**包括该子元素的padding  margin content内容
+
+```html
+<div class="container">
+    <div class="left"></div>
+    <div class="content"></div>
+    <div class="right"></div>
+  </div>
+</head>
+  <style>
+  .container{
+    display:flex;
+    height:300px;
+  }
+  .left{
+    width:100px;
+    background-color:sandybrown;
+  }
+  .content{
+    flex:1;
+    background-color:steelblue;
+  }
+  .right{
+    width:50px;
+    padding-left:50px;
+    margin-left:50px;
+    background-color:springgreen;
+  }
+  </style>
+```
+
+
+
 #### 4 总结
 
 * flex布局会首先计算剩余空间，然后比较剩余空间的正负，如果剩余空间为正，那么会根据各个子项的flex进行比例分配，进行扩张；如果剩余空间的值为负，那么就会根据各个子项的flex进行比例分配，进行收缩；
 * 剩余空间 = flex容器空间 - 子容器空间1(flex-basis || width ) - 子容器空间2(flex-basis || width ) - ....
 * 如果flex子项的 flex-basis 为 0，那么计算剩余空间的时候将不会将该flex子项计算在内；
 * 如果flex子项的 flex-basis 为auto 或者其他不为 0，那么在计算剩余空间的时候，就会将该flex子项的空间计算在内
+
+
+
