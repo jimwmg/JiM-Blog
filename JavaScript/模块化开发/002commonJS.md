@@ -184,6 +184,46 @@ http://www.infoq.com/resource/articles/nodejs-module-mechanism/zh/resources/imag
 
 ![image1](/Users/jim-w/Desktop/02studyspace/02mblog/img/image1.jpg)
 
+### 4 模块的加载机制
+
+CommonJS模块的加载机制是，输入的是被输出的值的拷贝。也就是说，一旦输出一个值，模块内部的变化就影响不到这个值。请看下面这个例子。
+
+下面是一个模块文件`lib.js`。
+
+```
+// lib.js
+var counter = 3;
+function incCounter() {
+  counter++;
+}
+module.exports = {
+  counter: counter,
+  incCounter: incCounter,
+};
+```
+
+上面代码输出内部变量`counter`和改写这个变量的内部方法`incCounter`。
+
+然后，加载上面的模块。
+
+```
+// main.js
+var counter = require('./lib').counter;
+var incCounter = require('./lib').incCounter;
+
+console.log(counter);  // 3
+incCounter();
+console.log(counter); // 3
+```
+
+上面代码说明，`counter`输出以后，`lib.js`模块内部的变化就影响不到`counter`了。
+
+- `require()`: 加载外部模块
+- `require.resolve()`：将模块名解析到一个绝对路径
+- `require.main`：指向主模块
+- `require.cache`：指向所有缓存的模块
+- `require.extensions`：根据文件的后缀名，调用不同的执行函数
+
 
 
 

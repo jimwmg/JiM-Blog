@@ -510,13 +510,14 @@ context默认值是 `process.cwd()`
 ```javascript
 compilation.addEntry(context, dep, name, callback);
 dep:{
-loc: {name: "app"}
-module: null
-optional: false
-request: "/Users/didi/learn/learnSPace/14webpack-learn/01webpack-base/src/index.js"
-userRequest: "/Users/didi/learn/learnSPace/14webpack-learn/01webpack-base/src/index.js"
-weak: false
-type: "single entry"}
+	loc: {name: "app"}
+	module: null
+	optional: false
+	request: "/Users/didi/learn/learnSPace/14webpack-learn/01webpack-base/src/index.js"
+	userRequest: "/Users/didi/learn/learnSPace/14webpack-learn/01webpack-base/src/index.js"
+	weak: false
+	type: "single entry"
+}
 ```
 
 `compilation.js`
@@ -825,6 +826,19 @@ try {
 
 某些插件会创建子编译器流程，然后直接执行 runAsChild ，然后执行 compiler方法，接着会执行 Compiler对象上的钩子函数的钩子流程，但是需要注意的是子编译器没有`["make", "compile", "emit", "after-emit", "invalid", "done", "this-compilation"]`这些钩子过程；
 
+`Compilation.js`
+
+```javascript
+createChildCompiler(name, outputOptions, plugins) {
+		const idx = (this.childrenCounters[name] || 0);
+		this.childrenCounters[name] = idx + 1;
+		//这里子编译器和主编译器用的是同一个compilation
+		return this.compiler.createChildCompiler(this, name, idx, outputOptions, plugins);
+	}
+```
+
+`Compiler.js`
+
 ```javascript
 createChildCompiler(compilation, compilerName, compilerIndex, outputOptions, plugins) {
 		const childCompiler = new Compiler();
@@ -856,6 +870,7 @@ createChildCompiler(compilation, compilerName, compilerIndex, outputOptions, plu
 		for(const name in outputOptions) {
 			childCompiler.options.output[name] = outputOptions[name];
 		}
+  //这里将子编译器的 parentCompilation 指向 compilation
 		childCompiler.parentCompilation = compilation;
 
 		compilation.applyPlugins("child-compiler", childCompiler, compilerName, compilerIndex);
@@ -914,6 +929,10 @@ compilation.prefetch
 `chunks:[chunk1,chunk2],chunk:{id,}`
 
 `children:[compilation1,compilation2,....]`
+
+`modules:所有的打包编译之后的信息 [module1,module2,...]`
+
+`_modules:所有的打包编译之后的代码{modulePath1:module1,modulePath2:module2,....}`
 
 `
 
