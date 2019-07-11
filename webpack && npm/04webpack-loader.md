@@ -393,3 +393,10 @@ require('test.js')
 ```
 
 此时如果通过`this.addDependency`这个API，增加一个文件 `path/to/add.js`，那么 `add.js`的变化也会触发webpack的重新编译；
+
+### 7 其他loaderContext对象常用属性值
+
+```
+this._module 可以用来访问当前module,这个module就是编译的时候的结果
+```
+

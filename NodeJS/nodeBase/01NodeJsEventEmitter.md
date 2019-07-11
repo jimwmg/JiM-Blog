@@ -7,7 +7,7 @@ updated :
 layout : 
 ---
 
-###1 events事件
+### 1 events事件
 
 ```javascript
 //引入events模块并创建eventEmitter对象

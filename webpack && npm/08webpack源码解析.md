@@ -584,6 +584,35 @@ newCompilationParams() {
 addEntry中执行_addModuleChain
 
 ```javascript
+addEntry(context, entry, name, callback) {
+		const slot = {
+			name: name,
+			module: null
+		};
+		this.preparedChunks.push(slot);
+		this._addModuleChain(context, entry, (module) => {
+
+			entry.module = module;
+			this.entries.push(module);
+			module.issuer = null;
+
+		}, (err, module) => {
+			if(err) {
+				return callback(err);
+			}
+
+			if(module) {
+				slot.module = module;
+			} else {
+				const idx = this.preparedChunks.indexOf(slot);
+				this.preparedChunks.splice(idx, 1);
+			}
+			return callback(null, module);
+		});
+	}
+```
+
+```javascript
 _addModuleChain(context, dependency, onModule, callback) {
     const start = this.profile && Date.now();
     const currentProfile = this.profile && {};
@@ -930,7 +959,7 @@ compilation.prefetch
 
 `children:[compilation1,compilation2,....]`
 
-`modules:所有的打包编译之后的信息 [module1,module2,...]`
+`modules:所有的打包编译之后的信息 [module1,module2,...]  这里的单个对象可以在loader中通过this._module来读写`
 
 `_modules:所有的打包编译之后的代码{modulePath1:module1,modulePath2:module2,....}`
 

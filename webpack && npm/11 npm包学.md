@@ -61,5 +61,7 @@ portfinder.getPort(function (err, port) {
 
 [fs-readdir-recursive](https://www.npmjs.com/package/fs-readdir-recursive)
 
+[resolve](https://www.npmjs.com/package/resolve)
+
 
 
