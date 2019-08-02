@@ -467,7 +467,7 @@ The plugin defaults to assuming that all polyfillable APIs will be provided by t
     [
       "@babel/plugin-transform-runtime",
       {
-        "corejs": 2, //这里配置2
+        "corejs": 2, //这里配置2 false  |  2  | 3
         "helpers": true,
         "regenerator": true,
         "useESModules": false

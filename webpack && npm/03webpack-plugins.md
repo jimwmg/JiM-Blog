@@ -112,3 +112,96 @@ module.exports = HelloWorldPlugin;
 
 ```
 
+### 4 webpack处理ES6的模块
+
+#### 1 基于babel-loader进行转化；
+
+webpack配置
+
+```javascript
+module: {
+    rules: [
+      { test: /\.js$/, 
+        exclude: [/node_modules/], 
+
+        loader: "babel-loader",
+      }
+    ]
+  },
+```
+
+`babelrc`
+
+```javascript
+{
+  "presets": [
+    ["env",{
+      "targets": {
+        "browsers": [
+          "> 1%",
+          "last 2 versions",
+          "not ie <= 8"
+        ]
+      }
+    }]
+  ],
+  "plugins":[
+    "transform-async-to-generator"
+  ]
+}
+
+```
+
+源文件
+
+```javascript
+export default  {f:'ss'};
+```
+
+经过babel-loader 之后，
+
+```javascript
+"'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = { f: 'ss' };"
+```
+
+打包后代码
+
+```javascript
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = { f: 'ss' };
+
+/***/ }),
+```
+
+#### 2 webpack本身支持ES6模块
+
+```javascript
+export default  {f:'ss'};
+```
+
+webpack本身会将这个ES6模块处理；
+
+```javascript
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony default export */ __webpack_exports__["default"] = ({f:'ss'});
+
+/***/ }),
+```
+
+**注意：如果没有走webpack的构建  同时也没有经过babel-loader的处理，那么ES6的模块系统无法在不支持的环境中运行**

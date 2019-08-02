@@ -2,7 +2,7 @@
 title: XSS 和 CSRF 
 ---
 
-##【转】[原文链接](https://mp.weixin.qq.com/s/Rf4dag7Z1rFNl4LxbAjyqw)
+【转】[原文链接](https://mp.weixin.qq.com/s/Rf4dag7Z1rFNl4LxbAjyqw)
 
 ### 1 在web安全中，XSS 和 CSRF是最常见的攻击方式；
 

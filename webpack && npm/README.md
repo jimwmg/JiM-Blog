@@ -21,3 +21,5 @@
 [webpack-增量构建](https://blog.csdn.net/kun5706947/article/details/78949038)
 
 [webpack-速度优化](https://www.ibm.com/developerworks/cn/web/wa-lo-expedite-webpack/index.html)
+
+[webpack文章掘金收藏](https://juejin.im/collection/5bb056c45188253dae00c02a)

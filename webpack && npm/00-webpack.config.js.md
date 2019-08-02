@@ -248,8 +248,14 @@ module.exports = {
 
     descriptionFiles: ["package.json"],
     // 从 package 描述中读取的文件
-
+		
     mainFields: ["main"],
+当从 npm 包中导入模块时（例如，import * as D3 from "d3"），此选项将决定在 package.json 中使用哪个字段导入模块。根据 webpack 配置中指定的 target 不同，默认值也会有所不同。
+当 target 属性设置为 webworker, web 或者没有指定，默认值为：
+    mainFields: ["browser", "module", "main"]
+  对于其他任意的 target（包括 node），默认值为：
+		mainFields: ["module", "main"]
+
     // 从描述文件中读取的属性
     // 当请求文件夹时
 
