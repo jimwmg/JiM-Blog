@@ -71,6 +71,7 @@ PluginsHooks.prototype.apply = function(compiler){
   debugger;
   
   compiler.plugin('entry-option',function pluginsHooksCb(...args){ //3 WebpackOptionsApply.js [options.context, options.entry]
+    
     debugger;
   }) ;//syncBialHook
   compiler.plugin('after-plugins',function pluginsHooksCb(...args){ //4 WebpackOptionsApply.js [compiler]
@@ -128,6 +129,7 @@ PluginsHooks.prototype.apply = function(compiler){
   //对于compilation的钩子函数一般放在this-compilation 和 compilation 里面
   compiler.plugin('this-compilation',function pluginsHooksCb(...args){
     //12 this-compilation Compiler.js [compilation,params] 
+    //compilation 这个对象上基本都是key对应的value大部分都是空值
     debugger;
     let compilation = args[0];
     compilation.plugin('build-module',function(...args){
@@ -429,5 +431,355 @@ PluginsHooks.prototype.apply = function(compiler){
 }
 
 module.exports = PluginsHooks;
+```
+
+### 3 webpack中常用对象key-value的简单分析
+
+
+
+| **compilation**           |                                                              | 备注                                                         |
+| ------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **属性**                  |                                                              |                                                              |
+| assets                    | 打包后的资源，将要输出到对应目录                             |                                                              |
+| chunks                    | 打包后的chunk，包括 initial chunk，async chunk,comon chunk；initial chunk又有一个属性 chunks,表示这个初始化的 initial chunk依赖了那些异步chunk; |                                                              |
+| compiler                  | webpack的构建对象 compiler                                   |                                                              |
+| modules                   | 包括所有的模块，异步模块 是一个数组 `[NormalModule]`         |                                                              |
+| options                   | 传入webpack的配置对象经过webpack加工过之后的值； 等于 compiler.options |                                                              |
+| _modules                  | 包括所有的模块，是一个对象`{pathto:NormalModule}`            |                                                              |
+|                           |                                                              |                                                              |
+| **方法**                  |                                                              |                                                              |
+| addChunk                  | 增加一个chunk：compilation.addChunk(chunkName)，返回一个新的chunk; | 会在chunks数组中新增一个chunk;                               |
+|                           |                                                              |                                                              |
+|                           |                                                              |                                                              |
+| **chunk**                 |                                                              |                                                              |
+| **属性**                  |                                                              |                                                              |
+| blocks                    | 入口chunk: [ ], 异步chunk: [RequireEnsureDependenciesBlock]  | 这个chunk的类型                                              |
+| chunks                    | 入口chunk: [chunk1,chunk2],依赖的异步chunk,没有异步chunk，则为[ ]<br />从每个入口递归循环分析依赖，找到所有的异步chunk，放到这个入口chunk里面；<br /> | 这个chunk的子chunk                                           |
+| entryModule               | 入口chunk才有这个属性                                        |                                                              |
+| _modules                  | 包括这个入口文件或者异步文件模块在内的所有递归循环依赖的模块信息；<br />需要注意的是，这里不包括异步引用的模块的信息，只有同步模块的信息；<br />也就是说至少一个是这个模块本身，其他的是这个模块依赖的同步模块；Set数据结构 |                                                              |
+|                           |                                                              |                                                              |
+| parents                   | 入口chunk:[ ] ,异步chunk: [parentChunk],这个指向入口chunk<br /> |                                                              |
+| name                      | 对于入口chunk，每个chunk都会有自己的名字；对于异步chunk，则该name对应的value为 null; |                                                              |
+| **方法**                  |                                                              |                                                              |
+| chunk.hasRuntime()        | 判断这个chunk是不是入口chunk,入口chunk一般都会有webpack的runtime代码 | hasRuntime() {<br/>		if(this.entrypoints.length === 0) return false;<br/>		return this.entrypoints[0].chunks[0] === this;<br/>	} |
+| chunk.addModule(module)   | 往 chunk._modules 添加模块                                   |                                                              |
+| chunk.addChunk(addChunk)  | chunk.chunk = [addChunk]                                     |                                                              |
+|                           |                                                              |                                                              |
+| **compiler**              |                                                              |                                                              |
+| options                   | 传入webpack的配置对象经过webpack加工过之后的值；             |                                                              |
+|                           |                                                              |                                                              |
+|                           |                                                              |                                                              |
+|                           |                                                              |                                                              |
+|                           |                                                              |                                                              |
+|                           |                                                              |                                                              |
+| **NormalModule**          | _modules 数组中存放的模块的具体信息                          |                                                              |
+| **属性**                  |                                                              |                                                              |
+| assets                    |                                                              |                                                              |
+| blocks                    |                                                              |                                                              |
+| loaders                   | 表示这个module经过那些loader处理                             |                                                              |
+| _chunks                   | 表示这个模块在哪个chunk中                                    |                                                              |
+|                           |                                                              |                                                              |
+| **方法**                  |                                                              |                                                              |
+| module.size()             | 获取某个模块的大小                                           |                                                              |
+| module.source()           | 获取某个模块的代码                                           |                                                              |
+| module.removeChunk(chunk) | `1 移除module上的某个chunk(module._chunks中的chunk); 2 同时移除所传chunk中的有的这个module,这个removeChunk会调用chunk.removeModule(this);那么chunk._modules中的对应的这个模块也会被移除` |                                                              |
+| module.addChunk(chunk)    | 往module._chunks添加chunk                                    |                                                              |
+|                           |                                                              |                                                              |
+|                           |                                                              |                                                              |
+|                           |                                                              |                                                              |
+
+### 备忘
+
+`Module.js`
+
+```javascript
+const DependenciesBlock = require("./DependenciesBlock");
+const ModuleReason = require("./ModuleReason");
+const SortableSet = require("./util/SortableSet");
+const Template = require("./Template");
+
+let debugId = 1000;
+
+const sortById = (a, b) => {
+	return a.id - b.id;
+};
+
+const sortByDebugId = (a, b) => {
+	return a.debugId - b.debugId;
+};
+
+class Module extends DependenciesBlock {
+
+	constructor() {
+		super();
+		this.context = null;
+		this.reasons = [];
+		this.debugId = debugId++;
+		this.id = null;
+		this.portableId = null;
+		this.index = null;
+		this.index2 = null;
+		this.depth = null;
+		this.used = null;
+		this.usedExports = null;
+		this.providedExports = null;
+		this._chunks = new SortableSet(undefined, sortById);
+		this._chunksDebugIdent = undefined;
+		this.warnings = [];
+		this.dependenciesWarnings = [];
+		this.errors = [];
+		this.dependenciesErrors = [];
+		this.strict = false;
+		this.meta = {};
+		this.optimizationBailout = [];
+	}
+
+	disconnect() {
+		this.reasons.length = 0;
+		this.id = null;
+		this.index = null;
+		this.index2 = null;
+		this.depth = null;
+		this.used = null;
+		this.usedExports = null;
+		this.providedExports = null;
+		this._chunks.clear();
+		this._chunksDebugIdent = undefined;
+		this.optimizationBailout.length = 0;
+		super.disconnect();
+	}
+
+	unseal() {
+		this.id = null;
+		this.index = null;
+		this.index2 = null;
+		this.depth = null;
+		this._chunks.clear();
+		this._chunksDebugIdent = undefined;
+		super.unseal();
+	}
+
+	setChunks(chunks) {
+		this._chunks = new SortableSet(chunks, sortById);
+		this._chunksDebugIdent = undefined;
+	}
+
+	addChunk(chunk) {
+		this._chunks.add(chunk);
+		this._chunksDebugIdent = undefined;
+	}
+
+	removeChunk(chunk) {
+		if(this._chunks.delete(chunk)) {
+			this._chunksDebugIdent = undefined;
+			chunk.removeModule(this);
+			return true;
+		}
+		return false;
+	}
+
+	isInChunk(chunk) {
+		return this._chunks.has(chunk);
+	}
+
+	getChunkIdsIdent() {
+		if(this._chunksDebugIdent !== undefined) return this._chunksDebugIdent;
+		this._chunks.sortWith(sortByDebugId);
+		const chunks = this._chunks;
+		const list = [];
+		for(const chunk of chunks) {
+			const debugId = chunk.debugId;
+
+			if(typeof debugId !== "number") {
+				return this._chunksDebugIdent = null;
+			}
+
+			list.push(debugId);
+		}
+
+		return this._chunksDebugIdent = list.join(",");
+	}
+
+	forEachChunk(fn) {
+		this._chunks.forEach(fn);
+	}
+
+	mapChunks(fn) {
+		return Array.from(this._chunks, fn);
+	}
+
+	getChunks() {
+		return Array.from(this._chunks);
+	}
+
+	getNumberOfChunks() {
+		return this._chunks.size;
+	}
+
+	hasEqualsChunks(otherModule) {
+		if(this._chunks.size !== otherModule._chunks.size) return false;
+		this._chunks.sortWith(sortByDebugId);
+		otherModule._chunks.sortWith(sortByDebugId);
+		const a = this._chunks[Symbol.iterator]();
+		const b = otherModule._chunks[Symbol.iterator]();
+		while(true) { // eslint-disable-line
+			const aItem = a.next();
+			const bItem = b.next();
+			if(aItem.done) return true;
+			if(aItem.value !== bItem.value) return false;
+		}
+	}
+
+	addReason(module, dependency) {
+		this.reasons.push(new ModuleReason(module, dependency));
+	}
+
+	removeReason(module, dependency) {
+		for(let i = 0; i < this.reasons.length; i++) {
+			let r = this.reasons[i];
+			if(r.module === module && r.dependency === dependency) {
+				this.reasons.splice(i, 1);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	hasReasonForChunk(chunk) {
+		for(let i = 0; i < this.reasons.length; i++) {
+			if(this.reasons[i].hasChunk(chunk))
+				return true;
+		}
+		return false;
+	}
+
+	rewriteChunkInReasons(oldChunk, newChunks) {
+		for(let i = 0; i < this.reasons.length; i++) {
+			this.reasons[i].rewriteChunks(oldChunk, newChunks);
+		}
+	}
+
+	isUsed(exportName) {
+		if(this.used === null) return exportName;
+		if(!exportName) return !!this.used;
+		if(!this.used) return false;
+		if(!this.usedExports) return false;
+		if(this.usedExports === true) return exportName;
+		let idx = this.usedExports.indexOf(exportName);
+		if(idx < 0) return false;
+		if(this.isProvided(exportName))
+			return Template.numberToIdentifer(idx);
+		return exportName;
+	}
+
+	isProvided(exportName) {
+		if(!Array.isArray(this.providedExports))
+			return null;
+		return this.providedExports.indexOf(exportName) >= 0;
+	}
+
+	toString() {
+		return `Module[${this.id || this.debugId}]`;
+	}
+
+	needRebuild(fileTimestamps, contextTimestamps) {
+		return true;
+	}
+
+	updateHash(hash) {
+		hash.update(this.id + "" + this.used);
+		hash.update(JSON.stringify(this.usedExports));
+		super.updateHash(hash);
+	}
+
+	sortItems(sortChunks) {
+		super.sortItems();
+		if(sortChunks)
+			this._chunks.sort();
+		this.reasons.sort((a, b) => sortById(a.module, b.module));
+		if(Array.isArray(this.usedExports)) {
+			this.usedExports.sort();
+		}
+	}
+
+	unbuild() {
+		this.disconnect();
+	}
+}
+
+Object.defineProperty(Module.prototype, "entry", {
+	configurable: false,
+	get() {
+		throw new Error("Module.entry was removed. Use Chunk.entryModule");
+	},
+	set() {
+		throw new Error("Module.entry was removed. Use Chunk.entryModule");
+	}
+});
+
+Object.defineProperty(Module.prototype, "chunks", {
+	configurable: false,
+	get: util.deprecate(function() {
+		return Array.from(this._chunks);
+	}, "Module.chunks: Use Module.forEachChunk/mapChunks/getNumberOfChunks/isInChunk/addChunk/removeChunk instead"),
+	set() {
+		throw new Error("Readonly. Use Module.addChunk/removeChunk to modify chunks.");
+	}
+});
+
+Module.prototype.identifier = null;
+Module.prototype.readableIdentifier = null;
+Module.prototype.build = null;
+Module.prototype.source = null;
+Module.prototype.size = null;
+Module.prototype.nameForCondition = null;
+
+module.exports = Module;
+
+});
+```
+
+`Entrypoint.js`
+
+```javascript
+class Entrypoint {
+	constructor(name) {
+		this.name = name;
+		this.chunks = [];
+	}
+
+	unshiftChunk(chunk) {
+		this.chunks.unshift(chunk);
+		chunk.entrypoints.push(this);
+	}
+
+	insertChunk(chunk, before) {
+		const idx = this.chunks.indexOf(before);
+		if(idx >= 0) {
+			this.chunks.splice(idx, 0, chunk);
+		} else {
+			throw new Error("before chunk not found");
+		}
+		chunk.entrypoints.push(this);
+	}
+
+	getFiles() {
+		const files = [];
+
+		for(let chunkIdx = 0; chunkIdx < this.chunks.length; chunkIdx++) {
+			for(let fileIdx = 0; fileIdx < this.chunks[chunkIdx].files.length; fileIdx++) {
+				if(files.indexOf(this.chunks[chunkIdx].files[fileIdx]) === -1) {
+					files.push(this.chunks[chunkIdx].files[fileIdx]);
+				}
+			}
+		}
+
+		return files;
+	}
+}
+
+module.exports = Entrypoint;
+
+});
 ```
 

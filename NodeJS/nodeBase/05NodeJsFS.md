@@ -210,3 +210,16 @@ fs.writeFileSync('./text.txt',1);//写入文件的内容是 1
  ]
 ```
 
+`existsSync   statSync`
+
+调用 `fs.statSync(filePath) `的时候，要先判断 路径是否存在，比如判断一个路径是文件或者目录
+
+```javascript
+function isDir(filePath){
+  return fs.existSync(filePath) && fs.statSync(filePath).isDirectory();
+}
+function isFile(filePath){
+  return fs.existSync(filePath) && fs.statSync(filePath).isFile();
+}
+```
+

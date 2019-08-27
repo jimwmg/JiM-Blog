@@ -116,6 +116,8 @@ module.exports = HelloWorldPlugin;
 
 #### 1 基于babel-loader进行转化；
 
+对babel-laoder的[配置](https://babeljs.io/docs/en/babel-preset-env#targetsbrowsers)
+
 webpack配置
 
 ```javascript
@@ -142,7 +144,8 @@ module: {
           "last 2 versions",
           "not ie <= 8"
         ]
-      }
+      },
+      "modules":"commonjs",
     }]
   ],
   "plugins":[

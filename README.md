@@ -1,5 +1,8 @@
-#  JiM-Blog
-#### 日常学习工作总结
+#### 
 
-#### 非商业转载请注明出处 ：https://github.com/jimwmg/JiM-Blog
+#### 学习资源汇总
+
+[FE-tech-list](https://github.com/alienzhou/frontend-tech-list)
+
+[web-fundamentals](https://developers.google.com/web/fundamentals/performance/why-performance-matters/)
 

@@ -14,13 +14,13 @@ layout :
 
 有序且不可重复的列表
 
-```
+```javascript
 Set(4) {"car", "buble", "dog", "name"}
 ```
 
 Set是一个构造函数,可以用来生成set数据结构,生成的
 
-```
+```javascript
  var set1 = new Set()
  console.log(set);
  var set2 = new Set([1,2,3,4,4]) //这里的4最终在Set数据结构中只存在一项
@@ -221,7 +221,25 @@ const map = new Map([
 // [[1,'one'], [2, 'two'], [3, 'three']]
 ```
 
+### 3 Array.from和 Set Map
 
+```javascript
+Array.from() 可以通过以下方式来创建数组对象：
+
+伪数组对象（拥有一个 length 属性和若干索引属性的任意对象）
+可迭代对象（可以获取对象中的元素,如 Map和 Set 等）
+Array.from() 方法有一个可选参数 mapFn，让你可以在最后生成的数组上再执行一次 map 方法后再返回。也就是说 Array.from(obj, mapFn, thisArg) 就相当于 Array.from(obj).map(mapFn, thisArg), 除非创建的不是可用的中间数组。 这对一些数组的子类,如  typed arrays 来说很重要, 因为中间数组的值在调用 map() 时需要是适当的类型。
+```
+
+```javascript
+const map = new Map();
+map.set({name:'jim'},1)
+map.set({name:'jhon'},2)
+map.set({name:'lucy'},3)
+console.log(map)
+console.log(Array.from(map))
+//[[{name:'jim'},1],[{name:'jhon'},2],[{name:'lucy'},3]]
+```
 
 
 

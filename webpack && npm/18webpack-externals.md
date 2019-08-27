@@ -2,11 +2,17 @@
 
 ---
 
+基于 "webpack": "^3.6.0",
+
+----
+
 ### 1 webpack配置
 
 webpack版本 `"webpack": "^3.6.0",`
 
 **externals是决定的是以哪种模式去加载所引入的额外的模块，这里的模块可以是npm包，也可以是其他任何模块，路径了等等**
+
+同时要注意 externals 匹配规则不仅适用于 代码中 引用模块的地方，同时还适用于入口处的文件路径；
 
 ```javascript
 'use strict'
@@ -267,7 +273,7 @@ externals:[
   ],
 ```
 
-#### 4.1 
+#### 4.1 externals是完全匹配加载路径
 
 `index.js` 如果这么引
 
@@ -310,7 +316,7 @@ externals:[
 
 
 
-#### 4.2 
+#### 4.2 externals完全匹配加载路径
 
 `index.js` 如果这么引
 
@@ -340,3 +346,102 @@ module.exports = someglobal.LT;
 ```
 
 也就是说无论是项目代码或者入口中引用的包，只有匹配了externals的值，才不会被打包进去，否则，都会打包进去；
+
+#### 4.3 externals 和  按需引入
+
+比如webpack配置如下
+
+```javascript
+'use strict'
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const webpack = require('webpack')
+
+function resolve (dir) {
+  return path.join(__dirname, './', dir)
+}
+
+const dist = resolve('dist/')
+
+module.exports = {
+  context: path.resolve(__dirname, './'),
+  entry: {
+    app: './src/index.js',
+  },
+  output: {
+    path: dist,
+    filename: '[name].js',
+    chunkFilename:'[name].non-entry.js'
+    // publicPath:'http://www.test/images/'
+  },
+  resolve: {
+    extensions: ['.js', '.jsx'],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.jsx?$/,
+        include: [resolve('src')],
+        use:{
+          loader: 'babel-loader',
+        }
+        
+      },
+    ]
+  },
+  externals:{
+    "lodash":"commonjs2 lodash-mpx",
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: 'index.html',
+      inject: true
+    }),
+    new webpack.NamedModulesPlugin(),
+  ]
+}
+
+```
+
+`.babelrc`
+
+```javascript
+{
+  "presets": [
+    "flow",
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": [
+            "> 1%",
+            "last 2 versions",
+            "not ie <= 8"
+          ]
+        }
+      }
+    ],
+    "stage-0"
+  ],
+  "plugins": [
+    "transform-remove-strict-mode",
+    ["babel-plugin-import", {
+      "libraryName": "lodash",
+      "libraryDirectory": "",
+      "camel2DashComponentName": false,  // default: true
+      }]
+    
+  ]
+}
+```
+
+`index.js`
+
+```javascript
+import _ from 'lodash';
+
+_.concat(1,2,3)
+```
+
+da

@@ -64,6 +64,19 @@ CommonJS为package.json文件定义了如下一些必须的字段：
 
 #### dependencies。当前包需要的依赖。这个属性十分重要，NPM会通过这个属性，帮你自动加载依赖的包。
 
+比如 ` pck1`这个npm 包有依赖 `pkg2`
+
+```javascript
+"dependencies": {
+    "pkg2": "^1.0.6"
+  }
+"devDependencies": {
+    "pkg3":"^1.0.1"
+  },
+```
+
+那么在执行`npm i pkg1`的时候，在`node_modules`中直接会安装 `pkg2`但是不会安装`pkg3`；
+
 以下是Express框架的package.json文件，值得参考。
 
 ```
@@ -151,7 +164,7 @@ webpack中经常看到如下配置,webpack  -h 可以查看所有支持的命令
 - display-error-details 输出详细的错误信息
 - webpack-dev-server 将会开启热更新
 - config，默认执行的配置文件时webpack.config.js,可以通过该指令指定其他配置文件
-- ​
+- 
 
 [webpack-CLI](https://doc.webpack-china.org/api/cli/)
 

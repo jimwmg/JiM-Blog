@@ -2,6 +2,10 @@
 
 ---
 
+基于 "webpack": "^3.6.0",
+
+----
+
 ### 1 webpack-target
 
 什么是webpack的target? 

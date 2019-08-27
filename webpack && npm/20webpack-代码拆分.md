@@ -2,6 +2,10 @@
 
 ---
 
+基于 "webpack": "^3.6.0",
+
+----
+
 ### 1 单入口情况下重复引用同一个模块
 
 webpack配置
@@ -151,6 +155,14 @@ module.exports = {
 **同时，webpack在加载过一个模块之后，如果再次加载该模块，会从缓存中直接读取，而不是在加载该模块执行一次，比如上面打包的结果中 公用模块 0 1 都只会执行一次，`console.log('module3.js') console.log('module4.js')`也只会输出一次**
 
 #### 1.2 分离公用chunk
+
+注意点：
+
+* **name： 如果entry和CommonsChunkPlugin的 name 都有vendor 是把抽离的公共部分合并到vendor这个入口文件中。 如果 entry 中没有vendor, 是把入口文件抽离出来放到 vendor 中。**
+
+- **commonChunk 之后的common.js 还可以继续被抽离，只要重新new CommonsChunkPlugin中name:配置就好就可以实现**
+
+公用chunk的名字以 `filename`的配置为准，如果没有`filename`的配置，那么就以`name`的配置为准
 
 如果觉得一个bundle太大的话，那么可以通过`CommonsChunkPlugin`将公用的`module`提取出来
 
@@ -307,6 +319,11 @@ dist
 ```javascript
 (function(modules){
   //webpack打包代码的辅助函数
+  var installedModules = {};
+  var installedChunks = {
+ 		2: 0
+	};
+ //注意这里没有调用 __webpack_require__()  函数
 })(
 []
 )
@@ -382,6 +399,20 @@ module.exports = {
 ],[2]);
 ```
 
+分析以上代码可以知道，webpack在分离公用chunk以及manifest  chunk的时候，它的打包部分代码都没有执行` __webpack_require__()  函数`;
+
+```html
+<script type="text/javascript" src="manifest.js"></script>
+<!-- //manifest.js定义了webpack  bootstrap 打包后的代码的全局方法， -->
+<script type="text/javascript" src="vendor.js"></script>
+<!-- //这个chunk将公用的模块先加载到webpack的模块系统中去； -->
+<script type="text/javascript" src="app.js"></script></body>
+<!-- 这个可以看到 webpackJsonp(chunkIds, moreModules, executeModules)
+这里传入了 executeModules:[2],这个就是项目的入口模块开始加载； -->
+```
+
+
+
 ### 2 多入口情况下重复引用同一个模块
 
 ```javascript
@@ -434,7 +465,26 @@ module.exports = __webpack_require__(2);
 },[5]);
 ```
 
+### 3 动态导入或者多入口代码拆分的一个潜在痛点是它增加了对脚本的请求数量，即使在HTTP/2环境中，也会带来挑战。让我们介绍一些可以提高使用代码拆分的应用程序的加载性能的方法。
 
+[参考](https://developers.google.com/web/fundamentals/performance/optimizing-javascript/code-splitting/)
+
+```javascript
+<link rel="preload" as="script" href="super-important.js">
+<link rel="preload" as="style" href="critical.css">
+```
+
+您可能已经想到除“as”属性以外的大部分语法结构。 该属性允许您告知浏览器您将加载的资源类型，以便浏览器可以正确处理该资源。 除非资源类型设置正确，否则浏览器不会使用预加载的资源。 浏览器将以同样的优先级加载资源，但提前了解了该资源，可以尽早开始下载。
+
+请注意，`<link rel="preload">` 是强制浏览器执行的指令；与我们将探讨的其他资源提示不同，它是浏览器必须执行的指令，而不只是可选提示。 因此，为确保使用该指令时不会偶然重复提取内容或提取不需要的内容，对其进行仔细测试尤其重要。
+
+使用 `<link rel="preload">` 提取的资源如果 3 秒内未被当前页面使用，将在 Chrome 开发者工具的控制台中触发警告，请务必留意这些警告！
+
+
+
+[参考资源优先级](https://developers.google.com/web/fundamentals/performance/resource-prioritization#preload)
+
+[code-spliting参考](https://github.com/malchata/code-splitting-example/tree/webpack-dynamic-splitting-precache)
 
 
 

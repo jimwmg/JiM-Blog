@@ -6,7 +6,7 @@
 
 [babel手册](https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md)
 
-
+[在这里可以进行babel的配置观察代码的转化](https://babeljs.io/repl#?babili=false&browsers=&build=&builtIns=false&spec=false&loose=false&code_lz=MYGwhgzhAECSB2ATApgD2gSwLYAcTK2XgBcYAFMAJyOIG8AoaaRMYsaAXmgaafjEIAuAEQArbMMbQAvlLA48ATwAUASh69gAe3gQt-AHQgtAc2UByeUvOqps2dt3FMSNJz7IA7nFeo1AbiA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=true&fileSize=false&timeTravel=false&sourceType=module&lineWrap=true&presets=stage-0%2Cflow%2Cenv&prettier=false&targets=&version=7.5.5&externalPlugins=)
 
 比如
 

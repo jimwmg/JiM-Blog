@@ -72,7 +72,7 @@ function clone(value){
     }else if(typeof value === 'object' && value !== null){
         let ret = {};
         for(let key in value){
-            ret[key] = value[key]
+            ret[key] = clone(value[key])
         }
         return ret;
     }else{

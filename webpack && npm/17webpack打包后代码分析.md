@@ -2,6 +2,10 @@
 
 ---
 
+基于 "webpack": "^3.6.0",
+
+----
+
 ### 1 webpack基本配置如下
 
 ```javascript
@@ -77,6 +81,12 @@ module.exports = {f:func};
 ```
 
 打包后代码整体结构
+
+```javascript
+(function(modules){
+  //...
+})([modules]))
+```
 
 ```javascript
 (function(modules){
@@ -783,5 +793,5 @@ libraryExport:'keyName'
 /*! all exports used */
 ```
 
-### 4 注意
+### 
 

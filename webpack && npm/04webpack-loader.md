@@ -24,6 +24,14 @@ title：webpack-loader
 
 [patching函数参数：](https://webpack.js.org/api/loaders#thisrequest)
 
+**使用loader加载顺序**
+
+分了三个级别，preloaders,loaders,postloaders，分别代表前中后，三个处理状态。除此外，webpack还提供require的额外定义。
+
+-  `require("!raw!./script.coffee")` 禁止preloaders生效。
+-  `require("!!raw!./script.coffee")` 禁止在配置文件中的所有加载器生效。
+-  `require("-!raw!./script.coffee")` 禁止loader和preloader，不禁止postloader
+
 内联的执行也是从右向左；
 
 比如 `style-loader` 是用来加载 `css` 文件的，如果不忽略配置会出现无限递归调用的情况。即 style-loader 里面调用了 `require(‘xxx.css’)` ，这个require又会去调用 style-loader，于是就无限循环了。
@@ -121,6 +129,8 @@ require('!!style-loader!css-loader!./styles.css');
 | -!   | loader  preloader            |      |
 
 **在loader中生成的 `require('!!style-loader!css-loader!./styles.css');`这样的代码也会经过webpack📱依赖的过程，同时也会生成编译后的assets和chunks,只不过这里面的文件会根据require前面的配置确定文件走哪个loader，而不会用webpack配置文件中的loader**
+
+**也就是说，这个loader配置的options也会以后续的查询字符串为准，会覆盖webpack配置文件中的options**
 
 每个loader通过 `!`进行分割；
 
