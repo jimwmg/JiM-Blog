@@ -8,7 +8,6 @@ updated :
 layout : 
 ---
 
-最近一直在忙react项目,好久没写博客了,需要用到immutable数据,这里先预热下map和set数据
 
 ### 1 Set数据结构,是ES6的新的数据结构,该数据结构类似于数组,但是和数组不同的一点就是,数组中可以有相同的成员,但是Set数据结构不允许数据成员有一样的,Set数据结构的成员都是唯一的.
 
@@ -74,7 +73,7 @@ for(let i of set){  //Set结构实例默认可遍历,默认遍历器生成函数
   console.log(i);  //car bubble dog name 
 }
 console.log('setForeach=====')
-set.forEach((value,key)=>console.log(value,key))
+set.forEach((key,value)=>console.log(key,value))
 /*
 car  car 
 bubble bubble 
@@ -86,9 +85,18 @@ name name
 1.3 对于 Set数据结构可以通过扩展运算符转化成数组，也可以通过 Array.from转化为数组
 
 ```javascript
-let a = new Set([1,2,3]);
-console.log([...a]); // [1,2,3]
-console.log(Array.from(a)) // [1,2,3]
+let set = new Set();
+set.add({age:"18"});
+set.add('key1');
+for(let key of set.keys()){
+  console.log(key) //{age:"18"}  key1
+}
+for(let key of set.values()){
+  console.log(key) //{age:"18"}  key1
+}
+for(let key of set.entries()){
+  console.log(key) //[{age:"18"},{age:"18"}] ,['key1','key1']
+}
 ```
 
 
@@ -97,7 +105,7 @@ console.log(Array.from(a)) // [1,2,3]
 
 键值对集合,对应于Object,Map对象
 
-```
+```javascript
 Map(2) {"a" => 1, "b" => 2}
 ```
 
@@ -109,18 +117,19 @@ var map = new Map()
 console.log(map)
 map.set(obj,'hello Map')  //对象作为键名
 console.log(map.get(obj))
+
 ```
 
 Map是一个构造函数,用来生成一个Map结构的数据对象
 
-```
+```javascript
 var map = new Map()
 console.log(map)
 ```
 
 1.1 Map数据结构的属性和方法,通过输出我们在控制台可以看到Set构造函数原型链上的所有的API 
 
-```
+```javascript
 -set(key,value)      给Map数据结构设置键值对,返回Map实例,所以可以进行链式调用,如果包含该键名,则会更新
 -get(key)			获取Map数据结构键名对应的键值,如果找不到则返回undefined
 -has(key)            判断Map数据结构是否包含某个键名,返回布尔类型值
@@ -130,31 +139,31 @@ console.log(map)
 
 1.2 Map数据结构的遍历
 
-```
+```javascript
 -keys()  -values()  返回键名的遍历器 和键值的遍历器
 -entries()          返回键名和键值组成的遍历器(Map数据默认遍历器接口就是这个 for-of )
 ```
 
 ```javascript
-var obj = {name:'Jhon',age:'13'}
+var obj = {name:'Jhon'}
 var arr = [1,2,3 ]
 
 var map = new Map()
 console.log(map)
 map.set(obj,'hello Map')
-map.set('heh',"hahahahh")
+map.set('key1',"key1Value")
 console.log(map.set(obj,'hello Map'))
 console.log(map.get(obj))
 console.log(map.has(obj))
 console.log(map.get(obj))
 for(let key of map.keys()){
-  console.log(key)
+  console.log(key) //{name:"jhon"} key1
 }
 for(let key of map.values()){
-  console.log(key)
+  console.log(key) //'hello Map'  key1Value
 }
 for(let key of map.entries()){
-  console.log(key)
+  console.log(key) //[{name:"jhon"},'hello map'] ,['key1','key1Value']
 }
 ```
 
@@ -241,7 +250,36 @@ console.log(Array.from(map))
 //[[{name:'jim'},1],[{name:'jhon'},2],[{name:'lucy'},3]]
 ```
 
+### Map 和 Set 的数据类型
 
+```javascript
+const map = new Map();
+const set = new Set();
+console.log(typeof map) ;//object
+console.log(typeof set);//object
+console.log(Object.prototype.toString.call(map));//[object Map]
+console.log(Object.prototype.toString.call(set));//[object Set]
+```
+
+### 2 WeakMap & WeakSet
+
+WeakMap 和 WeakSet 相比于 Map 和 Set 有以下区别
+
+1  WeakMap 和 WeakSet 中存放的都是弱引用，即垃圾回收机制不会考虑该对象的引用，如果出了 WeakMap/WeakSet的引用之外，没有其他对象在某个对象的引用，那么垃圾回收机制就会自动释放该对象所占用的内存；
+
+但是 Map 和 Set 就不是
+
+2 WeakSet 的成员只能是对象； WeakMap 页同样是接受对象作为键值；
+
+
+```javascript
+const ws = new WeakSet();
+const wp = new WeakMap();
+console.log(typeof ws) ;//object
+console.log(typeof wp);//object
+console.log(Object.prototype.toString.call(wp));//[object WeakMap]
+console.log(Object.prototype.toString.call(ws));//[object WeakSet]
+```
 
 
 

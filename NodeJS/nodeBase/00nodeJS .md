@@ -237,6 +237,8 @@ undefined
 
 ```
 node --inspect xxx.js
+npm install -g node-inspect
+node-inspect myscript.js
 ```
 
 

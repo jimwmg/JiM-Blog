@@ -8,15 +8,15 @@ title: 数组API
 
 ### 2 改变原数组的一些API
 
-* push: 向数组最后添加元素，返回改变之后的数组的长度；**改变原来的数组**
-* pop: 将数组最后一个元素删除，返回被删除的元素，如果数组为空，则返回undefined;**改变原来的数组**
-* unshift: 向数组的前面添加元素，返回改变之后数组的长度；**改变原来的数组**
-* shift: 将数组的第一个元素删除，返回被删除的元素，如果数组为空，返回undefined;**改变原来的数组**
-* splice: 移除数组中的一些元素，或者向数组中添加一些元素，返回被删除的元素组成的数组，如果没有元素被删除，则返回一个空数组，**改变原来的数组**；
+* push: 向数组最后添加元素，**返回改变之后的数组的长度**；**改变原来的数组** `arr.push(ele1,ele2,...)`
+* pop: 将数组最后一个元素删除，**返回被删除的元素**，如果数组为空，则返回undefined;**改变原来的数组**
+* unshift: 向数组的前面添加元素，**返回改变之后数组的长度**；**改变原来的数组**
+* shift: 将数组的第一个元素删除，**返回被删除的元素**，如果数组为空，返回undefined;**改变原来的数组**
+* splice: 移除数组中的一些元素，**或者向数组中添加一些元素，返回被删除的元素组成的数组**，如果没有元素被删除，则返回一个空数组，**改变原来的数组**；
 
 ### 3 不改变原来数组的API
 
-* concat: 将数组和传入的元素融合，返回一个新的数组；**不改变原来的数组，开辟新的内存**
+* concat: 将数组和传入的元素融合，返回一个新的数组；**不改变原来的数组，开辟新的内存** `arr.concat(ele1,ele2,...)`如果ele是数组，则会一个个放入；
 * slice: 返回一个数组中从开始位置（包括）到结束位置（不包括）的新的数组，**不改变原数组，开辟新的内存**
 
 ### 4 数组的遍历方法
@@ -74,6 +74,16 @@ numArr.forEach((num,i,arr) => {
     }
     console.log(num)
 })
+var words = ['one', 'two', 'three', 'four'];
+words.forEach(function(word) {
+  console.log(word);
+  if (word === 'two') {
+    words.shift();
+  }
+});
+// one
+// two
+// four
 ```
 
 对于`forEach map`等数组API是在调用的时候就确定了数组的遍历范围不同，`for-of`可以在访问到循环的过程中push进数组的新值；
@@ -88,5 +98,45 @@ for(let v of numArr) {
 }
 ```
 
+### 5 数组静态API
 
+#### Array.from
+
+The `**Array.from()**` method creates a new, shallow-copied `Array` instance from an array-like or iterable object.
+
+```javascript
+Array.from(arrayLike[, mapFn[, thisArg]])
+```
+
+数组的深拷贝
+
+```javascript
+function deepCloneArr(value){
+  return Array.isArray(value) ? Array.from(value,deepCloneArr) : value;
+}
+```
+
+```javascript
+let set = new Set();
+set.add({age:"18"});
+set.add('ssdad');
+let map = new Map();
+map.set('key1',{age:18})
+map.set({},{obj:'obj'})
+function arrayFrom(value,fn){
+  return Array.from(value,fn)
+}
+arrayFrom(map,function(val,index){
+  console.log('map-val,index',val,index);
+  return val
+})
+//'map-val,index' ['key1',{age:18}]  0
+//'map-val,index' [{},{obj:'obj'}]  1
+arrayFrom(set,function(val,index){
+  console.log('set-val,index',val,index);
+  return val
+})
+//set-val,index {age: "18"} 0
+//set-val,index ssdad 1
+```
 

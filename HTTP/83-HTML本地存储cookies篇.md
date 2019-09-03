@@ -98,7 +98,7 @@ expries 表示的是失效时间，准确讲是「时刻」，max-age表示的�
 
 Cookie都是通过document对象获取的，我们如果能让cookie在浏览器中不可见就可以了，那HttpOnly就是在设置cookie时接受这样一个参数，一旦被设置，在浏览器的document对象中就看不到cookie了。而浏览器在浏览网页的时候不受任何影响，因为Cookie会被放在浏览器头中发送出去(包括Ajax的时候)，应用程序也一般不会在JS里操作这些敏感Cookie的，对于一些敏感的Cookie我们采用HttpOnly，对于一些需要在应用程序中用JS操作的cookie我们就不予设置，这样就保障了Cookie信息的安全也保证了应用。
 
-###4、如何利用以上属性去设置cookie？
+### 4、如何利用以上属性去设置cookie？
 
 **服务器端设置**      [setCookie](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Set-Cookie)
 
@@ -164,7 +164,10 @@ document.cookie="age=12; expires=Thu, 26 Feb 2116 11:50:25 GMT; domain=sankuai.c
 
 大小限制：cookie的大小限制在4kb左右，不适合大量存储。
 
-增加流量：cookie每次请求都会被自动添加到Request Header中，无形中增加了流量。cookie信息越大，对服务器请求的时间越长
+增加流量：cookie每次请求都会被自动添加到Request Header中，无形中增加了流量。cookie信息越大，对服务器请求的时间越长。
+
+由于写在主域名下的cookie，如 xxx.com下的 cookie 比较大的情况下，若图片之类的 pic.xxx.com 图片去服务器取数据的时候，都需要发送本地的头，就会带上cookie，这样就会造成send数据过多，导致速度变慢像 js、style 等都会有这些问题。通常使用一个其他域名，这样这个域名下就没有cookie 了。
+按照普通设计，当网站cookie信息有1KB、网站首页共150个资源时，用户在请求过程中需要发送150KB的cookie信息，在512Kbps的常见带宽下，需要长达3秒左右才能全部发送完毕。 尽管这个过程可以和页面下载不同资源的时间并发，但毕竟对速度造成了影响。 而且这些信息在js/css/images/flash等静态资源上，几乎是没有任何必要的。 解决方案是启用和主站不同的域名来放置静态资源，也就是cookie free。
 
 ### 6 跨域不会发送cookies等用户凭证，如何解决？
 

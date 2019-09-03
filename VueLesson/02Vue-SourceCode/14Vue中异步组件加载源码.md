@@ -4,7 +4,7 @@ date: 2018-01-29
 categories: vue
 ---
 
-###1 Vue中加载异步组件的使用
+### 1 Vue中加载异步组件的使用
 
 ```javascript
 //1 
