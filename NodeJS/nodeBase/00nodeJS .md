@@ -61,7 +61,7 @@ Node.js = Runtime Environment + JavaScript Library
 * 核心模块  由node环境提供，比如http  fs，url , path等模块
 * 第三方模块，由社区，比如第三方提供，例如gulp browerSync moment等
 
-##2 npm使用简介
+## 2 npm使用简介
 
 ```javascript
 $ npm -v  查看版本号

@@ -2,7 +2,9 @@
 title: linux
 ---
 
-* 查看当前mac下JDK
+[shell-command-list](http://www.tutorialspoint.com/unix_commands/index.htm)
+
+查看当前mac下JDK
 
 ```
 打开终端：/usr/libexec/java_home -V（V必须大写）
@@ -82,6 +84,7 @@ touch filename 可以用来创建一个文件名
 ```
 
 * who 可以用来看终端的个数；
+* users：查看登录用户
 * which: 可以查看某个命令所在的位置，通过该位置可以看具体的详细信息；
 * pwd: 打印出当前所在目录
 * mkdir ： 新建一个目录
@@ -92,10 +95,51 @@ touch filename 可以用来创建一个文件名
 * mv :` mv [选项][来源文件][目的文件]`  可以用来重命名目录: mv  ./README.md  ./new.md重命名当前目录下的README.md为 new.md，内容不变；
 * redir: 删除一个目录,不能删除一个文件
 * alias：用于设置一个命令的别名
-* whoami: 显示用户名（didi）
+* whoami: 显示用户名
 * clear: 清空终端所有的内容
+* grep : 过滤 可以用来对之前的某个命令的结果进行过滤  ls | grep 'work'  那么只会列出包括 work的文件夹 grep -i 等
+* ps  ps -f :列出电脑中运行的所有程序  ps -f | grep local   同样可以过滤某些本地服务,每一个process有两个ID,pid表示当前这个程序的process id ; ppid表示这个进程的 Parent process ID
+* kill pid  :终止某个进程
+* top : 在终端列出所有process,这是一个动态工具，可以实时的展示物理和虚拟内存，以及cpu 等其他状态\
+* ping  hostname or ip-address: ping google.com    ping  172.24.40.92  等等；The **ping** command sends an echo request to a host available on the network. Using this command, you can check if your remote host is responding well or not.主要作用是检测你的远程host是否正常工作；
+* finger：The **finger** command displays information about users on a given host. The host can be either local or remote.
 
-### 2 shell脚本 && 环境变量
+```javascript
+//ps -f
+UID   PID  PPID   C STIME   TTY           TIME CMD
+  501  1606   891   0 10:42上午 ttys000    0:00.76 /bin/zsh -l
+  501  2447   891   0 10:45上午 ttys001    0:00.69 /bin/zsh -l
+  501  3373  3371   0 10:47上午 ttys002    0:00.66 /bin/zsh -l
+  501  4220  3371   0 10:50上午 ttys003    0:00.70 /bin/zsh -l
+  501 10292  7884   0 11:35上午 ttys004    0:00.03 /Applications/iTerm.app/Contents/MacOS/iTerm2 --server login -fp didi
+  501 10294 10293   0 11:35上午 ttys004    0:00.74 -zsh
+  501 11552   891   0 11:55上午 ttys005    0:00.56 /bin/zsh -l
+  501 12297 11552   0 11:55上午 ttys005    0:00.28 npm
+  501 12298 12297   0 11:55上午 ttys005    0:49.58 node build/dev-server.js
+  501 12299 12298   0 11:55上午 ttys005    0:00.06 open -W http://localhost:8002
+//top
+Processes: 369 total, 2 running, 367 sleeping, 2187 threads            12:04:29
+Load Avg: 1.69, 1.33, 1.26  CPU usage: 10.55% user, 11.51% sys, 77.93% idle
+SharedLibs: 120M resident, 35M data, 10M linkedit.
+MemRegions: 92676 total, 2211M resident, 62M private, 606M shared.
+PhysMem: 7869M used (1989M wired), 322M unused.
+VM: 1735G vsize, 1112M framework vsize, 58050(0) swapins, 66513(0) swapouts.
+Networks: packets: 3950471/971M in, 2152717/346M out.
+Disks: 1356211/14G read, 572369/5321M written.
+```
+
+
+
+### 2 vi
+
+* vi filename 创建一个文件
+* cat filename  显示文件的内容
+* cat -b filename 显示文件的内容的同时，页显示内容中每行对应的行数
+* wc filename 显示文件to get a count of the total number of lines, words, and characters contained in a file
+
+### 3 shell脚本 && 环境变量
+
+#### 3.1 基本概念
 
 概念： 简单点理解，就是系统跟计算机硬件交互时使用的中间介质，它只是系统的一个工具。实际上，在shell和计算机硬件之间还有一层东西那就是系统内核了。打个比方，如果把计算机硬件比作一个人的躯体，而系统内核则是人的大脑，至于shell，把它比作人的五官似乎更加贴切些。回到计算机上来，用户直接面对的不是计算机硬件而是shell，用户把指令告诉shell，然后shell再传输给系统内核，接着内核再去支配计算机硬件去执行各种操作。
 
@@ -198,6 +242,168 @@ cat /etc/shells
 **.bash_history** ：记录命令历史用的。
 
 **.bash_logout** ：当退出shell时，会执行该文件。可以把一些清理的工作放到这个文件中。
+
+#### 3.2 shell script
+
+##### read ：the **read** command which takes the input from the keyboard and assigns it as the value of the variable PERSON and finally prints it on STDOUT.
+
+```sh
+#!/bin/sh
+
+# Author : Zara Ali
+# Copyright (c) Tutorialspoint.com
+# Script follows here:
+
+echo "What is your name?"
+read PERSON
+echo "Hello, $PERSON"
+
+```
+
+##### 注释和执行shell
+
+`#! `表示用哪个sh执行脚本
+
+`#`表示注释
+
+```sh
+#!/bin/bash  
+
+# Author : Zara Ali
+# Copyright (c) Tutorialspoint.com
+# Script follows here:
+pwd
+ls
+```
+
+##### 变量
+
+声明：The name of a variable can contain only letters (a to z or A to Z), numbers ( 0 to 9) or the underscore character ( _).
+
+定义 :variable_name=variable_value
+
+使用：变量的使用可以以 $ 开头(一般建议使用变量的时候以`{}`包起来)
+
+只读：readonly  变量名；
+
+Unsetting 变量
+
+```sh
+NAME = 'LUCY';
+RE = "readonly"
+echo $NAME;
+echo ${NAME}
+readonly RE
+# 声明数组
+NAME[0]="Zara"
+NAME[1]="Qadir"
+NAME[2]="Mahnaz"
+NAME[3]="Ayan"
+NAME[4]="Daisy"
+echo "First Index: ${NAME[0]}"
+echo "Second Index: ${NAME[1]}"
+```
+
+
+
+变量类型
+
+- **Local Variables** − A local variable is a variable that is present within the current instance of the shell. It is not available to programs that are started by the shell. They are set at the command prompt.
+- **Environment Variables** − An environment variable is available to any child process of the shell. Some programs need environment variables in order to function correctly. Usually, a shell script defines only those environment variables that are needed by the programs that it runs.
+- **Shell Variables** − A shell variable is a special variable that is set by the shell and is required by the shell in order to function correctly. Some of these variables are environment variables whereas others are local variables.
+
+##### shell编程中的特殊变量
+
+`test.sh`
+
+```sh
+#!/bin/sh
+
+# Author : Zara Ali
+# Copyright (c) Tutorialspoint.com
+# Script follows here: $0 表示 执行的脚本文件名 $1~n 表示执行脚本的时候传入的参数
+# $# 表示执行脚本时候传入的参数的个数；$$ 表示process number 
+
+echo $0  test.sh
+echo $1  1
+echo $2  2
+
+echo $#  6
+echo $*
+echo $@
+echo $?
+echo $!
+echo $$
+```
+
+```
+sh test.sh 1 2 3 a b c 
+```
+
+##### shell编程中的基本运算
+
+[参考](http://www.tutorialspoint.com/unix/unix-basic-operators.htm)
+
+##### Command Substitution
+
+```javascript
+`command`
+```
+
+```sh
+DATE=`date`
+echo "Date is $DATE"
+
+USERS=`who | wc -l`
+echo "Logged in user are $USERS"
+
+UP=`date ; uptime`
+echo "Uptime is $UP"
+
+```
+
+##### 特殊字符
+
+```
+* ? [ ] ' " \ $ ; & ( ) | ^ < >
+```
+
+```sh
+NAME="LuCY"
+# 所有在单引号之内的特殊字符都将失效
+echo 'Hel lo; Word  $NAME '
+#的大部分双引号之间的特殊字符将失效，除了 $ ` \$ \' \"  \\
+echo "Hel lo; Word  ${NAME}"
+```
+
+##### Unix's version of **Help files** are called **man pages**. If there is a command name and you are not sure how to use it, then Man Pages help you out with every step.
+
+`man command`命令可以用来具体解释 `command`命令的具体信息
+
+```
+# man command
+
+man pwd  
+man ls
+man cat
+CAT(1)                    BSD General Commands Manual                   CAT(1)
+
+NAME
+     cat -- concatenate and print files
+
+SYNOPSIS
+     cat [-benstuv] [file ...]
+
+DESCRIPTION
+     The cat utility reads files sequentially, writing them to the standard output.  The file operands
+     are processed in command-line order.  If file is a single dash (`-') or absent, cat reads from the
+     standard input.  If file is a UNIX domain socket, cat connects to it and then reads it until EOF.
+     This complements the UNIX domain binding capability available in inetd(8).
+```
+
+
+
+
 
  ### 3 文件操作&磁盘管理
 
@@ -439,7 +645,11 @@ PERSON
 PERSON="jim"
 readonly PERSON
 PERSON="jhom" //只读变量不允许再次赋值
+echo $PERSON
+echo ${PERSON}
 ```
+
+变量名外面的花括号是可选的，加不加都行，加花括号是为了帮助解释器识别变量的边界
 
 5.2 数组
 

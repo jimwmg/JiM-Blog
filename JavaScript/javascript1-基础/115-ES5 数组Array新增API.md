@@ -124,25 +124,25 @@ Array.prorotype.forEach(callback,thisArg) //thisArg严格模式下指向undefine
 ```javascript
 //thisArg可以用来改变forEach的callback函数执行时候this指向  
 function Counter(){
-        this.sum = 0;
-        this.count = 0 ;
-    }
+  this.sum = 0;
+  this.count = 0 ;
+}
 
-    Counter.prototype.add = function(array){
-        array.forEach(function(item){
-            
-            this.sum += item ;
-            ++this.count;
+Counter.prototype.add = function(array){
+  array.forEach(function(item){
+      
+      this.sum += item ;
+      ++this.count;
 
-            console.log(this);//看下这个时候的this指向
-        },this);
-    }
+      console.log(this);//看下这个时候的this指向
+  },this);
+}
 
-    var arr = [9,6,2];
-    var counter = new Counter();
-    counter.add(arr);
-    console.log(counter.sum);
-    console.log(counter.count);
+var arr = [9,6,2];
+var counter = new Counter();
+counter.add(arr);
+console.log(counter.sum);
+console.log(counter.count);
 ```
 
 4.1 forEach 没有办法中止或者跳出 forEach 循环，除了抛出一个异常

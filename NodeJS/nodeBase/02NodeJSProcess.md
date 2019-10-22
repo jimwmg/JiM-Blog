@@ -60,36 +60,28 @@ updated :
 
 ```
 
-
-
-
-```javascript
-// print process.argv
-//process-args.js文件
-process.argv.forEach((val, index) => {
-  console.log(`${index}: ${val}`);
-});
-//然后执行
-node process-args.js one two=three four
-```
-
-```
-0: /usr/local/bin/node
-1: /Users/mjr/work/node/process-args.js
-2: one
-3: two=three
-4: four
-```
+#### 终端命令行传入 process.env 和 process.argv 
 
 index.js
 
 ```javascript
-consoel.log(process.argv)
+console.log(process.env);
+console.log(process.argv);
 ```
 
-执行 `node index.js` -a b fas --ho
+执行 `SOMEVAR=testVar node index.js` -a b fas --ho`
+
+**node 前面的可以用来传递给env ； node后面的用来传递给 argv**；
 
 ```javascript
+//process.env
+{ TMPDIR: '/var/folders/2w/tt1p_4td3yq9xlbl7c2t4jn00000gn/T/',
+ //...
+  LC_CTYPE: 'zh_CN.UTF-8',
+  SOMEVAR: 'testVar',
+  _: '/Users/didi/.nvm/versions/node/v10.9.0/bin/node' 
+}
+//process.argv
 [ '/Users/didi/.nvm/versions/node/v8.9.4/bin/node',//所执行的node命令所在文件路径
   '/Users/didi/learn/learnSPace/11cml-learn/index.js',//被执行的脚本的文件名路径
   '-a',//以下都是执行命令的时候传递的参数；
@@ -99,6 +91,39 @@ consoel.log(process.argv)
 ```
 
 可以看到，对于直接`process.argv` 会将所有的参数作为后续的数组,以空格作为分割；
+
+#### npm 脚本执行 上面的index.js 文件
+
+npm gets its config settings from the command line, environment variables, and `npmrc` files.
+
+```javascript
+{
+  "name": "02npm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "NODE_ENV=production a=b node-inspect index.js --a=$npm_package_license"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cross-env": "^6.0.0",
+    "react": "^16.5.0"
+  }
+}
+
+```
+
+此时 process.env 上会多一些 `npm_config_xxxx    npm_package_xxx`开头的一些变量，这些变量就是 
+
+* 可以通过在终端执行 npm run env 查看有哪些 npm_config_xxx 的变量
+* npm_package_xxx 就是当前 package.json 文件中的配置的所有对象，npm_package_dependencies_react
+* 在package.json s  script 脚本中 可以通过 `$npm_package_license ` 获取
+
+需要注意的一点是有些值的设置在不同系统上有些不同，一般通过 [cross-env](https://github.com/kentcdodds/cross-env)
 
 #### 方法 
 
@@ -113,7 +138,7 @@ consoel.log(process.argv)
 - `process.setuid()`：指定当前进程的用户，可以使用数字ID，也可以使用字符串ID。
 - process.binding(name) :这个方法用于返回指定名称的内置模块。Process对象同样部署了EventEmitter的接口，所以可以调用 Process.on 进行事件绑定等其他事件操作；
 
-**需要注意区分 `process.cwd()`和 `__dirname`的区别，前者是 运行node服务所在的绝对路径，而后者则是具体文件（js脚本）所在的目录路径；前者在同一个node服务中，不同的文件中的值是一样的，后者在不同的文件中值是不一样的**；
+**需要注意区分 `process.cwd()`和 `__dirname`的区别，前者是 运行node服务所在的绝对路径(如果对于一个终端命令行，返回的也是执行某个cli命令行的时候的目录)，而后者则是具体文件（js脚本）所在的目录路径；前者在同一个node服务中，不同的文件中的值是一样的，后者在不同的文件中值是不一样的**；
 
 #### 事件
 

@@ -47,7 +47,7 @@ W3C: In CSS, the adjoining margins of two or more boxes (which might or might no
 
 接下来针对上面的案例，给出拒绝margin合并的解决方案
 
-####2.1 毗邻盒子元素：针对这个margin形成的要点，可以设置隔离地带，拒绝margin合并；
+#### 2.1 毗邻盒子元素：针对这个margin形成的要点，可以设置隔离地带，拒绝margin合并；
 
 * 设置父元素的 border 或者 padding
 

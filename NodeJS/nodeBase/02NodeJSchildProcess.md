@@ -60,7 +60,23 @@ node childprocess.js 输出如下：
   execSync: [Function: execSync] }
 ```
 
-### 2 exec.  execSync
+### [spawn](http://nodejs.cn/api/child_process.html#child_process_child_process_spawn_command_args_options) [spawnSync](http://nodejs.cn/api/child_process.html#child_process_child_process_spawnsync_command_args_options)
+
+```javascript
+const  {spawnSync} = require('child_process')
+const crnaProjectCreationResponse = spawnSync(
+    'create-react-native-app',
+    ['react-native-demo'],
+    { stdio: "inherit", shell: true }
+  );
+const crnaProjectCreationResponse = spawnSync(
+    'npm',
+    ['install','vue-native-core','vue-native-helper','--save'],
+    { shell: true }
+  );
+```
+
+### exec.  execSync
 
 `child_process.exec(command[, options][, callback]).` 异步执行 返回值：Childprocess对象
 
@@ -90,24 +106,19 @@ child_process.exec(`open ${__dirname}`);
 `child_process.execFile(file[, args][, options][, callback])`
 
 ```javascript
-
+const {execFile, execFileSync} = require('child_process');
+const path = require('path')
+//3 execFile(file,args<string[]>,options<object>,callback) execFileSync
+//file 是要运行的可执行文件的名称或者路径
+const execFileRet = execFile('node',['--version'],{encoding:'utf-8'},(error,stdout,stderr) => {
+  console.log('execFileRet-stdout',stdout)
+  console.log('execFileRet-stderr',stderr)
+})
+const execFileSyncRet = execFileSync('node',['--version'],{encoding:'utf-8'}) 
+debugger;
 ```
 
-### 3 spawn   spawnSync  [node-文档](http://nodejs.cn/api/child_process.html#child_process_child_process_spawnsync_command_args_options)
-
-```javascript
-const  {spawnSync} = require('child_process')
-const crnaProjectCreationResponse = spawnSync(
-    'create-react-native-app',
-    ['react-native-demo'],
-    { stdio: "inherit", shell: true }
-  );
-const crnaProjectCreationResponse = spawnSync(
-    'npm',
-    ['install','vue-native-core','vue-native-helper','--save'],
-    { shell: true }
-  );
-```
+### 
 
 
 

@@ -148,7 +148,7 @@ This means if two transforms both visit the "Program" node, the transforms will 
 
 翻译：
 
-- 具体而言，plugins优先于presets进行编译。
+- 具体而言，plugins优先于presets进行编译。也就是说plugins的优先级高于presets；
 - plugins按照数组的index增序(从数组第一个到最后一个)进行编译。
 - presets按照数组的index倒序(从数组最后一个到第一个)进行编译。因为作者认为大部分会把presets写成`["es2015", "stage-0"]`。具体细节可以看[这个](https://github.com/babel/notes/blob/master/2016-08/august-01.md#potential-api-changes-for-traversal)。
 
@@ -206,6 +206,8 @@ npx babel src/example-cli.js -d lib
 **注意以上 preset和plugins的配置：如果目标浏览器不支持某些语法，比如箭头函数，let const 或者某些API :比如Object.assign  Array.from 等都需要配置对应的plugins进行转码才能在目标浏览器上得到支持**
 
 但是对于很多新的javascript语法，如果不想每个语法都通过plugins进行;可以通过配置 preset 集合；
+
+Babel 默认只转换新的 JavaScript 语法，而不转换新的 API。例如，Iterator、Generator、Set、Maps、Proxy、Reflect、Symbol、Promise 等全局对象，以及一些定义在全局对象上的方法（比如 Object.assign）都不会转译。如果想使用这些新的对象和方法，必须使用 babel-polyfill，为当前环境提供一个垫片。
 
 #### 2.3 polyfill的配置
 

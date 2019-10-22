@@ -121,21 +121,21 @@ var obj= {};
 
 ```javascript
 var obj= {};
-    Object.defineProperty(obj,"name",{
-        configurable:true,
-        enumerable : false,
+  Object.defineProperty(obj,"name",{
+      configurable:true,
+      enumerable : false,
 
-        get : function(){
-           return " I always return this string, whatever you have assigned";
+      get : function(){
+          return " I always return this string, whatever you have assigned";
 
-        },
-        set:function(){
-            obj.newName = "JiM2";
-        }
-    });
-    obj.name = 'JiM333'; // 这个表达式相当于调用了descriptor的set方法
-    console.log(obj.name);//  I always return this string, whatever you have assigned
-    console.log(obj.newName); //JiM2 
+      },
+      set:function(){
+          obj.newName = "JiM2";
+      }
+  });
+  obj.name = 'JiM333'; // 这个表达式相当于调用了descriptor的set方法
+  console.log(obj.name);//  I always return this string, whatever you have assigned
+  console.log(obj.newName); //JiM2 
 //obj.name 相当于调用descriptor的get方法
 ```
 

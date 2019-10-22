@@ -6,3 +6,4 @@
 
 [ele node进阶](https://github.com/ElemeFE/node-interview/tree/master/sections/zh-cn)
 
+[nodejs-awesome-project](https://github.com/sindresorhus/awesome-nodejs#mad-science)

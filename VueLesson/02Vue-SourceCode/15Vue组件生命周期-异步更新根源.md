@@ -232,7 +232,7 @@ if (vm.$options.el) {
 }
 ```
 
-####2.1 挂载阶段 beforeMount.  mounted
+#### 2.1 挂载阶段 beforeMount.  mounted
 
 1. 父组件的 beforeCreate --> created --> beforeMount -->
 2. 子组件的生命周期 beforeCreate --> created --> beforeMount --> mounted

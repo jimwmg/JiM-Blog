@@ -16,7 +16,7 @@ javascript 常用API总结：
 
 ```javascript
 Node.nodeName   //返回节点名称，只读
-Node.nodeType   //返回节点类型的常数值，只读
+Node.nodeType   //返回节点类型的常数值，只读 1 元素 3 文本 8 comment
 Node.nodeValue  //返回Text或Comment节点的文本值，只读
 Node.textContent  //返回当前节点和它的所有后代节点的文本内容，可读写
 Node.baseURI    //返回当前网页的绝对路径
@@ -40,6 +40,7 @@ Node.childElementCount  //返回当前节点所有Element子节点的数目。
 **1.2 操作**
 
 ```javascript
+//ParentNode 接口
 Node.appendChild(node)   //向节点添加最后一个子节点
 Node.hasChildNodes()   //返回布尔值，表示当前节点是否有子节点
 Node.cloneNode(true);  // 默认为false(克隆节点), true(克隆节点及其属性，以及后代)
@@ -55,7 +56,20 @@ Node.normalize()   //用于清理当前节点内部的所有Text节点。它会�
 Node.remove()  //用于删除当前节点
 Node.before()  //
 Node.after()
-Node.replaceWith()
+Node.replaceWith() 
+//
+```
+
+```javascript
+var parent = document.createElement("div");
+var child = document.createElement("p");
+parent.appendChild(child);
+var span = document.createElement("span");
+
+child.replaceWith(span);
+
+console.log(parent.outerHTML);
+// "<div><span></span></div>"
 ```
 
 **1.3 Document节点**
