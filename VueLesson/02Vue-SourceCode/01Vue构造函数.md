@@ -26,7 +26,7 @@ github搜VUE可以找到对应的源码
 
 ### 2 Vue构造函数的实现,静态属性和原型属性的添加
 
-####web平台上
+#### web平台上
 
 [platforms/web/entry-runtime-with-compiler.js](https://github.com/jimwmg/vue/tree/dev/src/platforms/web)
 

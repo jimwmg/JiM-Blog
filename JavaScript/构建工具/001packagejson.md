@@ -232,5 +232,7 @@ Use a `.npmignore` file to keep stuff out of your package. If there's no `.npmig
 
 ## 3 Configuring NPM
 
+### 4 npm  package-lock.json
+
 
 

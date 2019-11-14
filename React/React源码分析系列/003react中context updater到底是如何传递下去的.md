@@ -22,7 +22,7 @@ layout :
 * 父组件中声明Parent.childContextType
 * 子组件声明 Child.contextType
 
-###1  先看一个组件 
+### 1  先看一个组件 
 
 ```javascript
 class BaseDataSelect extends Component {

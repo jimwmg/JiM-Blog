@@ -63,5 +63,43 @@ portfinder.getPort(function (err, port) {
 
 [resolve](https://www.npmjs.com/package/resolve)
 
+[import-local](https://www.npmjs.com/package/import-local):Useful for CLI tools that want to defer to the user's locally installed version when available, but still work if it's not installed locally. For example, [AVA](http://ava.li/) and [XO](https://github.com/xojs/xo) uses this method.
+
+[debug](https://www.npmjs.com/package/debug):A tiny JavaScript debugging utility modelled after Node.js core's debugging technique. Works in Node.js and web browsers.
+
+```javascript
+var debug = require('debug')('http')
+  , http = require('http')
+  , name = 'My App';
+ 
+// fake app
+ 
+debug('booting %o', name);
+```
+
+DEBUG=* node index.js
+
+http booting 'My App' +0ms
+
+[chokidar](https://www.npmjs.com/package/chokidar):Chokidar does still rely on the Node.js core `fs` module, but when using `fs.watch` and `fs.watchFile` for watching, it normalizes the events it receives, often checking for truth by getting file stats and/or dir contents.
+
+```javascript
+const chokidar = require('chokidar');
+const path = require('path');
+const log = console.log.bind(console);
+// One-liner for current directory
+
+const watcher = chokidar.watch(path.resolve(__dirname,'cmd.js'));
+
+watcher
+  .on('add', path => log(`File ${path} has been added`))
+  .on('change', path => log(`File ${path} has been changed`))
+  .on('unlink', path => log(`File ${path} has been removed`));
+```
+
+[yargs](https://github.com/yargs/yargs/blob/HEAD/docs/api.md)
+
+[internal-ip](https://www.npmjs.com/package/internal-ip)
+
 
 

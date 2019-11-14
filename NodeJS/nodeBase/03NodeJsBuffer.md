@@ -16,7 +16,7 @@ JavaScript 语言自身只有字符串数据类型，没有二进制数据类型
 
 在 Node.js 中，Buffer 类是随 Node 内核一起发布的核心库。Buffer 库为 Node.js 带来了一种存储原始数据的方法，可以让 Node.js 处理二进制数据，每当需要在 Node.js 中处理I/O操作中移动的数据时，就有可能使用 Buffer 库。原始数据存储在 Buffer 类的实例中。一个 Buffer 类似于一个整数数组，但它对应于 V8 堆内存之外的一块原始内存。
 
-###2 如何创建Buffer实例 
+### 2 如何创建Buffer实例 
 
 ```javascript
 var buf = new Buffer(arg) //1 必须传入参数 2  传入的参数类型 string, Buffer, ArrayBuffer, Array, or array-like object.
@@ -50,7 +50,7 @@ console.log(buf5.length);
 console.log(buf5.toString());
 ```
 
-###3 向缓冲区写入数据以及读取数据
+### 3 向缓冲区写入数据以及读取数据
 
 ```javascript
 buf.write(string[, offset[, length]][, encoding])

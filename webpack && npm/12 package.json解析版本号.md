@@ -2,11 +2,11 @@
 title:package.json解析
 ---
 
-### 1 依赖的版本解析    [版本号解析](https://semver.npmjs.com/)
+### 1 依赖的版本解析    
 
-- Patch releases: `1.0` or `1.0.x` or `~1.0.4`
-- Minor releases: `1` or `1.x` or `^1.0.4`
-- Major releases: `*` or `x`
+- Major releases(主版本号):  当你做了不兼容的 API 修改 
+- Minor releases(次版本号): 当你做了向下兼容的功能性新增，可以理解为Feature版本
+- Patch releases(修订号): 当你做了向下兼容的问题修正，可以理解为Bug fix版本。
 
 **版本号格式： 主版本号.次版本号.修订号**  
 
@@ -56,120 +56,168 @@ A `comparator` is composed of an `operator` and a `version`. The set of primitiv
 - `>=` Greater than or equal to
 - `=` Equal. If no operator is specified, then equality is assumed, so this operator is optional, but MAY be included.
 
-For example, the comparator `>=1.2.7` would match the versions `1.2.7`, `1.2.8`, `2.5.3`, and `1.3.9`, but not the versions `1.2.6` or `1.1.0`.
+这个网站很重要，可以 填入任何你想要了解的 npm 包 以及 输入一些版本可以看下匹配；
 
-Comparators can be joined by whitespace to form a `comparator set`, which is satisfied by the **intersection** of all of the comparators it includes.
+**[npm semver calculator](https://semver.npmjs.com/)**
 
-A range is composed of one or more comparator sets, joined by `||`. A version matches a range if and only if every comparator in at least one of the `||`-separated comparator sets is satisfied by the version.
+### 2 npm 版本固化
 
-For example, the range `>=1.2.7 <1.3.0` would match the versions `1.2.7`, `1.2.8`, and `1.2.99`, but not the versions `1.2.6`, `1.3.0`, or `1.1.0`.
+[npm-github](https://github.com/npm/npm/issues/17979) 有些issue 描述了 版本固化的进化历程
 
-The range `1.2.7 || >=1.2.9 <2.0.0` would match the versions `1.2.7`,`1.2.9`, and `1.4.6`, but not the versions `1.2.8` or `2.0.0`.
+#### 不同 npm 版本下 npm i 的规则
 
-### Prerelease Tags
+- npm 5.0.x 版本：不管 package.json 中依赖是否有更新，npm i 都会根据 package-lock.json 下载。针对这种安装策略，有人提出了这个 issue -  [#16866](https://github.com/npm/npm/issues/16866) ，然后就演变成了 5.1.0 版本后的规则。
+- 5.1.0 版本后：当 package.json 中的依赖项有新版本时，npm install 会无视 package-lock.json 去下载新版本的依赖项并且更新 package-lock.json。针对这种安装策略，又有人提出了一个 issue - [#17979](https://github.com/npm/npm/issues/17979) ，参考 npm 贡献者 iarna 的评论，得出 5.4.2 版本后的规则。
+- 5.4.2 版本后：
+  - 如果只有一个 package.json 文件，运行 `npm i` 会根据它生成一个 package-lock.json 文件。
+  - 如果 package.json 的 semver-range version 和 package-lock.json 中版本兼容，即使此时 package.json 中有新的版本，执行 `npm i` 也还是会根据 package-lock.json 下载 - 实践场景1。
+  - 如果手动修改了 package.json 的 version ranges，且和 package-lock.json 中版本不兼容，那么执行 `npm i` 时 package-lock.json 将会更新到兼容 package.json 的版本 - 实践场景2。
 
-If a version has a prerelease tag (for example, `1.2.3-alpha.3`) then it will only be allowed to satisfy comparator sets if at least one comparator with the same `[major, minor, patch]` tuple also has a prerelease tag.
+对于 npm 包的版本兼容，可以理解为 次版本  和 修订版本下的 版本范围都是版本兼容的；
 
-For example, the range `>1.2.3-alpha.3` would be allowed to match the version `1.2.3-alpha.7`, but it would *not* be satisfied by `3.4.5-alpha.9`, even though `3.4.5-alpha.9` is technically "greater than" `1.2.3-alpha.3` according to the SemVer sort rules. The version range only accepts prerelease tags on the `1.2.3` version. The version `3.4.5` *would* satisfy the range, because it does not have a prerelease flag, and `3.4.5` is greater than `1.2.3-alpha.7`.
+接下来测试下版本固化
 
-The purpose for this behavior is twofold. First, prerelease versions frequently are updated very quickly, and contain many breaking changes that are (by the author's design) not yet fit for public consumption. Therefore, by default, they are excluded from range matching semantics.
+**node 版本 8.10.0 ；npm 版本  5.6.0  测试包 superagent**
 
-Second, a user who has opted into using a prerelease version has clearly indicated the intent to use *that specific* set of alpha/beta/rc versions. By including a prerelease tag in the range, the user is indicating that they are aware of the risk. However, it is still not appropriate to assume that they have opted into taking a similar risk on the *next* set of prerelease versions.
+可以执行 npm view superagent versions 看这个包所有的版本 或者在 [npm server calculator](https://semver.npmjs.com/)中输入测试包名查看
 
-#### Prerelease Identifiers
+#### 场景1：
 
-The method `.inc` takes an additional `identifier` string argument that will append the value of the string as a prerelease identifier:
+假如我们有如下 package.json 文件，在该文件所在目录执行 `npm isuperagent@3.5.1`
+
+```javascript
+{
+  "name": "package-npm-test",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "scripts": {},
+  "license": "MIT",
+  "dependencies": {
+  }
+}
 
 ```
-semver.inc('1.2.3', 'prerelease', 'beta')
-// '1.2.4-beta.0'
+
+可以发现我们的 package.json 变成了
+
+```javascript
+{
+  "name": "package-npm-test",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "scripts": {},
+  "license": "MIT",
+  "dependencies": {
+    "superagent": "^3.5.1"
+  }
+}
 ```
 
-command-line example:
+同时还多了一个 package-lock.json 文件；该文件中对 superagent 的版本进行了固化；假如此时删除 node_modules ，重新执行 npm i ,安装的 superagent 的版本依然是 @3.5.1；
 
-```
-$ semver 1.2.3 -i prerelease --preid beta
-1.2.4-beta.0
-```
-
-Which then can be used to increment further:
-
-```
-$ semver 1.2.4-beta.0 -i prerelease
-1.2.4-beta.1
+```javascript
+"superagent": {
+    "version": "3.5.1",
 ```
 
-### Advanced Range Syntax
+此时查看 node_modules/superagent 中的 package.json 
 
-Advanced range syntax desugars to primitive comparators in deterministic ways.
+```javascript
+"_from": "superagent@3.5.1",
+"_id": "superagent@3.5.1",
+"version": "3.5.1"
+```
 
-Advanced ranges may be combined in the same way as primitive comparators using white space or `||`.
+理论上来说 因为 package.json 中 `superagent:^3.5.1` 应该安装的版本范围应该是  3.5.1 < 4.0.0 ;具体可以在[npm-semver-calculator](https://semver.npmjs.com/)中查看应该安装的最新版本；也就是  3.8.3；但是node_modules 中依然安装的是 3.5.1，所以这就是版本固化的作用，
 
-#### Hyphen Ranges `X.Y.Z - A.B.C`
+```javascript
+"dependencies": {
+  "superagent": "^3.5.1"
+}
+```
 
-Specifies an inclusive set.
+#### 场景2 
 
-- `1.2.3 - 2.3.4` := `>=1.2.3 <=2.3.4`
+假如此时，我们删除 node_modules 和 package-lock.json 文件；只剩下  package.json 文件,然后在执行 npm i
 
-If a partial version is provided as the first version in the inclusive range, then the missing pieces are replaced with zeroes.
+```javascript
+{
+  "name": "package-npm-test",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "scripts": {},
+  "license": "MIT",
+  "dependencies": {
+    "superagent": "^3.5.1"
+  }
+}
+```
 
-- `1.2 - 2.3.4` := `>=1.2.0 <=2.3.4`
+此时查看 package-lock.json 
 
-If a partial version is provided as the second version in the inclusive range, then all versions that start with the supplied parts of the tuple are accepted, but nothing that would be greater than the provided tuple parts.
+```javascript
+"superagent": {
+   "version": "3.8.3",
+```
 
-- `1.2.3 - 2.3` := `>=1.2.3 <2.4.0`
-- `1.2.3 - 2` := `>=1.2.3 <3.0.0`
+查看 node_modules/superagent 中的 package.json
 
-#### X-Ranges `1.2.x` `1.X` `1.2.*` `*`
+```javascript
+"_from": "superagent@^3.5.1",
+"_id": "superagent@3.8.3",
+"version": "3.8.3"
+```
 
-Any of `X`, `x`, or `*` may be used to "stand in" for one of the numeric values in the `[major, minor, patch]` tuple.
+**可以发现，此时生成的新的 package-lock.json 中对于 superagent 的固化是 符合 ^3.5.1 这个版本范围的最大版本**
 
-- `*` := `>=0.0.0` (Any version satisfies)
-- `1.x` := `>=1.0.0 <2.0.0` (Matching major version)
-- `1.2.x` := `>=1.2.0 <1.3.0` (Matching major and minor versions)
+**一定要注意这里，如果某些 npm 包的开发者没有遵循 npm 包发版的规则，在 #次版本# 号中发布了不兼容的内容，那么就特别容易被坑！！！**
 
-A partial version range is treated as an X-Range, so the special character is in fact optional.
+所以在有 package-lock.json 的情况下，这种情况就是可以避免的；
 
-- `""` (empty string) := `*` := `>=0.0.0`
-- `1` := `1.x.x` := `>=1.0.0 <2.0.0`
-- `1.2` := `1.2.x` := `>=1.2.0 <1.3.0`
+#### 场景3 
 
-#### Tilde Ranges `~1.2.3` `~1.2` `~1`
+在场景2 的基础上，修改 package.json 中 superagent 的版本号,如下，然后直接执行 npm i ; (注意此时 原来的 package-lock.json 和 node_modules 都没有删除)
 
-Allows patch-level changes if a minor version is specified on the comparator. Allows minor-level changes if not.
+```javascript
+{
+  "name": "package-npm-test",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "scripts": {},
+  "license": "MIT",
+  "dependencies": {
+    "superagent": "^5.0.2"
+  }
+}
+```
 
-- `~1.2.3` := `>=1.2.3 <1.(2+1).0` := `>=1.2.3 <1.3.0`
-- `~1.2` := `>=1.2.0 <1.(2+1).0` := `>=1.2.0 <1.3.0` (Same as `1.2.x`)
-- `~1` := `>=1.0.0 <(1+1).0.0` := `>=1.0.0 <2.0.0` (Same as `1.x`)
-- `~0.2.3` := `>=0.2.3 <0.(2+1).0` := `>=0.2.3 <0.3.0`
-- `~0.2` := `>=0.2.0 <0.(2+1).0` := `>=0.2.0 <0.3.0` (Same as `0.2.x`)
-- `~0` := `>=0.0.0 <(0+1).0.0` := `>=0.0.0 <1.0.0` (Same as `0.x`)
-- `~1.2.3-beta.2` := `>=1.2.3-beta.2 <1.3.0` Note that prereleases in the `1.2.3` version will be allowed, if they are greater than or equal to `beta.2`. So, `1.2.3-beta.4` would be allowed, but `1.2.4-beta.2` would not, because it is a prerelease of a different `[major, minor, patch]` tuple.
+此时查看 package-lock.json
 
-#### Caret Ranges `^1.2.3` `^0.2.5` `^0.0.4`
+```java
+"superagent": {
+  "version": "5.1.0",
+```
 
-Allows changes that do not modify the left-most non-zero digit in the `[major, minor, patch]` tuple. In other words, this allows patch and minor updates for versions `1.0.0` and above, patch updates for versions `0.X >=0.1.0`, and *no*updates for versions `0.0.X`.
+查看 node_modules/superagent 中的 package.json
 
-Many authors treat a `0.x` version as if the `x` were the major "breaking-change" indicator.
+```javascript
+"_from": "superagent@^5.0.2",
+"_id": "superagent@5.1.0",
+"version": "5.1.0",
+```
 
-Caret ranges are ideal when an author may make breaking changes between `0.2.4` and `0.3.0` releases, which is a common practice. However, it presumes that there will *not*be breaking changes between `0.2.4` and `0.2.5`. It allows for changes that are presumed to be additive (but non-breaking), according to commonly observed practices.
 
-- `^1.2.3` := `>=1.2.3 <2.0.0`
-- `^0.2.3` := `>=0.2.3 <0.3.0`
-- `^0.0.3` := `>=0.0.3 <0.0.4`
-- `^1.2.3-beta.2` := `>=1.2.3-beta.2 <2.0.0` Note that prereleases in the `1.2.3` version will be allowed, if they are greater than or equal to `beta.2`. So, `1.2.3-beta.4` would be allowed, but `1.2.4-beta.2` would not, because it is a prerelease of a different `[major, minor, patch]` tuple.
-- `^0.0.3-beta` := `>=0.0.3-beta <0.0.4` Note that prereleases in the `0.0.3`version *only* will be allowed, if they are greater than or equal to `beta`. So, `0.0.3-pr.2` would be allowed.
 
-When parsing caret ranges, a missing `patch` value desugars to the number `0`, but will allow flexibility within that value, even if the major and minor versions are both `0`.
+综合以上场景，可以得出以下结论：
 
-- `^1.2.x` := `>=1.2.0 <2.0.0`
-- `^0.0.x` := `>=0.0.0 <0.1.0`
-- `^0.0` := `>=0.0.0 <0.1.0`
+1. 在没有 package-lock.json 的时候，直接 npm i ,生成的 package-lock.json 的版本号是以 根据 semver calculator 计算出来的最大版本为准进行固化的；
+2. 在有 package-lock.json 的时候，如果 package.json 中的 主版本号 大于 package-lock.json 中的主版本号，那么会以 package.json 中的版本为主进行安装，同时也会更改 package-lock.json 为主版本号较大版本
 
-A missing `minor` and `patch` values will desugar to zero, but also allow flexibility within those values, even if the major version is zero.
 
-- `^1.x` := `>=1.0.0 <2.0.0`
-- `^0.x` := `>=0.0.0 <1.0.0`
 
 
 

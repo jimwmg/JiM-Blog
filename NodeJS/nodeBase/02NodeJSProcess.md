@@ -192,7 +192,7 @@ console.log(args);
 具体的可以看下
 
 ```javascript
-$ node example/parse.js dev -x 3 -y 4 -n5 -abc --beep=boop foo bar baz
+$ node example/parse.js dev -x 3 -y 4 -n5 -abc --beep=boop foo bar baz --g
 { 
   _: [ 'dev','foo', 'bar', 'baz' ],
   x: 3,
@@ -201,6 +201,7 @@ $ node example/parse.js dev -x 3 -y 4 -n5 -abc --beep=boop foo bar baz
   a: true,
   b: true,
   c: true,
+  g:true,
   beep: 'boop'
 }
 

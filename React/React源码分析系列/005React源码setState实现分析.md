@@ -39,7 +39,7 @@ ReactComponent.prototype.setState = function (partialState, callback) {
 
 这里直接说结果，updater对象其实就是ReactUpdateQueue.js 中暴漏出的ReactUpdateQueue对象；
 
-###2 既然找到了setState之后执行的动作，我们在一步步深入进去
+### 2 既然找到了setState之后执行的动作，我们在一步步深入进去
 
 ```jsx
 class Root extends React.Component {

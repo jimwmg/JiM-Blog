@@ -87,13 +87,13 @@ PluginsHooks.prototype.apply = function(compiler){
     debugger;
   })//syncHook
   compiler.plugin('before-run',function pluginsHooksCb(...args){
-    // 6 before-run Compiler.js [cimpiler,callback]
+    // 6 before-run Compiler.js [compiler,callback]
     debugger;
     let callback = args[1];
     callback();//必须执行该回调，webpack才会继续执行
   })//AsyncSeriesHook
   compiler.plugin('run',function pluginsHooksCb(...args){
-    // 7 run Compiler.js [cimpiler,callback]
+    // 7 run Compiler.js [compiler,callback]
     debugger;
     let callback = args[1];
     callback();//必须执行该回调，webpack才会继续执行
