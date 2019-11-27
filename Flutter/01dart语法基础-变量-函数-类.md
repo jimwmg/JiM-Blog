@@ -459,6 +459,100 @@ void main() {
 
 Getters 和 setters 是用来设置和访问对象属性的特殊 函数。每个实例变量都隐含的具有一个 getter， 如果变量不是 final 的则还有一个 setter。 你可以通过实行 getter 和 setter 来创建新的属性， 使用 `get` 和 `set` 关键字定义 getter 和 setter：
 
+```dart
+class Rectangle {
+  num left;
+  num top;
+  num width;
+  num height;
+
+  Rectangle(this.left, this.top, this.width, this.height);
+
+  // Define two calculated properties: right and bottom.
+  num get right             => left + width;
+      set right(num value)  => left = value - width;
+  num get bottom            => top + height;
+      set bottom(num value) => top = value - height;
+}
+
+main() {
+  var rect = new Rectangle(3, 4, 20, 15);
+  assert(rect.left == 3);
+  rect.right = 12;
+  assert(rect.left == -8);
+}
+```
+
+### 4.3 构造函数
+
+使用new语句来构造一个类，构造函数的名字可能是 `ClassName`，也可以是 `ClassName.otherName`
+
+定义一个和 类 名字一样的方法就定义了一个构造函数；
+
+```dart
+class Example {
+    int x;
+    int y;
+    Example(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+// 但在 Dart 中是可以简化成这样的 (推荐)
+class Example {
+    int x;
+    int y;
+    Example(this.x, this.y);
+}
+```
+
+#### Default constructors（默认构造函数）
+
+如果你没有定义构造函数，则会有个默认构造函数。 默认构造函数没有参数，并且会调用超类的 没有参数的构造函数。
+
+#### Constructors aren’t inherited（构造函数不会继承）
+
+子类不会继承超类的构造函数。 子类如果没有定义构造函数，则只有一个默认构造函数 （没有名字没有参数）。
+
+#### Named constructors（命名构造函数）
+
+使用命名构造函数可以为一个类实现多个构造函数， 或者使用命名构造函数来更清晰的表明你的意图：
+
+```dart
+var example = Example.fromJson({'x': 2, 'y': 2});
+
+class Example {
+    int x;
+    int y;
+    
+    Example(this.x, this.y);
+    
+    // 命名构造函数
+    Example.fromJson(Map json) {
+		x = json['x'];
+        y = json['y'];
+    }
+}
+```
+
+重定向构造函数
+
+```dart
+var example = Example.alongXAxis(0);
+print(example);
+
+class Example {
+    int x;
+    int y;
+    
+    Example(this.x, this.y);
+    
+    // 重定向构造函数，使用冒号调用其他构造函数
+    Example.alongXAxis(int x) : this(x, 0);
+}
+```
+
 
 
 

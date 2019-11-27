@@ -45,6 +45,50 @@ sss 11
 res (3) ["11", "11", "11"]
 ```
 
+在看一个类似的例子
+
+```javascript
+async function sleep(num){
+    return new Promise((resolve,reject) => {
+      setTimeout(() => {
+        resolve()
+      },num * 1000)
+    })
+  }
+  async function startOne(i){
+    return new Promise((resolve,reject) => {
+      setTimeout(() => {
+        console.log(`startOne${i}`);
+        resolve();
+      },1500)
+    })
+  }
+  async function startAll(){
+    console.log('startall');
+    for(let i = 0;i < 5 ; i++){
+      await startOne(i);
+    };
+    await sleep(4);
+    console.log('startAll-end')
+  }
+  startAll()
+```
+
+输出如下
+
+```javascript
+startall
+startOne0  // 以下 0到5  没间隔 1500 ms 输出一次
+startOne1
+startOne2
+startOne3
+startOne4
+// 2000 ms 之后
+startAll-end
+```
+
+
+
 ### 2 如果想要并发请求，那么可以用promise.all
 
 ```javascript

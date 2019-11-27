@@ -216,10 +216,10 @@ fs.writeFileSync('./text.txt',1);//写入文件的内容是 1
 
 ```javascript
 function isDir(filePath){
-  return fs.existSync(filePath) && fs.statSync(filePath).isDirectory();
+  return fs.existsSync(filePath) && fs.statSync(filePath).isDirectory();
 }
 function isFile(filePath){
-  return fs.existSync(filePath) && fs.statSync(filePath).isFile();
+  return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
 }
 ```
 

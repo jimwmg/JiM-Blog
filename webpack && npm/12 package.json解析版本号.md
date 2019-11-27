@@ -217,8 +217,71 @@ A `comparator` is composed of an `operator` and a `version`. The set of primitiv
 1. 在没有 package-lock.json 的时候，直接 npm i ,生成的 package-lock.json 的版本号是以 根据 semver calculator 计算出来的最大版本为准进行固化的；
 2. 在有 package-lock.json 的时候，如果 package.json 中的 主版本号 大于 package-lock.json 中的主版本号，那么会以 package.json 中的版本为主进行安装，同时也会更改 package-lock.json 为主版本号较大版本
 
+### 3  npm install 深刻理解
 
+我们常用的形式可能就是下面这样的
 
+```
+npm install [<@scope>]<name>
+```
 
+这种安装方式仅仅是 `npm install`支持的安装方式中的一种,下面列出了所有的安装情况；
+
+```
+npm install (with no args, in package dir)
+npm install [<@scope>/]<name>
+npm install [<@scope>/]<name>@<tag>
+npm install [<@scope>/]<name>@<version>
+npm install [<@scope>/]<name>@<version range>
+npm install <git-host>:<git-user>/<repo-name>
+npm install <git repo url>
+npm install <tarball file>
+npm install <tarball url>
+npm install <folder>
+
+alias: npm i
+common options: [-P|--save-prod|-D|--save-dev|-O|--save-optional] [-E|--save-exact] [-B|--save-bundle] [--no-save] [--dry-run]
+```
+
+npm 上对于 npm 包的定义如下：
+
+A `package` is:
+
+- a) a folder containing a program described by a `package.json` file
+- b) a gzipped tarball containing (a)
+- c) a url that resolves to (b)
+- d) a `@` that is published on the registry (see `npm-registry`) with (c)
+- e) a `@` (see `npm-dist-tag`) that points to (d)
+- f) a `` that has a "latest" tag satisfying (e)
+- g) a `` that resolves to (a)
+
+比如安装一个 git url
+
+```
+npm install <git repo url>
+npm i git+https://github.com/jimwmg/lerna-repo.git
+```
+
+比如安装一个  本地文件
+
+```
+npm install <folder>
+npm i /Users/learn/learnSPace/lerna-demo/packages/lerna-tool2
+```
+
+安装之后
+
+```json
+"dependencies": {
+    "lerna-root": "git+https://github.com/jimwmg/lerna-repo.git",
+    "lerna-tool2": "file:../lerna-tool2"
+  }
+```
+
+```
+npm i lerna-tool5 
+```
+
+可以看下 `package-lock.json`中的 `lerna-tool5`中的 `requires`字段，这个字段对应的就是  `dependencies`里面的值；
 
 [参考](http://blog.kankanan.com/article/package.json-65874ef6-dependencies-4e2d7684540479cd7248672c53f75f625f0f.html)
