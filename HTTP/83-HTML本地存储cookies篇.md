@@ -12,9 +12,11 @@ layout :
 
 ### 1 HTTP cookie，通常直接叫做cookie，是客户端用来存储数据的一种选项，它既可以在客户端设置也可以在服务器端设置。cookie会跟随任意HTTP请求一起发送。
 
-优点：兼容性好
+Cookie 的作用很好理解，就是用来做**状态存储**的，但它也是有诸多致命的缺陷的：
 
-缺点：一是增加了网络流量；二则是它的数据容量有限，最多只能存储4KB的数据，浏览器之间各有不同；三是不安全。
+1. 容量缺陷。Cookie 的体积上限只有`4KB`，只能用来存储少量的信息。
+2. 性能缺陷。Cookie 紧跟域名，不管域名下面的某一个地址需不需要这个 Cookie ，请求都会携带上完整的 Cookie，这样随着请求数的增多，其实会造成巨大的性能浪费的，因为请求携带了很多不必要的内容。
+3. 安全缺陷。由于 Cookie 以纯文本的形式在浏览器和服务器中传递，很容易被非法用户截获，然后进行一系列的篡改，在 Cookie 的有效期内重新发送给服务器，这是相当危险的。另外，在`HttpOnly`为 false 的情况下，Cookie 信息能直接通过 JS 脚本来读取。
 
 ### 2.cookie的用途及工作原理
 
@@ -97,6 +99,75 @@ expries 表示的是失效时间，准确讲是「时刻」，max-age表示的�
 如果设置了该字段，那么在客户端，就不能通过document.cookies获取；
 
 Cookie都是通过document对象获取的，我们如果能让cookie在浏览器中不可见就可以了，那HttpOnly就是在设置cookie时接受这样一个参数，一旦被设置，在浏览器的document对象中就看不到cookie了。而浏览器在浏览网页的时候不受任何影响，因为Cookie会被放在浏览器头中发送出去(包括Ajax的时候)，应用程序也一般不会在JS里操作这些敏感Cookie的，对于一些敏感的Cookie我们采用HttpOnly，对于一些需要在应用程序中用JS操作的cookie我们就不予设置，这样就保障了Cookie信息的安全也保证了应用。
+
+#### `SameSite` Cookie允许服务器要求某个cookie在跨站请求时不会被发送，从而可以阻止跨站请求伪造攻击
+
+（[CSRF](https://developer.mozilla.org/en-US/docs/Glossary/CSRF)）。
+
+[SameSite](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Cookies)
+
+CSRF:
+
+#### 1. 自动发 GET 请求
+
+黑客网页里面可能有一段这样的代码:
+
+```
+<img src="https://xxx.com/info?user=hhh&count=100">
+复制代码
+```
+
+进入页面后自动发送 get 请求，值得注意的是，这个请求会自动带上关于 xxx.com 的 cookie 信息(这里是假定你已经在 xxx.com 中登录过)。
+
+假如服务器端没有相应的验证机制，它可能认为发请求的是一个正常的用户，因为携带了相应的 cookie，然后进行相应的各种操作，可以是转账汇款以及其他的恶意操作。
+
+#### 2. 自动发 POST 请求
+
+黑客可能自己填了一个表单，写了一段自动提交的脚本。
+
+```html
+<form id='hacker-form' action="https://xxx.com/info" method="POST">
+  <input type="hidden" name="user" value="hhh" />
+  <input type="hidden" name="count" value="100" />
+</form>
+<script>document.getElementById('hacker-form').submit();</script>
+复制代码
+```
+
+同样也会携带相应的用户 cookie 信息，让服务器误以为是一个正常的用户在操作，让各种恶意的操作变为可能。
+
+#### 3. 诱导点击发送 GET 请求
+
+在黑客的网站上，可能会放上一个链接，驱使你来点击:
+
+```
+<a href="https://xxx/info?user=hhh&count=100" taget="_blank">点击进入修仙世界</a>
+复制代码
+```
+
+点击后，自动发送 get 请求，接下来和`自动发 GET 请求`部分同理。
+
+这就是`CSRF`攻击的原理。和`XSS`攻击对比，CSRF 攻击并不需要将恶意代码注入用户当前页面的`html`文档中，而是跳转到新的页面，利用服务器的**验证漏洞**和**用户之前的登录状态**来模拟用户进行操作。
+
+SameSite可以有下面三种值：
+
+```
+**None**
+```
+
+浏览器会在同站请求、跨站请求下继续发送cookies，不区分大小写。
+
+**`Strict`**
+
+浏览器将只发送相同站点请求的cookie(即当前网页URL与请求目标URL完全一致)。如果请求来自与当前location的URL不同的URL，则不包括标记为Strict属性的cookie。
+
+这样也就避免了在 黑客的域名的网页下，向被目标域名 请求的时候，会带上呗攻击域名的 cookies;
+
+```
+Lax
+```
+
+在新版本浏览器中，为默认选项，Same-site cookies 将会为一些跨站子请求保留，如图片加载或者frames的调用，但只有当用户从外部站点导航到URL时才会发送。如link链接
 
 ### 4、如何利用以上属性去设置cookie？
 

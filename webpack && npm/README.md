@@ -23,3 +23,7 @@
 [webpack-速度优化](https://www.ibm.com/developerworks/cn/web/wa-lo-expedite-webpack/index.html)
 
 [webpack文章掘金收藏](https://juejin.im/collection/5bb056c45188253dae00c02a)
+
+[webpack-速度优化](https://github.com/lcxfs1991/blog/issues/2)
+
+[webpack架构解析](https://zhuanlan.zhihu.com/p/36445010)

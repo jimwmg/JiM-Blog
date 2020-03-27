@@ -284,4 +284,46 @@ npm i lerna-tool5
 
 可以看下 `package-lock.json`中的 `lerna-tool5`中的 `requires`字段，这个字段对应的就是  `dependencies`里面的值；
 
+### 4 [peerDependencies ](https://docs.npmjs.com/files/package.json#peerdependencies)
+
+经常我们在安装npm包的时候，会看到这样的警告,说某些npm包必须自己手动安装
+
+```
+npm WARN xxxx requires a peer of xxx but none is installed. You must install peer dependencies yourself.
+```
+
+In some cases, you want to express the compatibility of your package with a host tool or library, while not necessarily doing a `require` of this host. This is usually referred to as a *plugin*. Notably, your module may be exposing a specific interface, expected and specified by the host documentation.
+
+比如有如下 npm 包，那么当安装这个npm包的时候，`npm lerna-tool@3.0.0 -S`就会提示
+
+```
+npm WARN lerna-tool4@3.0.0 requires a peer of lerna-tool1@1.0.7 but none is installed. You must install peer dependencies yourself.
+```
+
+
+
+```json
+{
+  "name": "lerna-tool4",
+  "version": "3.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    
+  },
+  "peerDependencies":{
+    "lerna-tool1":"1.0.7"
+  }
+}
+
+```
+
+
+
 [参考](http://blog.kankanan.com/article/package.json-65874ef6-dependencies-4e2d7684540479cd7248672c53f75f625f0f.html)

@@ -18,14 +18,14 @@ categories: vue
 这个案例可以看出，如果是多出口，那么对应于同一个路由会对应多个组件；
 
 ```javascript
-//这里注意component 和  components的区别；vue-router库内部再生成路由 record 的时候，会优先取route.components ,如果不存在则会取  { default: route.component };
+//这里注意component 和  components的区别；vue-router库内部再生成路由 record 的时候，会优先取route.components , 如果不存在则会取  { default: route.component };
 const router = new VueRouter({
   mode: 'history',
   routes:[
     { path: '/', component: Home },
     { path: '/foo', component: Foo },
     { path: '/bar', component: Bar },
-    {path: '/other',
+    { path: '/other',
      components: {
        default: Home,
        a: Bar,

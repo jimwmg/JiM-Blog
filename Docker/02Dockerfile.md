@@ -50,6 +50,16 @@ RUN echo '<h1>Hello, Docker!</h1>' > /usr/share/nginx/html/index.html
 
 - *exec* 格式：`RUN ["可执行文件", "参数1", "参数2"]`，这更像是函数调用中的格式。
 
+[RUN](https://docs.docker.com/engine/reference/builder/#run) is an image build step, the state of the container after a `RUN` command will be committed to the docker image. A Dockerfile can have many `RUN` steps that layer on top of one another to build the image.
+
+[CMD](https://docs.docker.com/engine/reference/builder/#cmd) is the command the container executes by default when you launch the built image. A Dockerfile can only have one `CMD`. The `CMD` can be overridden when starting a container with `docker run $image $other_command
+
+注意，指定了`CMD`命令以后，`docker container run`命令就不能附加命令了（比如前面的`/bin/bash`），否则它会覆盖`CMD`命令。现在，启动容器可以使用下面的命令。
+
+
+
+[ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint) is also closely related to `CMD` and can modify the way a container starts an imag
+
 #### WORKDIR
 
 使用 `WORKDIR` 指令可以来指定工作目录（或者称为当前目录），**以后各层的当前目录就被改为指定的目录**，如该目录不存在，`WORKDIR` 会帮你建立目录。

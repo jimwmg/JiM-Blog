@@ -1,5 +1,5 @@
 ---
-
+c
 ---
 
 [参考文档](https://yeasy.gitbooks.io/docker_practice/image/build.html)
@@ -108,10 +108,18 @@ docker run --name webserverV1 -d -p 81:80 nginx:v1
 ### docker container
 
 ```javascript
+docker container create
+Usage:	docker container create [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Create a new container
 docker container create centos //创建一个容器，此时 docker container ls 并没有这个容器，因为还没有启动
-docker container xxx //是上面哪行命令的返回值
+docker container start xxx //是上面哪行命令的返回值
 docker container exec -it xxx //进入容器内部
 
+docker container run 
+Usage:	docker container run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run a command in a new container
 ```
 
 

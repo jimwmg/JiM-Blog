@@ -283,7 +283,7 @@ let vm = new Vue({
 
 由于beforeCreate该函数是Vue构造函数Vue.options.beforeCreate  Vue.options.destroyed上，所以在实例化Vue组件的时候，就会在`vm.$options.beforeCreate.    vm.$ptions.destroy`有这两个生命周期函数
 
-由于子组件中没有router这个属性，所以即时子组件上有这个beforeCreate钩子函数，也不会在此对router这个对象执行init函数；
+由于子组件中没有router这个属性，所以即使子组件上有这个beforeCreate钩子函数，也不会在此对router这个对象执行init函数；
 
 ```javascript
 Vue.mixin({

@@ -418,7 +418,7 @@ console.log( 'The area of a circle of radius 4 is ' + circle.area(4));
 
 这就是为什么我们直接在终端输入命令    node filename.js的时候，可以直接调用 exports require module等
 
-接下来我们来看下require加载文件的查找策略:
+### 3 node模块解析规则
 
 #### 从文件模块缓存中加载
 
@@ -440,3 +440,35 @@ require方法接受以下几种参数的传递：
 - ./mod或../mod，相对路径的文件模块。
 - /pathtomodule/mod，绝对路径的文件模块。
 - mod，非原生模块的文件模块。
+
+**绝对路径：**require支持以（/）或者盘符（C:）开头的绝对路径
+
+**相对路径：**支持以（./开头的相对路径）
+
+==**注意：**==但这两种路径在模块之间建立了强耦合关系，一旦某个模块文件的存放位置需要变更，使用该模块的其它模块的代码也需要跟着调整，变得牵一发动全身，不建议使用。
+
+**第三种形式的路径（常用方法）：**写法类似于`foo/bar`，按照以下规则进行解析，直到找到模块
+
+- **内置模块：**如果传递给require函数的是`NodeJS内`置模块名称，不做路径解析，直接返回内部模块的导出对象，例如`require('fs')`。
+
+- **node_modules目录：**`NodeJS`定义了一个特殊的node_modules目录用于存放模块。例如某个模块的绝对路径是`/home/user/hello.js`，在该模块中使用`require('foo/bar')`方式加载模块时，则`NodeJS`依次尝试使用以下路径
+
+  - `/home/user/node_modules/foo/bar`
+  - `/home/node_modules/foo/bar`
+  - `/node_modules/foo/bar`
+
+- **NODE_PATH环境变量：**与PATH环境变量类似，`NodeJS`允许通过NODE_PATH环境变量来指定额外的模块搜索路径。NODE_PATH环境变量中包含一到多个目录路径，路径之间在Linux下使用`:`分隔，在Windows下使用`;`分隔。例如定义了以下NODE_PATH环境变量：
+
+  - `NODE_PATH=/home/user/lib:/home/lib`
+
+  当使用`require('foo/bar')`的方式加载模块时，则NodeJS依次尝试以下路径。
+
+  - `/home/user/lib/foo/bar`
+  - `/home/lib/foo/bar`
+
+对于如何设置 `NODE_PATH` 
+
+```javascript
+"exec": "export NODE_PATH=/Users/path/to/dir && node xxx.js",
+```
+
