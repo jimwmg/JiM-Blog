@@ -143,6 +143,20 @@ myButton.addEventListener('click', function(){alert('Hello world');}, false);
 
 #### 事件对象参数-其他事件 
 
+## Window 事件属性
+
+针对 window 对象触发的事件（应用到 <body> 标签）：
+
+| 属性                                                         | 值     | 描述                                  |
+| :----------------------------------------------------------- | :----- | :------------------------------------ |
+| onerror                                                      | script | 在错误发生时运行的脚本。              |
+| onhaschange                                                  | script | 当文档已改变时运行的脚本。            |
+| [onload](https://www.w3school.com.cn/tags/event_onload.asp)  | script | 页面结束加载之后触发。                |
+| onmessage                                                    | script | 在消息被触发时运行的脚本。            |
+| onpopstate                                                   | script | 当窗口历史记录改变时运行的脚本。      |
+| [onresize](https://www.w3school.com.cn/tags/event_onresize.asp) | script | 当浏览器窗口被调整大小时触发。        |
+| onstorage                                                    | script | 在 Web Storage 区域更新后运行的脚本。 |
+
 #### MouseEvent (DragEvent、WheelEvent )
 
 onclick  ondrag  ondragstart  ondragend ondragover ondrageave ondragenter onmousedown  onmouseup  onmousemove onmousewheel  
@@ -157,7 +171,35 @@ ontouchstart  ontouchend   ontouchmove  ontouchcancel
 
 对于这些事件，事件对象参数都是基于基础事件扩展的，有很多对应该事件的属性和方法，具体参考[Event](https://developer.mozilla.org/zh-CN/docs/Web/API/Event)
 
+## Media 事件
 
+由媒介（比如视频、图像和音频）触发的事件（适用于所有 HTML 元素，但常见于媒介元素中，比如 <audio>、<embed>、<img>、<object> 以及 <video>）:
+
+| 属性               | 值     | 描述                                                         |
+| :----------------- | :----- | :----------------------------------------------------------- |
+| onabort            | script | 在退出时运行的脚本。                                         |
+| oncanplay          | script | 当文件就绪可以开始播放时运行的脚本（缓冲已足够开始时）。     |
+| oncanplaythrough   | script | 当媒介能够无需因缓冲而停止即可播放至结尾时运行的脚本。       |
+| ondurationchange   | script | 当媒介长度改变时运行的脚本。                                 |
+| onemptied          | script | 当发生故障并且文件突然不可用时运行的脚本（比如连接意外断开时）。 |
+| onended            | script | 当媒介已到达结尾时运行的脚本（可发送类似“感谢观看”之类的消息）。 |
+| onerror            | script | 当在文件加载期间发生错误时运行的脚本。                       |
+| onloadeddata       | script | 当媒介数据已加载时运行的脚本。                               |
+| onloadedmetadata   | script | 当元数据（比如分辨率和时长）被加载时运行的脚本。             |
+| onloadstart        | script | 在文件开始加载且未实际加载任何数据前运行的脚本。             |
+| onpause            | script | 当媒介被用户或程序暂停时运行的脚本。                         |
+| onplay             | script | 当媒介已就绪可以开始播放时运行的脚本。                       |
+| onplaying          | script | 当媒介已开始播放时运行的脚本。                               |
+| onprogress         | script | 当浏览器正在获取媒介数据时运行的脚本。                       |
+| onratechange       | script | 每当回放速率改变时运行的脚本（比如当用户切换到慢动作或快进模式）。 |
+| onreadystatechange | script | 每当就绪状态改变时运行的脚本（就绪状态监测媒介数据的状态）。 |
+| onseeked           | script | 当 seeking 属性设置为 false（指示定位已结束）时运行的脚本。  |
+| onseeking          | script | 当 seeking 属性设置为 true（指示定位是活动的）时运行的脚本。 |
+| onstalled          | script | 在浏览器不论何种原因未能取回媒介数据时运行的脚本。           |
+| onsuspend          | script | 在媒介数据完全加载之前不论何种原因终止取回媒介数据时运行的脚本。 |
+| ontimeupdate       | script | 当播放位置改变时（比如当用户快进到媒介中一个不同的位置时）运行的脚本。 |
+| onvolumechange     | script | 每当音量改变时（包括将音量设置为静音）时运行的脚本。         |
+| onwaiting          | script | 当媒介已停止播放但打算继续播放时（比如当媒介暂停已缓冲更多数据）运行脚本 |
 
 
 

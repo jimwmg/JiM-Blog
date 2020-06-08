@@ -18,6 +18,8 @@
 
 [babel-loader-webpack文档](https://webpack.docschina.org/loaders/babel-loader/)
 
+[@babel/parser-options配置](https://babeljs.io/docs/en/babel-parser)
+
 周一来了尝试下这个解决方案；
 
 

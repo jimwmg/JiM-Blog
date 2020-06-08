@@ -231,7 +231,7 @@ Babel 默认只转换新的 JavaScript 语法，而不转换新的 API。例如�
 
 ```javascript
 
-//语法：比如async await let const 等等
+//语法：比如async await let const 箭头函数 等等
 let o1 = {
   name: 'jim'
 };

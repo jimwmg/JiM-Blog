@@ -524,7 +524,7 @@ dist
       return installedChunkData[2] 
     }
     //接下来是开始创建加载chunk的代码
-    var head = document.getElementByTagName('head')[0];
+    var head = document.getElementsByTagName('head')[0];
     var script = document.createElement('script');
     script.type = 'text/javascript';
     script.async = true;

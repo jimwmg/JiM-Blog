@@ -666,3 +666,4 @@ class AsyncSeriesHook {
 
 [tapable-0.29源码](https://www.cnblogs.com/xiaokebb/p/8418905.html)
 
+[tapable-案例](https://juejin.im/post/5be90b84e51d457c1c4df852)

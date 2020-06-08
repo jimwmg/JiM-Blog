@@ -1,5 +1,7 @@
 学习资料汇总
 
+[webpack升级文档](https://webpack.js.org/migrate/)
+
 ### [深入浅出webpack](http://webpack.wuhaolin.cn/3%E5%AE%9E%E6%88%98/3-17%E9%80%9A%E8%BF%87Node.jsAPI%E5%90%AF%E5%8A%A8Webpack.html)
 
 [webpack构建案例详解](https://juejin.im/post/5c25b76ef265da614b120ed0?utm_medium=hao.caibaojian.com&utm_source=hao.caibaojian.com&from=groupmessage&isappinstalled=0)
@@ -27,3 +29,6 @@
 [webpack-速度优化](https://github.com/lcxfs1991/blog/issues/2)
 
 [webpack架构解析](https://zhuanlan.zhihu.com/p/36445010)
+
+[webpack5](https://notes.jindll.com/webpack/35%20Webpack%205.0.html#%E9%A2%84%E6%9C%9F](https://notes.jindll.com/webpack/)
+

@@ -363,7 +363,7 @@ PluginsHooks.prototype.apply = function(compiler){
     })
     compilation.plugin('chunk-hash',function(...args){
       debugger;
-    })
+    f
     compilation.plugin('module-assets',function(...args){
       debugger;
     })

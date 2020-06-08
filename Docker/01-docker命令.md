@@ -122,6 +122,10 @@ Usage:	docker container run [OPTIONS] IMAGE [COMMAND] [ARG...]
 Run a command in a new container
 ```
 
+````
+ d  : 可以清理掉所有处于终止状态的容器
+````
+
 
 
 ### 镜像上下文的概念

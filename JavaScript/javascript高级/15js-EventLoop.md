@@ -17,6 +17,14 @@ title: js Event-Loop
 
 浏览器是多进程的，浏览器之所以能够运行，是因为系统给浏览器分配了资源，这些资源包括电脑的 cpu  内存等；
 
+![](../../img/event1.png)
+
+基本执行流程
+
+![](../../img/event2.png)
+
+
+
 ![](../../img/eventloop.png)
 
 浏览器是多进程的，每一个应用程序都会分别有很多的功能模块，这些功能模块实际上是通过`子进程`来实现的。 对于这种`子进程`的扩展方式，我们可以称这个应用程序是`多进程`的。
@@ -72,10 +80,102 @@ title: js Event-Loop
 - 当前`宏任务`执行完毕，开始检查渲染，然后`GUI线程`接管渲染
 - 渲染完毕后，`JS线程`继续接管，开始下一个`宏任务`（从事件队列中获取）
 
+```javascript
+document.addEventListener('click', function(){
+    Promise.resolve().then(()=> console.log(1));
+    console.log(2);
+})
 
+document.addEventListener('click', function(){
+    Promise.resolve().then(()=> console.log(3));
+    console.log(4);
+})
+//2 1 4 3
+```
 
+```javascript
+Promise.resolve().then(()=>{
+  console.log('Promise1')
+  setTimeout(()=>{
+    console.log('setTimeout2')
+  },0)
+})
+setTimeout(()=>{
+  console.log('setTimeout1')
+  Promise.resolve().then(()=>{
+    console.log('Promise2')
+  })
+},0)
+/*
+最后输出结果是 Promise1，setTimeout1，Promise2，setTimeout2
 
+一开始执行栈的同步任务（这属于宏任务）执行完毕，会去查看是否有微任务队列，上题中存在(有且只有一个)，然后执行微任务队列中的所有任务输出 Promise1，同时会生成一个宏任务 setTimeout2
+然后去查看宏任务队列，宏任务 setTimeout1 在 setTimeout2 之前，先执行宏任务 setTimeout1，输出 setTimeout1
+在执行宏任务 setTimeout1 时会生成微任务 Promise2 ，放入微任务队列中，接着先去清空微任务队列中的所有任务，输出 Promise2
+清空完微任务队列中的所有任务后，就又会去宏任务队列取一个，这回执行的是 setTimeout2
+*/
+```
 
- 
+### 3.NodeJS-event-loop
+
+浏览器和node差异：
+
+![](../../img/event3.png)
+
+浏览器
+
+```javascript
+setTimeout(()=>{
+    console.log('timer1')
+    Promise.resolve().then(function() {
+        console.log('promise1')
+    })
+}, 20)
+setTimeout(()=>{
+    console.log('timer2')
+    Promise.resolve().then(function() {
+        console.log('promise2')
+    })
+}, 20)
+//time1  promise1  timer2  promise2
+```
+
+NodeJS
+
+```javascript
+setTimeout(()=>{
+  console.log('timer1')
+  Promise.resolve().then(function() {
+      console.log('promise1')
+  })
+}, 20)
+setTimeout(()=>{
+  console.log('timer2')
+  Promise.resolve().then(function() {
+      console.log('promise2')
+  })
+}, 20)
+//timer1  timer2  promise1 promise2
+```
+
+```javascript
+setTimeout(()=>{
+  console.log('timer1')
+  Promise.resolve().then(function() {
+      console.log('promise1')
+  })
+}, 20)
+setTimeout(()=>{
+  console.log('timer2')
+  Promise.resolve().then(function() {
+      console.log('promise2')
+  })
+}, 20)
+//timer1 promise1 timer2 promise2
+```
+
+[知乎-event-loop](https://zhuanlan.zhihu.com/p/33058983)
+
+参考：https://mp.weixin.qq.com/s/T6TUgwBlfkWftb9phoH_nA
 
  

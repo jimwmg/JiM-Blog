@@ -2,7 +2,68 @@
 title:shell 命令使用总结
 ---
 
+## 基本命令汇总
+
+[参考](http://www.magedu.com/74170.html)
+
+文件和目录操作类
+
+```
+ls(-a -l -r -R -t -n ) cd pwd cp(-i -r -f )  touch(-c -a -m)  mkdir(-p -v -m)  mv(-i )
+rm(-r -f -i)  rmdir(-p -v ) tree  
+```
+
+文本类
+
+```
+cat less  head tail  stat
+```
+
+日期类
+
+```
+语法格式：Pdate [OTION]… [+FORMAT]
+%F 以年-月-日显示 。例如
+[root@dxl ~ 11:10:31]# date +%F
+2017-09-17
+%T  时间，包含时分秒;  %Y  年份，四位显示 ; %m  月份，01-12显示 ; %d   日期，01-31显示 ;
+%H  小时，00-23显示 ;%M  分钟00-59显示 ; %S  秒
+```
+
+网络相关类
+
+```
+ifconfig
+ping
+```
+
+搜索查询类
+
+```
+file help man  info which whereis  who history  tty
+```
+
+权限相关
+
+```
+chomd 
+```
+
+
+
 ## 基本操作
+
+### file 判断某个命令是内部命令还是外部命令
+
+```
+type man
+man is /usr/bin/man
+ didi@localhost  ~/learn/learnSPace/17learn-linux  type node
+node is /Users/didi/.nvm/versions/node/v11.7.0/bin/node
+ didi@localhost  ~/learn/learnSPace/17learn-linux  
+```
+
+
 
 ### export
 
@@ -429,6 +490,12 @@ cat 命令用于连接文件并打印到标准输出设备上。
 ### mkdir 
 
 创建目录
+
+-p  通俗地说对于不存在的父和子目录一起创建出来  mkdir a/b/c  如果不带 -p  则无法创建
+
+-v 显示过程
+
+-m 直接给定权限
 
 ### rmdir
 

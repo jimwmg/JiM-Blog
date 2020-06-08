@@ -23,7 +23,7 @@ RUN echo '<h1>Hello, Docker!</h1>' > /usr/share/nginx/html/index.html
 docker build -t nginx:v1 .
 ```
 
-这个命令表示我们新建了一个 image,此时在执行 `docker iamge ls `
+这个命令表示我们新建了一个 image,此时在执行 `docker image ls `
 
 ```
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE

@@ -9,6 +9,31 @@ HTML最基础BOM
 Window 对象表示浏览器中打开的窗口。
 
 如果文档包含框架（frame 或 iframe 标签），浏览器会为 HTML 文档创建一个 window 对象，**并为每个框架创建一个额外的 window 对象。**
+#### Window事件
+
+## Window 事件属性
+
+针对 window 对象触发的事件（应用到 <body> 标签）：
+
+| 属性                                                         | 值     | 描述                                             |
+| :----------------------------------------------------------- | :----- | :----------------------------------------------- |
+| [onafterprint](https://www.w3school.com.cn/tags/event_onafterprint.asp) | script | 文档打印之后运行的脚本。                         |
+| [onbeforeprint](https://www.w3school.com.cn/tags/event_onbeforeprint.asp) | script | 文档打印之前运行的脚本。                         |
+| onbeforeunload                                               | script | 文档卸载之前运行的脚本。                         |
+| onerror                                                      | script | 在错误发生时运行的脚本。                         |
+| onhaschange                                                  | script | 当文档已改变时运行的脚本。                       |
+| [onload](https://www.w3school.com.cn/tags/event_onload.asp)  | script | 页面结束加载之后触发。                           |
+| onmessage                                                    | script | 在消息被触发时运行的脚本。                       |
+| onoffline                                                    | script | 当文档离线时运行的脚本。                         |
+| ononline                                                     | script | 当文档上线时运行的脚本。                         |
+| onpagehide                                                   | script | 当窗口隐藏时运行的脚本。                         |
+| onpageshow                                                   | script | 当窗口成为可见时运行的脚本。                     |
+| onpopstate                                                   | script | 当窗口历史记录改变时运行的脚本。                 |
+| onredo                                                       | script | 当文档执行撤销（redo）时运行的脚本。             |
+| [onresize](https://www.w3school.com.cn/tags/event_onresize.asp) | script | 当浏览器窗口被调整大小时触发。                   |
+| onstorage                                                    | script | 在 Web Storage 区域更新后运行的脚本。            |
+| onundo                                                       | script | 在文档执行 undo 时运行的脚本。                   |
+| [onunload](https://www.w3school.com.cn/tags/event_onunload.asp) | script | 一旦页面已下载时触发（或者浏览器窗口已被关闭）。 |
 
 #### Window 对象集合
 

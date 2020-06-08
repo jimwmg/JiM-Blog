@@ -4,6 +4,10 @@ title: XSS 和 CSRF
 
 【转】[原文链接](https://mp.weixin.qq.com/s/Rf4dag7Z1rFNl4LxbAjyqw)
 
+[前端安全系列（一）：如何防止XSS攻击？](https://juejin.im/post/5bad9140e51d450e935c6d64)
+
+[一个神秘URL酿大祸，差点让我背锅！](https://juejin.im/post/5ed98cedf265da771b2fe88f)
+
 ### 1 在web安全中，XSS 和 CSRF是最常见的攻击方式；
 
 XSS( Cross Site Script) : 跨站脚本攻击，是指攻击者在网站注入恶意的客户端代码，通过恶意脚本对客户端网页进行篡改，从而在用户浏览网页的时候，对用户浏览器进行控制或者获取用户隐私数据的一种攻击方式；
@@ -15,6 +19,10 @@ CSRF(Cross Site Request Forgery) : 跨站请求伪造，是一种劫持受信任
 ### 2 XSS(Cross Site Script)
 
 #### 2.1 分类： 反射型，存储型，基于DOM;
+
+反射型 XSS 漏洞常见于通过 URL 传递参数的功能，如网站搜索、跳转等。
+
+由于需要用户主动打开恶意的 URL 才能生效，攻击者往往会结合多种手段诱导用户点击。
 
 * 反射型：反射型XSS只是简单的把**用户输入的数据反射给浏览器**，这种攻击方式往往需要攻击者诱惑用户点击一个链接  或者  提交一个表单  ，然后注入脚本进入被攻击者的网站；被注入的脚本可能获取用户的隐私数据（如cookies)
 
@@ -119,6 +127,7 @@ http://example.com/withdraw?account=jim&amount=10000&for=attack
 这就是`CSRF`攻击的原理。和`XSS`攻击对比，CSRF 攻击并不需要将恶意代码注入用户当前页面的`html`文档中，而是跳转到新的页面，利用服务器的**验证漏洞**和**用户之前的登录状态**来模拟用户进行操作。
 
 #### 3.2 防范
+[参考](https://github.com/CodeLittlePrince/blog/issues/6)
 
 * **验证码**
 
@@ -139,6 +148,26 @@ http://example.com/withdraw?account=jim&amount=10000&for=attack
 HTTP头中有一个Referer字段，这个字段用以标明请求来源于哪个地址。在处理敏感数据请求时，通常来说，Referer字段应和请求的地址位于同一域名下。以上文银行操作为例，Referer字段地址通常应该是转账按钮所在的网页地址，应该也位于www.examplebank.com之下。而如果是CSRF攻击传来的请求，Referer字段会是包含恶意网址的地址，不会位于www.examplebank.com之下，这时候服务器就能识别出恶意的访问。
 
 这种办法简单易行，工作量低，仅需要在关键访问处增加一步校验。但这种办法也有其局限性，因其完全依赖浏览器发送正确的Referer字段。虽然http协议对此字段的内容有明确的规定，但并无法保证来访的浏览器的具体实现，亦无法保证浏览器没有安全漏洞影响到此字段。并且也存在攻击者攻击某些浏览器，篡改其Referer字段的可能。
+
+0x01 Referer为空的情况
+解决方案：
+
+利用ftp://,http://,https://,file://,javascript:,data:这个时候浏览器地址栏是file://开头的，如果这个HTML页面向任何http站点提交请求的话，这些请求的Referer都是空的。
+
+利用https协议（https向http跳转的时候Referer为空）
+
+1
+<iframe src="https://xxxxx.xxxxx/attack.php">
+0x02 判断Referer是某域情况下绕过
+比如你找的csrf是xxx.com 验证的referer是验证的*.xx.com 可以找个二级域名 之后<img "csrf地址"> 之后在把文章地址发出去 就可以伪造。
+
+0x03 判断Referer是否存在某关键词
+Referer判断存在不存在google.com这个关键词
+在网站新建一个google.com目录 把CSRF存放在google.com目录,即可绕过
+
+0x04 判断referer是否有某域名
+判断了Referer开头是否以126.com以及126子域名 不验证根域名为126.com 那么我这里可以构造子域名x.126.com.xxx.com作为蠕虫传播的载体服务器，即可绕过。
+
 
 * **添加 token 验证**
 

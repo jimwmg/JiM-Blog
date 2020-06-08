@@ -269,3 +269,6 @@ module.exports = [ serverConfig, clientConfig ];
     // 可以通过  npm run build  执行 webpack 命令
 ```
 
+### 7.name
+
+https://webpack.js.org/configuration/other-options/#name

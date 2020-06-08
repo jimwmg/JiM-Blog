@@ -12,7 +12,7 @@ var NULL = valuePromise(null);
 var UNDEFINED = valuePromise(undefined);
 var ZERO = valuePromise(0);
 var EMPTYSTRING = valuePromise('');
-
+//function noop() {}
 function valuePromise(value) {
   var p = new Promise(Promise._noop);
   p._state = 1;
@@ -68,7 +68,6 @@ console.log('one');
 // one
 // two
 // three
-//为什么不是 two one three 
 ```
 
 从promise源码中可以看到Promise.resolve() 返回的结果p

@@ -8,6 +8,9 @@ updated :
 layout : 
 ---
 
+Cookie 同源策略
+Cookie中的同源只关注域名，忽略协议和端口。所以
+https://localhost:8080/和http://localhost:8081/的Cookie是共享的
 本地存储cookies篇
 
 ### 1 HTTP cookie，通常直接叫做cookie，是客户端用来存储数据的一种选项，它既可以在客户端设置也可以在服务器端设置。cookie会跟随任意HTTP请求一起发送。
