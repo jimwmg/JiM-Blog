@@ -222,4 +222,22 @@ function isFile(filePath){
   return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
 }
 ```
+还有以下这种，注意错误捕获
+```javascript
+function tryStat(path) {
+  debug('stat "%s"', path);
+
+  try {
+    return fs.statSync(path);
+  } catch (e) {
+    return undefined;
+  }
+}
+
+let stat = tryStat(path);
+
+if (stat && stat.isFile()) {
+  return path;
+}
+```
 

@@ -41,20 +41,22 @@ ES6 的有些数据结构原生具备 Iterator 接口（比如数组），即不
 * 类数组对象部署 遍历器接口是可以使用 for-of 遍历器的
 * 不是类数组对象，即使部署了遍历器接口也是不能使用 for - of 循环的
 
+注意下这两个【类数组对象】
 ```javascript
-var o = {0:'jhon',1:12,length:2, [Symbol.iterator]: Array.prototype[Symbol.iterator]}
+var o = {0:'jhon',1:12,length:4, [Symbol.iterator]: Array.prototype[Symbol.iterator]}
 for(let v of o) {
     console.log(v);
 }
-// 可以
+// 可以 输出 jhon  12  undefined undefined  
 ```
 
 ```javascript
-var o = {1:'fff',name:'jhon',age:12,length:2, [Symbol.iterator]:Array.prototype[Symbol.iterator]}
+var o = {1:'fff',name:'jhon',age:12,length:4, [Symbol.iterator]:Array.prototype[Symbol.iterator]}
 for(let v of o) {
     console.log(v);
 }
-// 可以，只是不会遍历属性不是数字的，并且长度之外的
+// 可以，只是不会遍历属性不是数字的，并且长度之外的 ;
+// 输出  undefined fff  undefined  undefined
 ```
 
 ### 4 for-of 迭代可迭代的对象的时候，如果可迭代对象动态变化，for-of也会遍历到动态变化的值
@@ -70,3 +72,26 @@ for(let v of numArr) {
 }
 ```
 
+### 5 for-of   for-in的区别
+ 
+for of 迭代 Map Set  Array  String 等此类数据，他们共同的特点都是可迭代对象，通俗来讲，对应到数组来说，都有类似下标为 0,1,2... 的可迭代顺序，比如上面提到的类数组对象
+```javascript
+Object.prototype.objCustom = function() {}; 
+Array.prototype.arrCustom = function() {};
+
+let iterable = [3, 5, 7];
+iterable.foo = 'hello';
+
+for (let i in iterable) {
+  console.log(i); // logs 0, 1, 2, "foo", "arrCustom", "objCustom"
+}
+
+for (let i in iterable) {
+  if (iterable.hasOwnProperty(i)) {
+    console.log(i); // logs 0, 1, 2, "foo"
+  }
+}
+
+for (let i of iterable) {
+  console.log(i); // logs 3, 5, 7
+```

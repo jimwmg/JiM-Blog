@@ -32,7 +32,7 @@ events模块只提供了一个对象: events.EventEmitter .该对象的核心就
 
 events.EventEmitter 对象提供了多个属性，比如on可以绑定事件 emit用于触发事件,当事件触发的时候，注册到这个事件的监听器会被依次调用，事件参数作为回调函数参数传递；
 
-on(event,listener)   emit(event,arg1,arg2,····)
+`on(event,listener)   emit(event,arg1,arg2,····)`
 
 ```javascript
 var events = require('events');

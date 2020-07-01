@@ -68,7 +68,7 @@ Object.defineProperty(obj,"name",{
 //等价于如下:
 var obj = {};
 Object.defineProperty(obj,"name",{
-    value : undefined,
+  value : undefined,
 	writable : false ,
 	configurable : false ,
 	enumerable : false

@@ -111,3 +111,11 @@ vis是一款基于webapck-dashboard的webpack性能分析插件，性能分析�
 ### 8 webpack-parallel-uglify-plugin
 
 [webpack-parallel-uglify-plugin](https://www.npmjs.com/package/webpack-parallel-uglify-plugin)
+
+### 9.[script-ext-html-webpack-plugin](https://www.npmjs.com/package/script-ext-html-webpack-plugin)
+
+### 10.按需引用插件
+
+### (https://www.npmjs.com/package/babel-plugin-import)
+
+https://github.com/lodash/lodash-webpack-plugin
