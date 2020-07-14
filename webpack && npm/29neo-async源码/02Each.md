@@ -1,0 +1,73 @@
+
+
+
+
+```javascript
+ function eachSeries(collection, iterator, callback) {
+    callback = onlyOnce(callback || noop);
+    var size, key, keys, iter, item, iterate;
+    var sync = false;
+    var completed = 0;
+
+    if (isArray(collection)) {
+      size = collection.length;
+      iterate = iterator.length === 3 ? arrayIteratorWithIndex : arrayIterator;
+    } else if (!collection) {
+    } else if (iteratorSymbol && collection[iteratorSymbol]) {
+      size = Infinity;
+      iter = collection[iteratorSymbol]();
+      iterate = iterator.length === 3 ? symbolIteratorWithKey : symbolIterator;
+    } else if (typeof collection === obj) {
+      keys = nativeKeys(collection);
+      size = keys.length;
+      iterate = iterator.length === 3 ? objectIteratorWithKey : objectIterator;
+    }
+    if (!size) {
+      return callback(null);
+    }
+    iterate();
+
+    function arrayIterator() {
+      iterator(collection[completed], done);
+    }
+
+    function arrayIteratorWithIndex() {
+      iterator(collection[completed], completed, done);
+    }
+
+    function symbolIterator() {
+      item = iter.next();
+      item.done ? callback(null) : iterator(item.value, done);
+    }
+
+    function symbolIteratorWithKey() {
+      item = iter.next();
+      item.done ? callback(null) : iterator(item.value, completed, done);
+    }
+
+    function objectIterator() {
+      iterator(collection[keys[completed]], done);
+    }
+
+    function objectIteratorWithKey() {
+      key = keys[completed];
+      iterator(collection[key], key, done);
+    }
+
+    function done(err, bool) {
+      if (err) {
+        callback(err);
+      } else if (++completed === size || bool === false) {
+        iterate = throwError;
+        callback(null);
+      } else if (sync) {
+        nextTick(iterate);
+      } else {
+        sync = true;
+        iterate();
+      }
+      sync = false;
+    }
+  }
+```
+

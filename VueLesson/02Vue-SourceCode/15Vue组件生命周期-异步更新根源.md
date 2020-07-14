@@ -53,49 +53,49 @@ App.vue
 
 ```vue
 <template>
-    <transition name="router-fade" mode="out-in">
-        <keep-alive>
-            <router-view v-if="$route.meta.keepAlive"></router-view>
-        </keep-alive>
-    </transition>
-    <transition name="router-fade" mode="out-in">
-        <router-view v-if="!$route.meta.keepAlive"></router-view>
-    </transition>
+<transition name="router-fade" mode="out-in">
+  <keep-alive>
+    <router-view v-if="$route.meta.keepAlive"></router-view>
+  </keep-alive>
+  </transition>
+<transition name="router-fade" mode="out-in">
+  <router-view v-if="!$route.meta.keepAlive"></router-view>
+  </transition>
 </template>
 <script>
-  	export default {
-    	
-		beforeCreate(){
-			console.log('APP.Vue BeforeCreate')
-		},
-		created(){
-			console.log('APP.Vue Created')
-		},
-		beforeMount(){
-			console.log('APP.vue beforeMounted')
-		},
-		mounted(){
-			console.log('APP.vue mounted')
-		},
-		activated(){
-			console.log('APP.vue actived')
-		},
-		deactivated(){
-			console.log('APP.vue deactived')
-		},
-        updated(){
-        	console.log('APP.vue updated')
-    	},
-		beforeDestroy(){
-			console.log('APP.vue beforeDestroy')
-		},
-		beforeDestroy(){
-			console.log('APP.vue beforeDestroy')
-		},
-		destroyed(){
-			console.log('App.vue destroyed')
-		}
-  	}
+  export default {
+
+    beforeCreate(){
+      console.log('APP.Vue BeforeCreate')
+    },
+    created(){
+      console.log('APP.Vue Created')
+    },
+    beforeMount(){
+      console.log('APP.vue beforeMounted')
+    },
+    mounted(){
+      console.log('APP.vue mounted')
+    },
+    activated(){
+      console.log('APP.vue actived')
+    },
+    deactivated(){
+      console.log('APP.vue deactived')
+    },
+    updated(){
+      console.log('APP.vue updated')
+    },
+    beforeDestroy(){
+      console.log('APP.vue beforeDestroy')
+    },
+    beforeDestroy(){
+      console.log('APP.vue beforeDestroy')
+    },
+    destroyed(){
+      console.log('App.vue destroyed')
+    }
+  }
 
 </script>
 ```
