@@ -37,6 +37,8 @@ const boundGetX = unboundGetX.bind(module);
 console.log(boundGetX());
 // expected output: 42
 ```
+>Symbol 是 JavaScript 的 原始数据类型 ，Symbol实例是唯一且不可改变的.  
+Symbol 值通过Symbol函数生成。这就是说，对象的属性名现在可以有两种类型，一种是原来就有的字符串，另一种就是新增的 Symbol 类型。凡是属性名属于 Symbol 类型，就都是独一无二的，可以保证不会与其他属性名产生冲突。
 
 ## 手动实现
 
@@ -54,7 +56,7 @@ Function.prototype.myCall = function (context) {
    context[fn] = this;      
    const args = [...arguments].slice(1);    
    const result = context[fn](...args);     
-  delete context[fn];      
+   delete context[fn];      
   return result;    
 }
 ```
