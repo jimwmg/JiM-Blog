@@ -119,3 +119,7 @@ vis是一款基于webapck-dashboard的webpack性能分析插件，性能分析�
 ### (https://www.npmjs.com/package/babel-plugin-import)
 
 https://github.com/lodash/lodash-webpack-plugin
+
+### 11.[检测是否循环引用插件](https://www.npmjs.com/package/circular-dependency-plugin)
+
+项目中如果有循环引用的模块，可能会出现意想不到的问题，产生隐患，利用此插件可以在构建的时候进行检测，防止循环引用带来的badcase

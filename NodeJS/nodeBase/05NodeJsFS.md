@@ -241,3 +241,18 @@ if (stat && stat.isFile()) {
 }
 ```
 
+递归创建文件夹
+
+```javascript
+function makeDirSync(dirname){
+  if(fs.existsSync(dirname)){
+    return true
+  }else{
+    if(makeDirSync(path.dirname(dirname))){
+      fs.mkdirSync(dirname);
+      return true;
+    }
+  }
+}
+```
+

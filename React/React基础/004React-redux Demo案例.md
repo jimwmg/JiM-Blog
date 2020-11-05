@@ -117,6 +117,24 @@ ReactDOM.render(
 );
 ```
 
+类似下面这样，UI的更新都要调用  ReactDOM.render 
+
+```javascript
+function tick() {
+  const element = (
+    <div>
+      <h1>Hello, world!</h1>
+      <h2>It is {new Date().toLocaleTimeString()}.</h2>
+    </div>
+  );
+  ReactDOM.render(element, document.getElementById('root'));
+}
+
+setInterval(tick, 1000);
+```
+
+
+
 ### 3 react    redux     react-redux 
 
 通过第二部分代码我们可以看出来,redux确实可以帮助我们管理代码,但是有一点不好的地方就是每次state的状态改变的时候,都需要重新手动刷新视图.

@@ -2,7 +2,7 @@
 title: 实现ES6的extends
 ---
 
-###1 ES6 中extends的核心作用
+### 1 ES6 中extends的核心作用
 
 ```javascript
 class Parent{

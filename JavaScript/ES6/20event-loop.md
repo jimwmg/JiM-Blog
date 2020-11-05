@@ -1,7 +1,3 @@
-**作者：杨敬卓**
-
-**转载请注明出处**
-
 # 异步的思考
 
 event loops隐藏得比较深，很多人对它很陌生。但提起异步，相信每个人都知道。异步背后的“靠山”就是event loops。这里的异步准确的说应该叫浏览器的event loops或者说是javaScript运行环境的event loops，因为[ECMAScript](https://tc39.github.io/ecma262/)中没有event loops，event loops是在[HTML Standard](https://html.spec.whatwg.org/#event-loops)定义的。

@@ -4,7 +4,9 @@ titile:webpack编译速度和构建包体积优化汇总
 
 ### 0 基础工具升级
 
+官方建议文档：
 
+https://webpack.docschina.org/guides/build-performance/
 
 ### 1 thread-loader（webpack4 官方推荐）
 
@@ -77,6 +79,10 @@ module.exports = {
 我们也有方法,我们可以通过`cache-loader` ，它所做的事情很简单，就是 `babel-loader` 开启 `cache `后做的事情，将 `loader` 的编译结果写入硬盘缓存。再次构建会先比较一下，如果文件较之前的没有发生变化则会直接使用缓存。使用方法如官方 demo 所示，在一些性能开销较大的 loader 之前添加此 loader即可
 
 ### 4 HardSourceWebpackPlugin
+
+`HardSourceWebpackPlugin` is a plugin for webpack to provide an intermediate caching step for modules. In order to see results, you'll need to run webpack twice with this plugin: the first build will take the normal amount of time. The second build will be significantly faster.
+
+Install with `npm install --save-dev hard-source-webpack-plugin` or `yarn add --dev hard-source-webpack-plugin`. And include the plugin in your webpack's plugins configuration.
 
 ```javascript
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
@@ -238,6 +244,8 @@ module.exports = {
   ]
 }
 ```
+
+### 8 sw-precache-webpack-plugin
 
 
 

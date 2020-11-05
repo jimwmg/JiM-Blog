@@ -15,8 +15,6 @@ layout :
 - 函数的this指向null,而原先的HTML绑定时间this指向的是绑定事件的元素
 - react并不会真正的绑定事件到每一个具体的元素上，而是采用事件代理的模式：在根节点document上为每种事件添加唯一的Listener，然后通过事件对象的event.target找到真实的触发元素。这样从触发元素到顶层节点之间的所有节点如果有绑定这个事件，React都会触发对应的事件处理函数。这就是所谓的React模拟事件系统。
 
-建议先了解下箭头函数，我也有些过关于[箭头函数](https://jimwmg.github.io/2016/12/07/117-ES6%E6%96%B0%E7%89%B9%E6%80%A7%20%20%E7%AE%AD%E5%A4%B4%E5%87%BD%E6%95%B0/)的博文
-
 ```html
 <body>
     <a href="http://www.baidu.com" onclick="console.log('The link was clicked.'); console.log(this);return false">

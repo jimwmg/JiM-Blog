@@ -116,11 +116,42 @@ let myArr : StringArray = ['Jhon',"Jim"];
 
 ### 3 类实现接口
 
-先看类的基本定义和使用
+实现（implements）是面向对象中的一个重要概念。一般来讲，一个类只能继承自另一个类，有时候不同类之间可以有一些共有的特性，这时候就可以把特性提取成接口（interfaces），用 `implements` 关键字来实现。这个特性大大提高了面向对象的灵活性。
+
+#### 3.1.先看类的基本定义和使用
+
+JS中的基本写法
+
+```javascript
+class ClassWithStaticField {
+  static staticField = 'static field';
+	//static staticField;  如果没有设定初始值，那么该值会被设定为undefined
+ static staticMethod() {
+    return 'static method has been called.';
+  }
+	instanceField = 'instance field';
+	//instanceField  没有设定初始化程序的字段将默认被初始化为undefined
+	publicMethod() {
+    return 'hello world';
+  }
+}
+const classWithStaticField = new ClassWithStaticField()
+console.log(ClassWithStaticField.staticField);
+// 预期输出值: "static field"​
+console.log(classWithStaticField.instanceField)
+//预期输出值：instance field
+```
+
+TS中的基本写法
 
 ```typescript
 class Animal {
-    name:string;
+    static origin = new Point(0, 0);
+    /** 静态方法，计算与原点距离 */
+    static distanceToOrigin(p: Point) {
+        return Math.sqrt(p.x * p.x + p.y * p.y);
+    }
+    name:string;//实例属性
   	constructor(theName:string){
         this.name = theName;
     }
@@ -130,7 +161,7 @@ class Animal {
 }
 ```
 
-类实现接口
+#### 3.2.类实现接口
 
 ```typescript
 interface ClockInterface1 {
@@ -144,6 +175,56 @@ class Clock1 implements ClockInterface1 {
   }
   constructor(h: number, m: number) { }
 } 
+```
+
+
+
+举例来说，门是一个类，防盗门是门的子类。如果防盗门有一个报警器的功能，我们可以简单的给防盗门添加一个报警方法。这时候如果有另一个类，车，也有报警器的功能，就可以考虑把报警器提取出来，作为一个接口，防盗门和车都去实现它：
+
+```javascript
+interface Alarm {
+    alert(): void;
+}
+
+class Door {
+}
+
+class SecurityDoor extends Door implements Alarm {
+    alert() {
+        console.log('SecurityDoor alert');
+    }
+}
+
+class Car implements Alarm {
+    alert() {
+        console.log('Car alert');
+    }
+}
+```
+
+一个类可以实现多个接口
+
+```javascript
+interface Alarm {
+    alert(): void;
+}
+
+interface Light {
+    lightOn(): void;
+    lightOff(): void;
+}
+
+class Car implements Alarm, Light {
+    alert() {
+        console.log('Car alert');
+    }
+    lightOn() {
+        console.log('Car light on');
+    }
+    lightOff() {
+        console.log('Car light off');
+    }
+}
 ```
 
 

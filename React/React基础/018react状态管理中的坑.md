@@ -1,5 +1,5 @@
 ---
-title:react状态管理中的坑
+ title:react状态管理中的坑
 date: 2017-06-21 12:36:00
 categories: react
 tags : react
@@ -47,7 +47,6 @@ layout :
 
     因为每次执行setState方法的时候,上面这两个函数都会重新执行,每次执行的时候,又会执行setState,所以造成死循环.
 
-
-###3  对于请求后台数据给到组件状态 
+### 3  对于请求后台数据给到组件状态 
 
 3.1 componentDidMount里面发起ajax请求，然后在请求成功后用setState

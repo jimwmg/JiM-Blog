@@ -5,7 +5,7 @@ categories: react
 
 ---
 
-###嗯，只写代码了 ，不写解释了 
+
 
 ```javascript
 class AttachmentPreview extends React.Component{

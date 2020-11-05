@@ -7,6 +7,8 @@ updated :
 layout : 
 ---
 
+[MDN-class语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Classes/Private_class_fields)
+
 ### 1 class declarations 可以用以下三种方式声明class类，必须先声明在使用；每一个使用class方式定义的类默认都有一个**constructor**函数， 这个函数是构造函数的主函数， 该函数体内部的**this**指向生成的实例
 
 An important difference between **function declarations** and **class declarations** is that function declarations are  hoisted(变量提升) and class declarations are not. You first need to declare your class and then access it,
@@ -391,5 +393,95 @@ console.log(p);
 console.log(p.name);    //TOM
 console.log(p._name);    //tom
 p.sayName(); //TOM
+```
+
+#### class 静态属性和静态方法
+
+```javascript
+class Animal {
+    static name = 'statci-name'; //在Animal 对象上
+		static isAnimal(){ //在Animal 对象上
+      return true
+    }
+    age = 16  //在实例化的 animal 对象上  ES6 中实例的属性只能通过构造函数中的 this.xxx 来定义，ES7 提案中可以直接在类里面定义：
+    constructor(name) {  //在animal.__proto__ 对象上
+        this.name = name;
+    }
+    sayHi() {  //在animal.__proto__ 对象上
+        return `My name is ${this.name}${this.age}`;
+    }
+}
+
+let animal = new Animal('Jack');
+console.log(animal.sayHi()); // My name is Jack
+```
+
+#### 类元素
+
+* 静态公有字段、公有实例字段
+* 静态公有方法、公用实例方法
+
+> 备注：静态方法是在类的赋值阶段用[Object.defineProperty](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty)方法添加到类中的。静态方法是可编辑的、不可遍历的和可配置的。
+
+```javascript
+class ClassWithStaticField {
+  static staticField = 'static field';
+	//static staticField;  如果没有设定初始值，那么该值会被设定为undefined
+ static staticMethod() {
+    return 'static method has been called.';
+  }
+	instanceField = 'instance field';
+	//instanceField  没有设定初始化程序的字段将默认被初始化为undefined
+	publicMethod() {
+    return 'hello world';
+  }
+}
+const classWithStaticField = new ClassWithStaticField()
+console.log(ClassWithStaticField.staticField);
+// 预期输出值: "static field"​
+console.log(classWithStaticField.instanceField)
+//预期输出值：instance field
+```
+
+
+
+#### 私有字段
+
+只能在类的内部使用，其他使用方式就会报错；理解为需要通过类的其他方法【间接】使用私有字段
+
+* 私有实例字段、私有静态字段
+* 私有实例方法、私有静态方法
+
+```javascript
+class ClassWithPrivateField {
+  #a;  //私有实例字段
+  #b;
+  constructor(a, b) {
+    this.#a = a;
+    this.#b = b;
+  }
+  #privateMethod() {  //私有实例方法
+    debugger;
+    return this.#a + this.#b;
+  }
+  printSum() {
+    console.log(this.#privateMethod());
+  }
+}
+const classWithPrivateField = new ClassWithPrivateField(1,2)
+classWithPrivateField.printSum()
+//私有静态属性和私有静态方法
+class ClassWithPrivateStaticField {
+  static #PRIVATE_STATIC_FIELD //私有静态字段
+	static #privateStaticMethod() {  //私有静态方法
+  	return 42
+	}
+  static publicStaticMethod() {
+    ClassWithPrivateStaticField.#PRIVATE_STATIC_FIELD = 42
+    return ClassWithPrivateStaticField.#PRIVATE_STATIC_FIELD
+  }
+}
+
+console.log(ClassWithPrivateStaticField.publicStaticMethod() === 42)
 ```
 

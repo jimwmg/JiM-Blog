@@ -1,4 +1,4 @@
-##主要记录了从开始接触React,到项目中使用React,到研究React源码的一些博客
+## 主要记录了从开始接触React,到项目中使用React,到研究React源码的一些博客
 
 ### React源码分析系列 -介绍了
 
@@ -80,3 +80,14 @@ componentWillMount() {
 * 另一个很重要的是，当你写React代码时，不要一出现变化就在根节点上调用setState方法。你应该在接收变化事件的组件或其上面的组件上调用`setState`，你应该极少的在上层中调。根据以上的分析可以看出来，路由的变化，其实是在根组件执行了setState,而状态的变化是对每个组件都执行了setState
 * 任何时候只要你在一个组件中调用了`setState`，React将把这个组件标记为dirty（脏），在事件循环结束后，React将找到所有脏的组件并重新渲染它们。
 * 所有的操作都是在数据层面的，不管是dispatch(action) 还是router的路由跳转，最终我们改变的仅仅是ReactElement这个大对象，虚拟DOM的diff是在挂载DOM的根据前后的ReactElement这个大对象进行比较的；
+
+
+
+
+
+推荐资源
+
+[React高频面试题](https://mp.weixin.qq.com/s?__biz=Mzg2NDAzMjE5NQ==&mid=2247484667&idx=1&sn=dcaea6836c604100f9811c8c7f98a147&scene=21#wechat_redirect)
+
+[React-setState原理](https://mp.weixin.qq.com/s/jOTxys4HU-HiZeIMvf8KDg)
+

@@ -18,11 +18,7 @@ layout :
 
 第三步 [router](http://react-guide.github.io/react-router-cn/)     [demo](https://reacttraining.com/react-router/web/guides/quick-start)     [API](https://github.com/ReactTraining/react-router/tree/master/packages/react-router/docs)
 
-学习方法推荐,基础最重要,源码很重要 
 
-* github上搜索  分别单独搜索  react   redux   react-router    react-redux   react-redux -router
-* google搜索  说句实话,谷歌要比百度靠谱太多,google搜索都是干货,百度甩给你的可能是bug
-* 知乎搜索 react ,有一些话题以及问题会由比较好的链接
 
 ### 2 项目理解
 
@@ -34,7 +30,5 @@ layout :
 
 [React和redux 通过react-redux结合 ](https://github.com/bailicangdu/react-pxq)
 
-### 3 我的博客也有一些自己学习的总结,感兴趣也可以看下.
 
-后期会补充,欢迎交流
 

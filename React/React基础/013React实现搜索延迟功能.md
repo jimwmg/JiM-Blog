@@ -40,5 +40,3 @@ export default Search
 ```
 
 以上就是一个最简单的搜索延迟功能的实现。有误之处还请指出。
-
-jimwmg@foxmail.com
