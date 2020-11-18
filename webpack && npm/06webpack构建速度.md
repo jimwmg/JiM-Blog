@@ -250,3 +250,9 @@ module.exports = {
 
 
 [webpack优化汇总](https://mp.weixin.qq.com/s/4WD98dwNqjzs7h0FqwSl7g)
+
+
+
+### 9 webpack-jarvis
+
+https://github.com/zouhir/jarvis   webpack速度、性能优化插件

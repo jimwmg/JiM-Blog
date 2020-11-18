@@ -63,7 +63,7 @@ console.log(numArr);
 
   -- `forEach()` 为每个数组元素执行callback函数；不像[`map()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/map) 或者[`reduce()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce) ，它总是返回 [`undefined`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/undefined)值，并且不可链式调用。典型用例是在一个链的最后执行副作用。
 
-  -- **注意：** 没有办法中止或者跳出 forEach 循环，除了抛出一个异常。如果你需要这样，使用forEach()方法是错误的，你可以用一个简单的循环作为替代。如果您正在测试一个数组里的元素是否符合某条件，且需要返回一个布尔值，那么可使用 [`Array.every`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/every) 或 [`Array.some`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/some)。如果可用，新方法 [`find()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/find) 或者[`findIndex()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex) 也可被用于真值测试的提早终止。
+  -- **注意：** 【没有办法中止或者跳出 forEach 循环】，除了抛出一个异常。如果你需要这样，使用forEach()方法是错误的，你可以用一个简单的循环作为替代。如果您正在测试一个数组里的元素是否符合某条件，且需要返回一个布尔值，那么可使用 [`Array.every`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/every) 或 [`Array.some`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/some)。如果可用，新方法 [`find()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/find) 或者[`findIndex()`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/findIndex) 也可被用于真值测试的提早终止。
 
 ```javascript
 let numArr = [1,2,3,4];
@@ -85,6 +85,33 @@ words.forEach(function(word) {
 // two
 // four
 ```
+
+```javascript
+let arr = [1,4,5,2,7,8]
+function ret(){
+  arr.forEach((v) => {
+    if(v === 2){
+
+      return ;
+    }
+    console.log('v',v)
+
+  })
+}
+ret() //1 4 5 7 8
+//函数将会在return语句执行后立即中止。
+function ret2(){
+  for(let i = 0;i < arr.length;i++){
+    if(arr[i] === 2){
+      return
+    }
+    console.log(arr[i])
+  }
+}
+ret2() // 1 4 5
+```
+
+
 
 对于`forEach map`等数组API是在调用的时候就确定了数组的遍历范围不同，`for-of`可以在访问到循环的过程中push进数组的新值；
 
