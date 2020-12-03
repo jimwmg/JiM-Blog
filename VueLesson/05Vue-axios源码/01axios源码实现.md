@@ -97,7 +97,7 @@ Axios.prototype.request = function request(config) {
   }
 // defaults表示系统默认的设置，this.defaults 表示new Axios(config)中传入的配置
   config = utils.merge(defaults, this.defaults, { method: 'get' }, config);
-  config.method = config.method.toLowerCase();
+  config.method = configx.method.toLowerCase();
 
   // Hook up interceptors middleware
   var chain = [dispatchRequest, undefined];

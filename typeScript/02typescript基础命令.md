@@ -4,7 +4,7 @@ tsc命令行的使用
 
 ### 0.为什么需要typescript?
 
-![](./ts.png)
+![](https://static.didialift.com/pinche/gift/resource/qseqhi4q1m8-1605853375591-ts.png)
 
 ### 1.tsc命令行的安装与使用
 
@@ -68,7 +68,7 @@ tsc 00.base-ts.ts -t es2017 --alwaysStrict
 
 通过`tsc --help`可以看到所有的支持的命令列表，该命令列表支持的命令选项和[tsconfig.json支持配置项](https://www.tslang.cn/docs/handbook/compiler-options.html)基本是一致的
 
-![](./ts-help.png)
+![](https://static.didialift.com/pinche/gift/resource/cmjon3c18lg-1605853367930-ts-help.png)
 
 所以typescript支持通过配置文件的形式抽离出来这样的配置项
 
@@ -267,7 +267,7 @@ Vue CLI v4.3.1
 npx typescript-starter
 ```
 
-![](./ts-starter.svg)
+![](https://camo.githubusercontent.com/3cf7f0045e2f2a1b006c6f84fc6857a1b595737f11f620cbb3272adeedefc065/68747470733a2f2f63646e2e7261776769742e636f6d2f6269746a736f6e2f747970657363726970742d737461727465722f63336533623765632f64656d6f2e737667)
 
 
 

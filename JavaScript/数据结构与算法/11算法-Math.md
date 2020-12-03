@@ -45,12 +45,26 @@ main(factorial2,100,1)
 ### 2 斐波那契数列 1 1 2 3 5 8 13 ....
 
 ```javascript
+//递归实现
 // terrible ~ very terrible O(2^N)
 function fibonacci0 (n) {
     if ( n <= 1 ) {return 1};
 
     return fibonacci0(n - 1) + fibonacci0(n - 2);
 }
+
+function fibonacci1(pos,previous = 0,current = 1) {
+    if(typeof pos !== 'number' || pos <= 0 ) {
+        throw new Error();
+    }
+    if(pos === 1) {
+        return current;
+    }
+    return fibonacci1(pos - 1, current,previous+current);
+}
+console.log(fibonacci1(4))
+
+//递推实现
 //good  O(n)
 function fibonacci(pos) {
     if(typeof pos !== 'number' || pos <= 0 ) {
@@ -71,16 +85,16 @@ function fibonacci(pos) {
     return current;
 }  
 console.log(fibonacci(1))
-function fibonacci1(pos,previous = 0,current = 1) {
-    if(typeof pos !== 'number' || pos <= 0 ) {
-        throw new Error();
+
+function fibonacc(n){
+    let current = 0;
+    let next = 1;
+    for(let i = 0; i < n; i++){
+        [current,next] = [next,current + next]
     }
-    if(pos === 1) {
-        return current;
-    }
-    return fibonacci1(pos - 1, current,previous+current);
+    return current
 }
-console.log(fibonacci1(4))
+console.log(fibonacc(4))
 ```
 
 ### 3 [最大公约数-百科](https://baike.baidu.com/item/%E6%9C%80%E5%A4%A7%E5%85%AC%E7%BA%A6%E6%95%B0/869308?fr=aladdin)
