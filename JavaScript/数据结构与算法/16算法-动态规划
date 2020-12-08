@@ -1,0 +1,75 @@
+### 1.动态规划概念
+
+DP(Dynamic Programming)
+
+**动态规划**（Dynamic Programming，DP）是运筹学的一个分支，是求解[决策过程](https://baike.baidu.com/item/决策过程/6714639)最优化的过程。20世纪50年代初，[美国](https://baike.baidu.com/item/美国/125486)数学家[贝尔曼](https://baike.baidu.com/item/贝尔曼/9239579)（R.Bellman）等人在研究多阶段决策过程的优化问题时，提出了著名的最[优化原理](https://baike.baidu.com/item/优化原理/949739)，从而创立了动态规划。动态规划的应用极其广泛，包括[工程技术](https://baike.baidu.com/item/工程技术/6998399)、经济、工业生产、军事以及[自动化控制](https://baike.baidu.com/item/自动化控制/8483773)等领域，并在[背包问题](https://baike.baidu.com/item/背包问题/2416931)、生产经营问题、资金管理问题、[资源分配问题](https://baike.baidu.com/item/资源分配问题/19135166)、[最短路径问题](https://baike.baidu.com/item/最短路径问题/23162228)和复杂系统可靠性问题等中取得了显著的效果 [1] 。 [2]
+
+- **[最优化原理](https://baike.baidu.com/item/最优化原理)****（最优子结构性质）**
+
+最优化原理可这样阐述：一个最优化策略具有这样的性质，不论过去状态和决策如何，对前面的决策所形成的状态而言，余下的诸决策必须构成最优策略。简而言之，一个最优化策略的子策略总是最优的。一个问题满足最优化原理又称其具有最优子结构性质 [8] 。
+
+- **[无后效性](https://baike.baidu.com/item/无后效性)**
+
+将各阶段按照一定的次序排列好之后，对于某个给定的阶段状态，它以前各阶段的状态无法直接影响它未来的决策，而只能通过当前的这个状态。换句话说，每个状态都是过去历史的一个完整总结。这就是无后向性，又称为无后效性 [8] 。
+
+- **子问题的重叠性**
+
+动态规划算法的关键在于解决冗余，这是动态规划算法的根本目的。动态规划实质上是一种以空间换时间的技术，它在实现的过程中，不得不存储产生过程中的各种状态，所以它的空间复杂度要大于其他的算法。选择动态规划算法是因为动态规划算法在空间上可以承受，而搜索算法在时间上却无法承受，所以我们舍空间而取时间 [8] 。
+
+### 2.算法题案例
+
+#### 2.1.爬楼梯: 状态转义方程如下   dp[i] = dp[i-1] + dp[i-2]
+
+- 首先dp[i] 表示的就到第i个阶梯的方案数
+- 那么爬到第i阶梯，有两种情况👇
+  - 从第i-1阶梯再爬1阶就到第i阶
+  - 从第i-2阶梯再爬2阶就到第i阶
+- 那么它的状态方程转移就是上面的式子
+
+```javascript
+function climbStairs(n){
+  let dp = [];
+  dp[1] = 1; dp[2] = 2;
+  for(let i = 3;i <= n ;i++){
+    dp[n] = dp[i-1] + dp[i-2];
+  }
+  return  dp[n]
+}
+```
+
+```javascript
+function climbStairs(n){
+  let pre = 1;
+  let next = 2;
+  for(let i = 0; i < n; i++){
+    [pre,next] = [next,pre=next]
+  }
+  return next;
+}
+```
+
+#### 2.2.**求出从矩阵左上角走到右下角，且只能向右向下移动，一共有多少种可能性**
+
+```javascript
+function movePosilities(m,n){
+  //m * n 矩阵
+  let pos = new Array(m);
+  for (let i = 0; i < m; i++) {
+        pos[i] = new Array(n)
+    }
+  for(let i = 0 ; i < m ; i++){
+    pos[i][0] = 1;
+  }
+  for(let i = 0 ;i < n; i++){
+    pos[0][i] = 1
+  }
+  console.log(pos)
+  for(let i = 1 ;i < m ; i++){
+    for(let j = 1 ; j < n ;j++){
+      pos[i][j] = pos[i-1][j] + pos[i][j-1];
+    }
+  };
+  return  pos[m-1][n-1]
+}
+```
+

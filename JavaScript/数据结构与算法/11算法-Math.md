@@ -97,6 +97,21 @@ function fibonacc(n){
 console.log(fibonacc(4))
 ```
 
+```javascript
+let map = new Map();
+let fibonacci = function(n){
+    if(n === 1 || n === 2){
+        return n;
+    }
+    if(map.get(n)){
+        return map.get(n)
+    }
+    let result = fibonacci(n-1) + fibonacci(n -2);
+    map.set(n,result);
+    return result;
+}
+```
+
 ### 3 [最大公约数-百科](https://baike.baidu.com/item/%E6%9C%80%E5%A4%A7%E5%85%AC%E7%BA%A6%E6%95%B0/869308?fr=aladdin)
 
 ```javascript
