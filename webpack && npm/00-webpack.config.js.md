@@ -46,17 +46,17 @@ module.exports = {
     // 导出库(exported library)的名称
 
     libraryTarget: "umd", // 通用模块定义
-        libraryTarget: "umd2", // 通用模块定义
-        libraryTarget: "commonjs2", // exported with module.exports
-        libraryTarget: "commonjs-module", // 使用 module.exports 导出
-        libraryTarget: "commonjs", // 作为 exports 的属性导出
-        libraryTarget: "amd", // 使用 AMD 定义方法来定义
-        libraryTarget: "this", // 在 this 上设置属性
-        libraryTarget: "var", // 变量定义于根作用域下
-        libraryTarget: "assign", // 盲分配(blind assignment)
-        libraryTarget: "window", // 在 window 对象上设置属性
-        libraryTarget: "global", // property set to global object
-        libraryTarget: "jsonp", // jsonp wrapper
+    libraryTarget: "umd2", // 通用模块定义
+    libraryTarget: "commonjs2", // exported with module.exports
+    libraryTarget: "commonjs-module", // 使用 module.exports 导出
+    libraryTarget: "commonjs", // 作为 exports 的属性导出
+    libraryTarget: "amd", // 使用 AMD 定义方法来定义
+    libraryTarget: "this", // 在 this 上设置属性
+    libraryTarget: "var", // 变量定义于根作用域下
+    libraryTarget: "assign", // 盲分配(blind assignment)
+    libraryTarget: "window", // 在 window 对象上设置属性
+    libraryTarget: "global", // property set to global object
+    libraryTarget: "jsonp", // jsonp wrapper
     // 导出库(exported library)的类型
 
     /* 高级输出配置（点击显示） */
