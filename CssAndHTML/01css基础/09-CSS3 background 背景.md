@@ -125,3 +125,21 @@ background:none  [0% 0%] /auto repeat  scroll padding-box content-box transparen
 background:image  pisition size repeat attachment origin clip color
 ```
 
+### box-shadow
+
+```
+无阴影
+<length>①：
+第 1 个长度值定义元素的阴影水平偏移值。正值，阴影出现在元素右侧；负值，则阴影出现在元素左侧
+<length>②：
+第 2 个长度值定义元素的阴影垂直偏移值。正值，阴影出现在元素底部；负值，则阴影出现在元素顶部
+<length>③：
+第 3 个长度值定义元素的阴影模糊值半径（如果提供了）。该值越大阴影边缘越模糊，若该值为0，阴影边缘不出现模糊。不允许负值
+<length>④：
+第 4 个长度值定义元素的阴影外延值（如果提供了）。正值，阴影将向四面扩展；负值，则阴影向里收缩
+<color>：
+定义元素阴影的颜色。如果该值未定义，阴影颜色将默认取当前最近的文本颜色
+inset：
+定义元素的阴影类型为内阴影。该值为空时，则元素的阴影类型为外阴影
+```
+
