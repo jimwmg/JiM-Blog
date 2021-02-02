@@ -256,3 +256,20 @@ module.exports = {
 ### 9 webpack-jarvis
 
 https://github.com/zouhir/jarvis   webpack速度、性能优化插件
+
+### 10.代码分割
+
+### 11.苍蝇肉也是肉 
+
+#### 条件判断
+
+```javascript
+if(process.env.NODE_ENV){  //在压缩的时候，当条件为 true的时候，这里的代码才会被打包进来
+  //yourcode
+}
+```
+
+#### 工具分析代码重复
+
+https://github.com/wechat-miniprogram/miniprogram-slim
+
