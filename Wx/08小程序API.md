@@ -311,6 +311,28 @@ Object wx.getMenuButtonBoundingClientRect()
 
 文件、画布、位置
 
+转发
+
+wx.onCopyUrl 
+
+监听用户点击右上角菜单的「复制链接」按钮时触发的事件。本接口为 Beta 版本，暂只在 Android 平台支持。
+
+参数
+
+### function callback
+
+用户点击右上角菜单的「复制链接」按钮时触发的事件的回调函数
+
+#### 参数
+
+##### Object res
+
+| 属性  | 类型   | 说明                                                         |
+| :---- | :----- | :----------------------------------------------------------- |
+| query | string | 用短链打开小程序时当前页面携带的查询字符串。小程序中使用时，应在进入页面时调用 `wx.onCopyUrl` 自定义 `query`，退出页面时调用 `wx.offCopyUrl`，防止影响其它页面。 |
+
+## 
+
 ### 9.开放接口
 
 登录：wx.login   wx.checkSession
