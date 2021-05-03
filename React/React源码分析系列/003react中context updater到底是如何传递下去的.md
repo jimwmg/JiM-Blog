@@ -68,7 +68,7 @@ var Provider = function (_Component) {
     return _react.Children.only(this.props.children);
   };
   //父组件需要声明
-Provider.childContextTypes = {store:PropTypes.storeShape.isRequired,}
+	Provider.childContextTypes = {store:PropTypes.storeShape.isRequired,}
   return Provider;
 }(_react.Component);
 ```

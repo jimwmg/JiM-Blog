@@ -359,3 +359,7 @@ shouldComponentUpdate(nextProps, nextState) {
 当此函数返回false时，组件就不会调用render方法从而避免了虚拟DOM的创建和内存中的Diff比较，从而有助于提高性能。当返回true时，则会进行正常的render的逻辑。
 
 [有关更详细的API ]: http://cdn2.infoqstatic.com/statics_s1_20170411-0445/resource/articles/react-jsx-and-component/zh/resources/0702001.png
+
+![image-20210430151034506](/Users/jim/Library/Application Support/typora-user-images/image-20210430151034506.png)
+
+[生命周期](https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)

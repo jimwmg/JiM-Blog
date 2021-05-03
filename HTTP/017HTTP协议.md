@@ -42,6 +42,13 @@ URL是Internet上用来描述信息资源的字符串，主要用在各种WWW客
 | path                   访问资源的路径           |      |      |
 | query-string       发送给http服务器的数据         |      |      |
 
+相对协议：
+```html
+<img src="//domain.com/img/logo.png">
+```
+
+就是将URL的协议（http、https）去掉，只保留://及后面的内容。这样，在使用https的网站中，浏览器会通过https请求URL，否则就通过http发送请求。
+
 ##### URN，uniform resource name，统一资源命名，是通过名字来标识资源，比如mailto:java-net@java.sun.com。
 
 URI是以一种抽象的，高层次概念定义统一资源标识，而URL和URN则是具体的资源标识的方式。URL和URN都是一种URI。笼统地说，每个 URL 都是 URI，但不一定每个 URI 都是 URL。这是因为 URI 还包括一个子类，即统一资源名称 (URN)，它命名资源但不指定如何定位资源。上面的 mailto、news 和 isbn URI 都是 URN 的示例。  

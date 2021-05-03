@@ -80,6 +80,15 @@ function _inheritsLoose(subClass, superClass) {
   subClass.__proto__ = superClass;
 }
 ```
+Object.create(proto，[propertiesObject])
+Object.setPrototypeOf(obj, prototype)   //obj.__proto__ = prototype
+```javascript 
+function _inherit(subClass,superClass){
+  subClass.prototype = Object.create(superClass.prototype,{value:subClass,configurable:true,writable:true})
+  Object.setPrototypeOf(subClass,superClass);
+
+}
+```
 
 接下来重点看下 `jsx(Parser)`;
 
